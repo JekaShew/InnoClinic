@@ -13,7 +13,7 @@ namespace AuthorizationAPI.Application.CQS.Handlers.UserHandlers.QueriesHandlers
         }
         public async Task<Guid> Handle(TakeUserIdByEmailQuery request, CancellationToken cancellationToken)
         {
-            var userDTO = await _userRepository.TakeUserWithPredicate(u => u.Email.Equals(request.Email));
+            var userDTO = await _userRepository.TakeUserDTOWithPredicate(u => u.Email.Equals(request.Email));
             return userDTO.Id;
         }
     }

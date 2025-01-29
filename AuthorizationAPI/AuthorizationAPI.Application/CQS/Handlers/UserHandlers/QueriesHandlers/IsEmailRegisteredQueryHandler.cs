@@ -14,7 +14,7 @@ namespace AuthorizationAPI.Application.CQS.Handlers.UserHandlers.QueriesHandlers
         }
         public async Task<CustomResponse> Handle(IsEmailRegisteredQuery request, CancellationToken cancellationToken)
         {
-            var check = await _userRepository.TakeUserWithPredicate(u => u.Email.Equals(request.EnteredEmail));
+            var check = await _userRepository.TakeUserDTOWithPredicate(u => u.Email.Equals(request.EnteredEmail));
             if (check is not null)
                 return new CustomResponse(false, "This Email has been already Registered!");
             return new CustomResponse(true, "Empty Email!");

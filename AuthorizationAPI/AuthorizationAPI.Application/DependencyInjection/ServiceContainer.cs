@@ -11,6 +11,7 @@ namespace AuthorizationAPI.Application.DependencyInjection
         {
             services.AddHttpContextAccessor();
             services.AddScoped<IAuthorizationServices, AuthorizationServices>();
+            services.AddScoped<IUserServices, UserServices>();
             
             return services;
         }

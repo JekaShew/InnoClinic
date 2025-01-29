@@ -55,7 +55,8 @@ namespace AuthorizationAPI.Presentation.Controllers
             return Ok(result.Message);
         }
 
-        public async Task<IActionResult> ChangeUserStatusOfUser(UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO)
+        [HttpPatch("/changeuserstatusofuser")]
+        public async Task<IActionResult> ChangeUserStatusOfUser([FromBody] UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO)
         {
             var result = await _userServices.ChangeUserStatusOfUser(userIdUserStatusIdPairDTO);
             if (result.Flag == false)
@@ -63,7 +64,8 @@ namespace AuthorizationAPI.Presentation.Controllers
             return Ok(result.Message);
         }
 
-        public async Task<IActionResult> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPirDTO)
+        [HttpPatch("/changeroleofuser")]
+        public async Task<IActionResult> ChangeRoleOfUser([FromBody] UserIdRoleIdPairDTO userIdRoleIdPirDTO)
         {
             var result = await _userServices.ChangeRoleOfUser(userIdRoleIdPirDTO);
             if (result.Flag == false)
@@ -71,7 +73,8 @@ namespace AuthorizationAPI.Presentation.Controllers
             return Ok(result.Message);
         }
 
-        public async Task<IActionResult> ChangePasswordByOldPassword(string oldPassword, string newPassword)
+        [HttpPatch("/changepasswordbyoldpassword")]
+        public async Task<IActionResult> ChangePasswordByOldPassword([FromBody] string oldPassword, string newPassword)
         {
             var result = await _userServices.ChangePasswordByOldPassword(oldPassword, newPassword);
             if (result.Flag == false)
@@ -79,7 +82,8 @@ namespace AuthorizationAPI.Presentation.Controllers
             return Ok(result.Message);
         }
 
-        public async Task<IActionResult> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword)
+        [HttpPatch("/changeforgottenpasswordbysecretphrase")]
+        public async Task<IActionResult> ChangeForgottenPasswordBySecretPhrase([FromBody] EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword)
         {
             var result = await _userServices.ChangeForgottenPasswordBySecretPhrase(emailSecretPhrasePairDTO, newPassword);
             if (result.Flag == false)
@@ -88,7 +92,8 @@ namespace AuthorizationAPI.Presentation.Controllers
         }
 
         //Implement
-        public async Task<IActionResult> ChangeForgottenPasswordByEmail(string email)
+        [HttpPatch("/changeforgottenpasswordbyemail")]
+        public async Task<IActionResult> ChangeForgottenPasswordByEmail([FromBody] string email)
         {
             return NotFound("Service  unavailable.");
         }

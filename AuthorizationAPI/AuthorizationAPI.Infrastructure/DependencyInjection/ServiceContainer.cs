@@ -1,6 +1,8 @@
-﻿using AuthorizationAPI.Application.CQS.Queries.RefreshTokenQueries;
+﻿using AuthorizationAPI.Application.CQS.Handlers.UserStatusHandlers.QueriesHandlers;
+using AuthorizationAPI.Application.Interfaces;
 using AuthorizationAPI.Application.Validators.UserStatusValidators;
 using AuthorizationAPI.Domain.Data;
+using AuthorizationAPI.Infrastructure.Repositories;
 using FluentValidation;
 using InnoShop.CommonLibrary.DependencyInjection;
 using InnoShop.CommonLibrary.Middleware;
@@ -18,9 +20,15 @@ namespace AuthorizationAPI.Infrastructure.DependencyInjection
             // last variable is for DB Connection String Key that in configuration
             CommonServiceContainer.AddCommonServices<AuthDBContext>(services, configuration, configuration["AuthSerolog:FileName"]!, "AuthDB");
 
+            //Registration of Repositories
+            services.AddScoped<IUserStatus, UserStatusRepository>();
+            services.AddScoped<IUser, UserRepository>();
+            services.AddScoped<IRole, RoleRepository>();
+            services.AddScoped<IRefreshToken, RefreshTokenRepository>();
+
             //MediatR
             services.AddMediatR(cfg => cfg
-                        .RegisterServicesFromAssembly(typeof(TakeRefreshTokenDTOByRTokenIdQuery).Assembly));
+                        .RegisterServicesFromAssembly(typeof(TakeUserStatusDTOByIdQueryHandler).Assembly));
 
             // FluentValidation
             services.AddValidatorsFromAssembly(typeof(AddUserStatusCommandValidator).Assembly);
