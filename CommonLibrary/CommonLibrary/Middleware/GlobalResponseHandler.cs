@@ -1,7 +1,7 @@
-﻿using InnoShop.CommonLibrary.Logs;
+﻿using InnoClinic.CommonLibrary.Logs;
 using Microsoft.AspNetCore.Http;
 
-namespace InnoShop.CommonLibrary.Middleware
+namespace InnoClinic.CommonLibrary.Middleware
 {
     public class GlobalResponseHandler(RequestDelegate next)
     {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace InnoShop.CommonLibrary.DependencyInjection
+namespace InnoClinic.CommonLibrary.DependencyInjection
 {
     public static class JWTAuthenticationScheme
     {

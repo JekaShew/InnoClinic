@@ -1,8 +1,8 @@
-﻿using InnoShop.CommonLibrary.Exceptions;
+﻿using InnoClinic.CommonLibrary.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 
-namespace InnoShop.CommonLibrary.Middleware
+namespace InnoClinic.CommonLibrary.Middleware
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {

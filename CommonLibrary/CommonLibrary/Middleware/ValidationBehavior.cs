@@ -1,8 +1,8 @@
 ﻿using FluentValidation;
-using InnoShop.CommonLibrary.Exceptions;
+using InnoClinic.CommonLibrary.Exceptions;
 using MediatR;
 
-namespace InnoShop.CommonLibrary.Middleware
+namespace InnoClinic.CommonLibrary.Middleware
 {
     public class ValidationBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
         where TRequest : IRequest<TResponse>
