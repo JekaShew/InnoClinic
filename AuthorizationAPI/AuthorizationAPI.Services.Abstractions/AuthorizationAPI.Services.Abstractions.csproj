@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\CommonLibrary\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\AuthorizationAPI.Shared\AuthorizationAPI.Shared.csproj" />
   </ItemGroup>
 
 </Project>

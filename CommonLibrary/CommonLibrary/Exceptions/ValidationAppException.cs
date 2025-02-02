@@ -1,4 +1,4 @@
-﻿namespace InnoShop.CommonLibrary.Exceptions
+﻿namespace InnoClinic.CommonLibrary.Exceptions
 {
     public class ValidationAppException : Exception
     {

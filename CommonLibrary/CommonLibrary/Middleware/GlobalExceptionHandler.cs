@@ -1,8 +1,8 @@
-﻿using InnoShop.CommonLibrary.Exceptions;
+﻿using InnoClinic.CommonLibrary.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 
-namespace InnoShop.CommonLibrary.Middleware
+namespace InnoClinic.CommonLibrary.Middleware
 {
     public class GlobalExceptionHandler : IExceptionHandler
     {
@@ -36,6 +36,8 @@ namespace InnoShop.CommonLibrary.Middleware
 
                 return await ModifyExceptopnResponse(problemDetailsContext);
             }
+
+            // maybe not found exception Handler ??
 
             if(exception is ValidationAppException validationException)
             {

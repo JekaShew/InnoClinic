@@ -1,5 +1,5 @@
-﻿using AuthorizationAPI.Application.DTOs;
-using AuthorizationAPI.Application.Interfaces;
+﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
+using AuthorizationAPI.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
@@ -52,7 +52,7 @@ namespace AuthorizationAPI.Presentation.Controllers
             if (response.Item1.Flag == false || (response.Item2.IsNullOrEmpty() || response.Item3.IsNullOrEmpty()))
                 return BadRequest($"Tokens refresh Failed! {response.Item1.Message}");
 
-            return Ok(new { AccessToken = response.Item2, RefreshToken = response.Item3});
+            return Ok(new { AccessToken = response.Item2, RefreshToken = response.Item3 });
         }
 
         [HttpPatch("/revoke")]
@@ -64,5 +64,5 @@ namespace AuthorizationAPI.Presentation.Controllers
 
             return Ok(revoke.Message);
         }
-    }   
+    }
 }

@@ -1,8 +1,5 @@
-﻿using AuthorizationAPI.Application.CQS.Commands.UserCommands;
-using AuthorizationAPI.Application.CQS.Queries.UserQueries;
-using AuthorizationAPI.Application.DTOs;
-using AuthorizationAPI.Application.Interfaces;
-using MediatR;
+﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
+using AuthorizationAPI.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers
@@ -11,18 +8,16 @@ namespace AuthorizationAPI.Presentation.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IMediator _mediator;
         private readonly IUserServices _userServices;
-        public UserController(IMediator mediator, IUserServices userServices)
+        public UserController( IUserServices userServices)
         {
-            _mediator = mediator;
             _userServices = userServices;
         }
 
         [HttpGet("{userId}")]
         public async Task<IActionResult> TakeUserById(Guid userId)
         {
-            var result = await _mediator.Send(new TakeUserDTOByIdQuery() { Id = userId});
+            var result = await _mediator.Send(new TakeUserDTOByIdQuery() { Id = userId });
             if (result == null)
                 return NotFound("User Not found!");
             return Ok(result);
@@ -38,7 +33,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateUser([FromBody] UserDTO userDTO)
+        public async Task<IActionResult> UpdateUser([FromBody] UserDetailedDTO userDTO)
         {
             var result = await _mediator.Send(new UpdateUserCommand() { UserDTO = userDTO });
             if (result.Flag == false)

@@ -1,4 +1,4 @@
-﻿using InnoShop.CommonLibrary.Middleware;
+﻿using InnoClinic.CommonLibrary.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -6,27 +6,34 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 
-namespace InnoShop.CommonLibrary.DependencyInjection
+namespace InnoClinic.CommonLibrary.DependencyInjection
 {
     public static class CommonServiceContainer
     {
+         
         public static IServiceCollection AddCommonServices<TContext>(
             this IServiceCollection services,
             IConfiguration configuration,
             string serilogFile,
-            string dbConnectionStringKey) where TContext : DbContext
+            KeyValuePair<string,string> dbConnectionStringKey) where TContext : DbContext
         {
             // DB MSSQL 
-            services.AddDbContext<TContext>(option =>
-                option.UseSqlServer(
-                    configuration.GetConnectionString(dbConnectionStringKey), sqlserverOption => sqlserverOption.EnableRetryOnFailure()));
+            if (dbConnectionStringKey.Key.Equals("MSSQL"))
+                services.AddDbContext<TContext>(option =>
+                    option.UseSqlServer(
+                        configuration.GetConnectionString(dbConnectionStringKey.Value), sqlserverOption => sqlserverOption.EnableRetryOnFailure()));
+
+            // DB MongoDB
+            if (dbConnectionStringKey.Key.Equals("MongoDB"))
+                services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
+            //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
 
             //Serilog
             Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
-                .Enrich.FromLogContext()
-                .WriteTo.File($"{serilogFile}.log")
-                .CreateBootstrapLogger();
+            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.File($"{serilogFile}.log")
+            .CreateBootstrapLogger();
 
             services.AddSerilog((services, lc) => lc
                 .ReadFrom.Configuration(configuration)

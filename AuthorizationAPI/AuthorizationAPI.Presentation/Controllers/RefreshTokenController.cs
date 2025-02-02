@@ -1,7 +1,4 @@
-﻿using AuthorizationAPI.Application.CQS.Commands.RefreshTokenCommands;
-using AuthorizationAPI.Application.CQS.Queries.RefreshTokenQueries;
-using AuthorizationAPI.Application.DTOs;
-using MediatR;
+﻿using AuthorizationAPI.Shared.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers
@@ -10,16 +7,15 @@ namespace AuthorizationAPI.Presentation.Controllers
     [ApiController]
     public class RefreshTokenController : ControllerBase
     {
-        private readonly IMediator _mediator;
-        public RefreshTokenController(IMediator mediator)
+        public RefreshTokenController()
         {
-            _mediator = mediator;
+
         }
 
         [HttpGet("{rTokenId}")]
         public async Task<IActionResult> TakeRefreshTokenByRTokenId(Guid rTokenId)
         {
-            var result = await _mediator.Send(new TakeRefreshTokenDTOByRTokenIdQuery() { Id = rTokenId});
+            var result = await _mediator.Send(new TakeRefreshTokenDTOByRTokenIdQuery() { Id = rTokenId });
             if (result == null)
                 return NotFound("Refresh Token Not found!");
             return Ok(result);
@@ -37,7 +33,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateRefreshToken([FromBody] RefreshTokenDTO refreshTokenDTO)
         {
-            var result = await _mediator.Send(new UpdateRefreshTokenCommand() { RefreshTokenDTO = refreshTokenDTO});
+            var result = await _mediator.Send(new UpdateRefreshTokenCommand() { RefreshTokenDTO = refreshTokenDTO });
             if (result.Flag == false)
                 return StatusCode(500, result.Message);
             return Ok(result.Message);
@@ -46,7 +42,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         [HttpDelete("{rTokenId}")]
         public async Task<IActionResult> DeleteRefreshTokenByRTokenId(Guid rTokenId)
         {
-            var result = await _mediator.Send(new DeleteRefreshTokenByRTokenIdCommand() { Id = rTokenId});
+            var result = await _mediator.Send(new DeleteRefreshTokenByRTokenIdCommand() { Id = rTokenId });
             if (result.Flag == false)
                 return StatusCode(500, result.Message);
             return Ok(result.Message);

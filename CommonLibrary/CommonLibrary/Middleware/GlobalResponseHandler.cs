@@ -1,7 +1,6 @@
-﻿using InnoShop.CommonLibrary.Logs;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 
-namespace InnoShop.CommonLibrary.Middleware
+namespace InnoClinic.CommonLibrary.Middleware
 {
     public class GlobalResponseHandler(RequestDelegate next)
     {
@@ -41,7 +40,6 @@ namespace InnoShop.CommonLibrary.Middleware
             }
             catch (Exception ex)
             {
-                LogException.LogExceptions(ex);
                 throw new Exception(ex.Message);
             }
         }
