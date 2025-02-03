@@ -3,7 +3,7 @@ using InnoClinic.CommonLibrary.Response;
 
 namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
-    public interface IUserServices
+    public interface IUserService
     {
         public Task<CustomResponse> CreateUser(RegistrationInfoDTO registrationInfoDTO);
         public Task<CustomResponse> DeleteAccountById();

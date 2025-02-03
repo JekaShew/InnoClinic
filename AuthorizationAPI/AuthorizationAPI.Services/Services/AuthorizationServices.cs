@@ -1,4 +1,5 @@
-﻿using AuthorizationAPI.Domain.IRepositories;
+﻿using AuthorizationAPI.Domain.Data.Models;
+using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Shared.DTOs;
 using InnoClinic.CommonLibrary.Response;
@@ -10,16 +11,22 @@ using System.Text;
 
 namespace AuthorizationAPI.Services.Services
 {
-    public class AuthorizationServices : IAuthorizationServices
+    public class AuthorizationServices : IAuthorizationService
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IConfiguration _configuration;
-        public AuthorizationServices(IConfiguration configuration, IUserRepository userRepository,  IRoleRepository roleRepository)
+        public AuthorizationServices(
+                IConfiguration configuration, 
+                IUserRepository userRepository,  
+                IRoleRepository roleRepository,
+                IRefreshTokenRepository refreshTokenRepository)
         {
             _configuration = configuration;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
+            _refreshTokenRepository = refreshTokenRepository;
         }
 
         private async Task<string> GenerateJwtTokenStringByUserId(Guid userId)
@@ -56,7 +63,7 @@ namespace AuthorizationAPI.Services.Services
 
         private async Task<string> GenerateRefreshTokenByUserId(Guid userId)
         {
-            var refreshToken = new RefreshTokenDTO()
+            var refreshToken = new RefreshToken()
             {
                 Id = Guid.NewGuid(),
                 UserId = userId,
@@ -64,17 +71,17 @@ namespace AuthorizationAPI.Services.Services
                 ExpireDate = DateTime.UtcNow.AddMinutes(120),
             };
 
-            var addRefreshToken = await _mediator.Send(new AddRefreshTokenCommand() { RefreshTokenDTO = refreshToken });
-            if (addRefreshToken.Flag == false)
+            var addRefreshTokenResponse = await _refreshTokenRepository.AddRefreshToken(refreshToken);
+            if (addRefreshTokenResponse.Flag == false)
                 return null;
             return refreshToken.Id.ToString();
         }
 
-        private async Task<(string, string)> GenerateTokenPair(Guid userId)
+        private async Task<TokensDTO> GenerateTokenPair(Guid userId)
         {
             var jwt = await GenerateJwtTokenStringByUserId(userId);
             var rt = await GenerateRefreshTokenByUserId(userId);
-            return (jwt, rt);
+            return new TokensDTO() {AccessToken = jwt, RefreshToken = rt };
         }
 
         public async Task<CustomResponse<(string, string)>> SignIn(LoginInfoDTO loginInfoDTO)
@@ -96,7 +103,7 @@ namespace AuthorizationAPI.Services.Services
 
         public async Task<CustomResponse> SignOut(Guid rTokenId)
         {
-            return await _mediator.Send(new DeleteRefreshTokenByRTokenIdCommand() { Id = rTokenId });
+            return await ;
         }
 
         public async Task<CustomResponse<(string, string)>> SignUp(RegistrationInfoDTO registrationInfoDTO)
@@ -132,7 +139,7 @@ namespace AuthorizationAPI.Services.Services
             return new CustomResponse<(string, string)>(true, "Success!", tokens); ;
         }
 
-        public async Task<CustomResponse> RevokeTokenByRTokenId(Guid rTokenId)
+        public async Task<CustomResponse> RevokeTokenByRefreshTokenId(Guid rTokenId)
         {
             //Check is RefreshToken Correct
             var isRTokenCorrect = await _mediator.Send(new IsRTokenCorrectByRTokenIdQuery() { RTokenId = rTokenId });

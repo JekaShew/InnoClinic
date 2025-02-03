@@ -10,7 +10,7 @@ using System.Text;
 
 namespace AuthorizationAPI.Services.Services
 {
-    public class UserServices : IUserServices
+    public class UserServices : IUserService
     {
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;

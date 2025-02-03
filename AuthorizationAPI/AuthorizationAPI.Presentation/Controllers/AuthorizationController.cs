@@ -9,8 +9,8 @@ namespace AuthorizationAPI.Presentation.Controllers
     [ApiController]
     public class AuthorizationController : ControllerBase
     {
-        private readonly IAuthorizationServices _authorizationService;
-        public AuthorizationController(IAuthorizationServices authorizationService)
+        private readonly IAuthorizationService _authorizationService;
+        public AuthorizationController(IAuthorizationService authorizationService)
         {
             _authorizationService = authorizationService;
         }
@@ -58,7 +58,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         [HttpPatch("/revoke")]
         public async Task<IActionResult> RevokeTokenByRTokenId([FromBody] Guid rTokenId)
         {
-            var revoke = await _authorizationService.RevokeTokenByRTokenId(rTokenId);
+            var revoke = await _authorizationService.RevokeTokenByRefreshTokenId(rTokenId);
             if (revoke.Flag == false)
                 return BadRequest(revoke.Message);
 
