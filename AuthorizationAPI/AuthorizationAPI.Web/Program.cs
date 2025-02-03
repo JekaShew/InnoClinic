@@ -1,5 +1,6 @@
-using AuthorizationAPI.Persistance.DependencyInjection;
-using AuthorizationAPI.Services.DependencyInjection;
+using AuthorizationAPI.Persistance.Extensions;
+using AuthorizationAPI.Services.Extensions;
+using InnoClinic.CommonLibrary.Exceptions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,13 +9,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
-builder.Services.AddApplicationService(builder.Configuration);
-builder.Services.AddInfrastructureService(builder.Configuration);
+CommonServicesExtensions.AddCommonServices(builder.Services, builder.Configuration, builder.Configuration["AuthSerolog:FileName"]!);
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddPersistanceServices(builder.Configuration);
 
 var app = builder.Build();
 
-app.UseInfrastructurePolicy();
+CommonServicesExtensions.UseCommonPolicies(app);
 
 app.UseStaticFiles();
 

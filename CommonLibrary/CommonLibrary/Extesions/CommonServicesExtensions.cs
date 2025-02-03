@@ -1,31 +1,22 @@
 ﻿using InnoClinic.CommonLibrary.Middleware;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 
-namespace InnoClinic.CommonLibrary.DependencyInjection
+namespace InnoClinic.CommonLibrary.Exceptions
 {
-    public static class CommonServiceContainer
+    public static class CommonServicesExtensions
     {
-         
-        public static IServiceCollection AddCommonServices<TContext>(
+        public static IServiceCollection AddCommonServices(
             this IServiceCollection services,
             IConfiguration configuration,
-            string serilogFile,
-            KeyValuePair<string,string> dbConnectionStringKey) where TContext : DbContext
+            string serilogFile)
         {
-            // DB MSSQL 
-            if (dbConnectionStringKey.Key.Equals("MSSQL"))
-                services.AddDbContext<TContext>(option =>
-                    option.UseSqlServer(
-                        configuration.GetConnectionString(dbConnectionStringKey.Value), sqlserverOption => sqlserverOption.EnableRetryOnFailure()));
-
             // DB MongoDB
-            if (dbConnectionStringKey.Key.Equals("MongoDB"))
-                services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
+            //if (dbConnectionStringKey.Key.Equals("MongoDB"))
+            //    services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
             //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
 
             //Serilog

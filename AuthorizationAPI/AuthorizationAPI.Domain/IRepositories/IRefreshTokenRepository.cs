@@ -1,14 +1,14 @@
 ﻿using AuthorizationAPI.Domain.Data.Models;
-using InnoClinic.CommonLibrary.Response;
+using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Domain.IRepositories
 {
     public interface IRefreshTokenRepository
     {
-        public Task<CustomResponse> AddRefreshToken(RefreshToken refreshToken);
-        public Task<CustomResponse<List<RefreshToken>>> TakeAllRefreshTokens();
-        public Task<CustomResponse<RefreshToken>> TakeRefreshTokenByRTokenId(Guid refreshTokenId);
-        public Task<CustomResponse> UpdateRefreshToken(RefreshToken refreshToken);
-        public Task<CustomResponse> DeleteRefreshTokenByRTokenId(Guid refreshTokenId);
+        public void CreateRefreshToken(RefreshToken refreshToken);
+        public Task<IEnumerable<RefreshToken>> GetAllRefreshTokensAsync(bool trackChanges);
+        public void UpdateRefreshToken(RefreshToken refreshToken);
+        public void DeleteRefreshToken(RefreshToken refreshToken);
+        public Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression, bool trackChanges);
     }
 }

@@ -1,4 +1,5 @@
-﻿using AuthorizationAPI.Domain.Data.Models;
+﻿using AuthorizationAPI.Domain.Data.Configuration;
+using AuthorizationAPI.Domain.Data.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorizationAPI.Persistance.Data
@@ -10,13 +11,8 @@ namespace AuthorizationAPI.Persistance.Data
         public DbSet<UserStatus> UserStatuses { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
 
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>()
-                    .HasIndex(u => u.Email)
-                    .IsUnique();
-
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 entityType.GetForeignKeys()
@@ -25,7 +21,13 @@ namespace AuthorizationAPI.Persistance.Data
                     .ForEach(fk => fk.DeleteBehavior = DeleteBehavior.Restrict);
             }
 
+            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            modelBuilder.ApplyConfiguration(new UserStatusConfiguration());
+            modelBuilder.ApplyConfiguration(new UserConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
+
+
     }
 }

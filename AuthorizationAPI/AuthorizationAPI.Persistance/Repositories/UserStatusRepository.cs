@@ -8,71 +8,35 @@ using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories
 {
-    public class UserStatusRepository : IUserStatusRepository
+    public class UserStatusRepository : BaseRepository<UserStatus>, IUserStatusRepository
     {
-        private readonly AuthDBContext _authDBContext;
-
-        public UserStatusRepository(AuthDBContext authDBContext)
+        public UserStatusRepository(AuthDBContext authDBContext) : base(authDBContext) 
         {
-            _authDBContext = authDBContext;
         }
 
-        public async Task<CustomResponse> AddUserStatus(UserStatus userStatus)
+        public async Task<IEnumerable<UserStatus>> GetAllUserStatusesAsync(bool trackChanges)
         {
-            await _authDBContext.UserStatuses.AddAsync(userStatus);
-            await _authDBContext.SaveChangesAsync();
-
-            return new CustomResponse(true, "Successfully Added!");
+            return await GetAll(trackChanges).ToListAsync();
         }
 
-        public async Task<CustomResponse> DeleteUserStatusById(Guid userStatusId)
+        public async Task<IEnumerable<UserStatus>> GetUserStatusesWithExpressionAsync(Expression<Func<UserStatus, bool>> expression, bool trackChanges)
         {
-            var userStatus = await _authDBContext.UserStatuses
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(us => us.Id.Equals(userStatusId)); ;
-
-            _authDBContext.UserStatuses.Remove(userStatus);
-            await _authDBContext.SaveChangesAsync();
-
-            return new CustomResponse(true, "Successfully Deleted!");
+            return await GetWithExpression(expression, trackChanges).ToListAsync();
         }
 
-        public async Task<CustomResponse<List<UserStatus>>> TakeAllUserStatuses()
+        public void CreateUserStatus(UserStatus userStatus)
         {
-            var userStatuses = await _authDBContext.UserStatuses
-                    .AsNoTracking()
-                    .ToListAsync();
-
-            return new CustomResponse<List<UserStatus>>(true, "Success!", userStatuses);
+            Create(userStatus);
         }
 
-        public async Task<CustomResponse<UserStatus>> TakeUserStatusById(Guid userStatusId)
+        public void DeleteUserStatus(UserStatus userStatus)
         {
-            var userStatus = await _authDBContext.UserStatuses
-                .AsNoTracking()
-                .FirstOrDefaultAsync(us => us.Id == userStatusId);
-
-            return new CustomResponse<UserStatus>(true, "Success!", userStatus);
+            Delete(userStatus);
         }
 
-        public async Task<CustomResponse> UpdateUserStatus(UserStatus updatedUserStatus)
+        public void UpdateUserStatus(UserStatus updatedUserStatus)
         {
-            var userStatus = await _authDBContext.UserStatuses.FindAsync(updatedUserStatus.Id);
-
-            _authDBContext.UserStatuses.Entry(userStatus).State = EntityState.Detached;
-            _authDBContext.UserStatuses.Update(updatedUserStatus);
-            await _authDBContext.SaveChangesAsync();
-
-            return new CustomResponse(true, "Successfully Updated!");
-        }
-
-        public async Task<CustomResponse<UserStatus>> TakeUserStatusWithPredicate(Expression<Func<UserStatus, bool>> predicate)
-        {
-            var userStatus = await _authDBContext.UserStatuses
-                    .Where(predicate)
-                    .FirstOrDefaultAsync();
-
-            return new CustomResponse<UserStatus>(true,"Success!", userStatus);
+            Update(updatedUserStatus);
         }
     }
 }

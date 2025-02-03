@@ -6,40 +6,44 @@ using InnoClinic.CommonLibrary.Response;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 
 namespace AuthorizationAPI.Services.Services
 {
-    public class AuthorizationServices : IAuthorizationService
+    public class AuthorizationService //: IAuthorizationService
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IRoleRepository _roleRepository;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
+        private readonly IRepositoryManager _repositoryManager;
+        //private readonly IUserRepository _userRepository;
+        //private readonly IRoleRepository _roleRepository;
+        //private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IConfiguration _configuration;
-        public AuthorizationServices(
-                IConfiguration configuration, 
-                IUserRepository userRepository,  
-                IRoleRepository roleRepository,
-                IRefreshTokenRepository refreshTokenRepository)
+        public AuthorizationService(
+                IConfiguration configuration,
+                //IUserRepository userRepository,
+                //IRoleRepository roleRepository,
+                //IRefreshTokenRepository refreshTokenRepository,
+                IRepositoryManager repositoryManager)
         {
             _configuration = configuration;
-            _userRepository = userRepository;
-            _roleRepository = roleRepository;
-            _refreshTokenRepository = refreshTokenRepository;
+            //_userRepository = userRepository;
+            //_roleRepository = roleRepository;
+            //_refreshTokenRepository = refreshTokenRepository;
+            _repositoryManager = repositoryManager;
         }
 
         private async Task<string> GenerateJwtTokenStringByUserId(Guid userId)
         {
-            var user = await _userRepository.TakeUserById(userId);
-            var role = await _roleRepository.TakeRoleById(user.Value.RoleId);
+            var user = (await _repositoryManager.User.GetUsersWithExpressionAsync(u => u.Id.Equals(userId), false)).FirstOrDefault();
+            var role = (await _repositoryManager.Role.GetRolesWithExpressionAsync(r => r.Id.Equals(user.RoleId), false)).FirstOrDefault();
 
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.Email, user.Value.Email),
-                new Claim(ClaimTypes.Name, user.Value.FIO),
+                new Claim(ClaimTypes.Email, user.Email),
+                new Claim(ClaimTypes.Name, $"{user.FirstName} {user.LastName}"),
                 new Claim(ClaimTypes.NameIdentifier, userId.ToString()),
-                new Claim(ClaimTypes.Role, role.Value.Title),
+                new Claim(ClaimTypes.Role, role.Title),
             };
 
             var jwtHandler = new JwtSecurityTokenHandler();
@@ -71,9 +75,9 @@ namespace AuthorizationAPI.Services.Services
                 ExpireDate = DateTime.UtcNow.AddMinutes(120),
             };
 
-            var addRefreshTokenResponse = await _refreshTokenRepository.AddRefreshToken(refreshToken);
-            if (addRefreshTokenResponse.Flag == false)
-                return null;
+            _repositoryManager.RefreshToken.CreateRefreshToken(refreshToken);
+            await _repositoryManager.SaveChangesAsync();
+            
             return refreshToken.Id.ToString();
         }
 
@@ -81,7 +85,7 @@ namespace AuthorizationAPI.Services.Services
         {
             var jwt = await GenerateJwtTokenStringByUserId(userId);
             var rt = await GenerateRefreshTokenByUserId(userId);
-            return new TokensDTO() {AccessToken = jwt, RefreshToken = rt };
+            return new TokensDTO() { AccessToken = jwt, RefreshToken = rt };
         }
 
         public async Task<CustomResponse<(string, string)>> SignIn(LoginInfoDTO loginInfoDTO)
@@ -98,12 +102,12 @@ namespace AuthorizationAPI.Services.Services
             var userId = await _mediator.Send(new TakeUserIdByEmailQuery() { Email = loginInfoDTO.Email });
             var tokens = await GenerateTokenPair(userId);
 
-            return new CustomResponse<(string,string)>(true, "Success!", tokens);
+            return new CustomResponse<(string, string)>(true, "Success!", tokens);
         }
 
         public async Task<CustomResponse> SignOut(Guid rTokenId)
         {
-            return await ;
+            return await deleteRefreshToken;
         }
 
         public async Task<CustomResponse<(string, string)>> SignUp(RegistrationInfoDTO registrationInfoDTO)

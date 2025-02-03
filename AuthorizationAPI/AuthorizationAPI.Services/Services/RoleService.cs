@@ -4,10 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AuthorizationAPI.Services.Abstractions.Interfaces
+namespace AuthorizationAPI.Services.Services
 {
-    public interface IRoleService
+    internal class RoleService
     {
-        
     }
 }

@@ -1,81 +1,40 @@
 ﻿using AuthorizationAPI.Domain.Data.Models;
 using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Persistance.Data;
-using InnoClinic.CommonLibrary.Response;
 using Microsoft.EntityFrameworkCore;
-using System.Data;
 using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : BaseRepository<User>, IUserRepository
     {
-        private readonly AuthDBContext _authDBContext;
+        public UserRepository(AuthDBContext authDBContext) : base(authDBContext) 
+        { }
 
-        public UserRepository(AuthDBContext authDBContext)
+        public async Task<IEnumerable<User>> GetAllUsersAsync(bool trackChanges)
         {
-            _authDBContext = authDBContext;
+            return await GetAll(trackChanges).ToListAsync();
         }
 
-        public async Task<CustomResponse> AddUser(User updatedUser)
+        public async Task<IEnumerable<User>> GetUsersWithExpressionAsync(Expression<Func<User, bool>> expression, bool trackChanges)
         {
-
-            await _authDBContext.Users.AddAsync(updatedUser);
-            await _authDBContext.SaveChangesAsync();
-
-            return new CustomResponse(true, "Successfully Added!");
+            return await GetWithExpression(expression, trackChanges).ToListAsync();
         }
 
-        public async Task<CustomResponse> DeleteUserById(Guid userId)
+        public void CreateUser(User user)
         {
-            var user = await _authDBContext.Users
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Id == userId);
-
-            _authDBContext.Users.Remove(user);
-            await _authDBContext.SaveChangesAsync();
-
-            return new CustomResponse(true, "Successfully Deleted!");
+            Create(user);
         }
 
-        public async Task<CustomResponse<List<User>>> TakeAllUsers()
+        public void DeleteUser(User user)
         {
-            var users = await _authDBContext.Users
-                    .AsNoTracking()
-                    .ToListAsync();
-
-            return new CustomResponse<List<User>>(true, "Success!", users);
+            Delete(user);
         }
 
-        public async Task<CustomResponse<User>> TakeUserById(Guid userId)
+        public void UpdateUser(User updatedUser)
         {
-            var user = await _authDBContext.Users
-                    .Include(r => r.Role)
-                    .Include(us => us.UserStatus)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Id.Equals(userId));
-
-            return new CustomResponse<User>(true, "Success!", user);
-        }
-
-        public async Task<CustomResponse> UpdateUser(User updatedUser)
-        {
-            var user = await _authDBContext.Users.FindAsync(updatedUser.Id);
-
-            _authDBContext.Users.Entry(user).State = EntityState.Detached;
-            _authDBContext.Users.Update(updatedUser);
-            await _authDBContext.SaveChangesAsync();
-
-            return new CustomResponse(true, "Successfully Updated!");
-        }
-
-        public async Task<CustomResponse<User>> TakeUserWithPredicate(Expression<Func<User, bool>> predicate)
-        {
-            var user = await _authDBContext.Users
-                    .Where(predicate)
-                    .FirstOrDefaultAsync();
-
-            return new CustomResponse<User>(true, "Success!", user);
+            Update(updatedUser);
         }
     }
 }
+

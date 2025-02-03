@@ -1,21 +1,21 @@
 ﻿namespace InnoClinic.CommonLibrary.Response
 {
-    public class CustomResponse
+    public class CommonResponse
     {
         public bool Flag { get; }
         public string Message { get; }
-        public CustomResponse(bool flag = false, string message = null!)
+        public CommonResponse(bool flag = false, string message = null!)
         {
             Flag = flag;
             Message = message;
         }
     }
 
-    public class CustomResponse<T> : CustomResponse
+    public class CommonResponse<T> : CommonResponse
     {
         public T Value { get; }
 
-        public CustomResponse(bool flag = false, string message = null!, T value = default!)
+        public CommonResponse(bool flag = false, string message = null!, T value = default!)
             : base(flag, message)
         {
             Value = value;
