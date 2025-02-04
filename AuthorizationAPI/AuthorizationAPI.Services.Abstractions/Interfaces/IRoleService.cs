@@ -1,13 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AuthorizationAPI.Shared.DTOs.RoleDTOs;
+using InnoClinic.CommonLibrary.Response;
 
 namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
     public interface IRoleService
     {
-        
+        public Task<CommonResponse> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO);
+        public Task<CommonResponse> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO);
+        public Task<CommonResponse> DeleteRoleByIdAsync(Guid roleId);
+        public Task<CommonResponse<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync();
+        public Task<CommonResponse<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId);
+
     }
 }

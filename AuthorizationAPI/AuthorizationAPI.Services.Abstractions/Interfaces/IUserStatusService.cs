@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
+using InnoClinic.CommonLibrary.Response;
 
 namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
-    internal class IUserStatusService
+    public interface IUserStatusService
     {
+        public Task<CommonResponse> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO);
+        public Task<CommonResponse> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO);
+        public Task<CommonResponse> DeleteUserStatusByIdAsync(Guid userStatusId);
+        public Task<CommonResponse<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync();
+        public Task<CommonResponse<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId);
     }
 }

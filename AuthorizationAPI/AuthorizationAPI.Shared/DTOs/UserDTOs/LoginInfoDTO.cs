@@ -1,4 +1,4 @@
-﻿namespace AuthorizationAPI.Shared.DTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.UserDTOs
 {
     public class LoginInfoDTO
     {

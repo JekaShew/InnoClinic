@@ -26,6 +26,12 @@ namespace AuthorizationAPI.Domain.Data.Configuration
                     Id = new Guid("6C6FEEBA-0919-4266-B2D1-9F5B724DB31A"),
                     Title = "Deleted",
                     Description = "The Deleted user status means that User Deleted their account.",
+                },
+                new UserStatus
+                {
+                    Id = new Guid("7B31946C-6D14-44DC-9F93-3A4C06DB902E"),
+                    Title = "Banned",
+                    Description = "The Banned user status means that User was Banned by Administrator for some action.",
                 }
             );
         }

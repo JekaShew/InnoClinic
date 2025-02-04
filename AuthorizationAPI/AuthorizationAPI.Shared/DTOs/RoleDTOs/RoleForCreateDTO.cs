@@ -1,8 +1,7 @@
-﻿namespace AuthorizationAPI.Shared.DTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.RoleDTOs
 {
-    public class RoleDTO
+    public class RoleForCreateDTO
     {
-        public Guid Id { get; set; }
         public string Title { get; set; }
         public string? Description { get; set; }
     }

@@ -1,4 +1,4 @@
-﻿namespace AuthorizationAPI.Shared.DTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
 {
     public class TokensDTO
     {

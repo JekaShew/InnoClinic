@@ -1,28 +1,32 @@
-﻿using AuthorizationAPI.Shared.DTOs;
+﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
+using AuthorizationAPI.Shared.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserStatusController : ControllerBase
+    public class UserStatusesController : ControllerBase
     {
-        //private readonly IUserStatusServices _userStatusServices;
-        //public UserStatusController()
-        //{
+        private readonly IUserStatusService _userStatusService;
+        public UserStatusesController(IUserStatusService userStatusService)
+        {
+            _userStatusService = userStatusService;
+        }
 
-        //}
-
-        //[HttpGet("{userStatusId}")]
-        //public async Task<IActionResult> TakeUserStatusById(Guid userStatusId)
-        //{
-        //    var result = await _mediator.Send(new TakeUserStatusDTOByIdQuery() { Id = userStatusId });
-        //    if (result is null)
-        //        return NotFound("User Status Not found!");
-        //    return Ok(result);
-        //}
+        [HttpGet("{userStatusId}")]
+        [Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> TakeUserStatusById(Guid userStatusId)
+        {
+            var result = await _userStatusService.GetUserStatusByIdAsync(userStatusId);
+            if (result.Flag == false)
+                return result.ResponseType;
+            return Ok(result);
+        }
 
         //[HttpGet]
+        //[Authorize(Roles = "Administrator")]
         //public async Task<IActionResult> TakeAllUserStatuses()
         //{
         //    var result = await _mediator.Send(new TakeUserStatusDTOListQuery() { });
@@ -32,6 +36,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         //}
 
         //[HttpPost]
+        //[Authorize(Roles = "Administrator")]
         //public async Task<IActionResult> AddUserStatus([FromBody] UserStatusDTO userStatusDTO)
         //{
         //    var result = await _mediator.Send(new AddUserStatusCommand() { UserStatusDTO = userStatusDTO });
@@ -41,6 +46,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         //}
 
         //[HttpPut]
+        //[Authorize(Roles = "Administrator")]
         //public async Task<IActionResult> UpdateUserStatus([FromBody] UserStatusDTO userStatusDTO)
         //{
         //    var result = await _mediator.Send(new UpdateUserStatusCommand() { UserStatusDTO = userStatusDTO });
@@ -50,6 +56,7 @@ namespace AuthorizationAPI.Presentation.Controllers
         //}
 
         //[HttpDelete("{userStatusId}")]
+        //[Authorize(Roles = "Administrator")]
         //public async Task<IActionResult> DeleteUserStatusById(Guid userStatusId)
         //{
         //    var result = await _mediator.Send(new DeleteUserStatusByIdCommand() { Id = userStatusId });

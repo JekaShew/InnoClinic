@@ -9,7 +9,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-CommonServicesExtensions.AddCommonServices(builder.Services, builder.Configuration, builder.Configuration["AuthSerolog:FileName"]!);
+CommonServicesExtensions.AddCommonServices(builder.Services, builder.Configuration, builder.Configuration["AuthSerolog:FileName"]);
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddPersistanceServices(builder.Configuration);
 

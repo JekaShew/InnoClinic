@@ -10,8 +10,8 @@ namespace AuthorizationAPI.Services.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddHttpContextAccessor();
-            //services.AddScoped<IAuthorizationService, AuthorizationServices>();
+
+            services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IUserService, UserService>();
             services.AddFluentValidationMethod(configuration);
 
