@@ -6,42 +6,42 @@ namespace InnoClinic.CommonLibrary.Middleware
     {
         public async Task InvokeAsync(HttpContext httpContext)
         {
-            try
-            {
-                await next(httpContext);
+            //try
+            //{
+            //    await next(httpContext);
 
-                if (httpContext.Response.StatusCode == StatusCodes.Status429TooManyRequests)
-                {
-                    var title = "Alert!";
-                    var message = "Too many requests were made!";
-                    var statusCode = (int)StatusCodes.Status429TooManyRequests;
+            //    if (httpContext.Response.StatusCode == StatusCodes.Status429TooManyRequests)
+            //    {
+            //        var title = "Alert!";
+            //        var message = "Too many requests were made!";
+            //        var statusCode = (int)StatusCodes.Status429TooManyRequests;
                     
-                    await ModifyResponse(httpContext, title, message, statusCode);
-                }
+            //        await ModifyResponse(httpContext, title, message, statusCode);
+            //    }
 
-                if (httpContext.Response.StatusCode == StatusCodes.Status401Unauthorized)
-                {
-                    var title = "Warning!";
-                    var message = "You are UnAuthorized!";
-                    var statusCode = (int)StatusCodes.Status401Unauthorized;
+            //    if (httpContext.Response.StatusCode == StatusCodes.Status401Unauthorized)
+            //    {
+            //        var title = "Warning!";
+            //        var message = "You are UnAuthorized!";
+            //        var statusCode = (int)StatusCodes.Status401Unauthorized;
                     
-                    await ModifyResponse(httpContext, title, message, statusCode);
-                }
+            //        await ModifyResponse(httpContext, title, message, statusCode);
+            //    }
 
-                if (httpContext.Response.StatusCode == StatusCodes.Status403Forbidden)
-                {
-                    var title = "Warning!";
-                    var message = "The resource is forbidden for you!";
-                    var statusCode = (int)StatusCodes.Status403Forbidden;
+            //    if (httpContext.Response.StatusCode == StatusCodes.Status403Forbidden)
+            //    {
+            //        var title = "Warning!";
+            //        var message = "The resource is forbidden for you!";
+            //        var statusCode = (int)StatusCodes.Status403Forbidden;
                     
-                    await ModifyResponse(httpContext, title, message, statusCode);
-                }
+            //        await ModifyResponse(httpContext, title, message, statusCode);
+            //    }
 
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception(ex.Message);
+            //}
         }
 
         private static async Task ModifyResponse(

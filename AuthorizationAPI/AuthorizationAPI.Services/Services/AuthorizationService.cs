@@ -1,11 +1,13 @@
 ﻿using AuthorizationAPI.Domain.Data.Models;
 using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Services.Abstractions.Interfaces;
+using AuthorizationAPI.Services.Extensions;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -17,13 +19,13 @@ namespace AuthorizationAPI.Services.Services
     {
         private readonly IRepositoryManager _repositoryManager;
         private readonly IUserService _userService;
-        private readonly IConfiguration _configuration;
+        private readonly AuthenticationSettings _authenticationSettings;
         public AuthorizationService(
-                IConfiguration configuration,
+                IOptions<AuthenticationSettings> options,
                 IRepositoryManager repositoryManager,
                 IUserService userService)
         {
-            _configuration = configuration;
+            _authenticationSettings = options.Value;
             _repositoryManager = repositoryManager;
             _userService = userService;
         }
@@ -42,13 +44,13 @@ namespace AuthorizationAPI.Services.Services
             };
 
             var jwtHandler = new JwtSecurityTokenHandler();
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Authentication:SecretKey"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_authenticationSettings.SecretKey));
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Issuer = _configuration["Authentication:Issuer"],
-                Audience = _configuration["Authentication:Audience"],
+                Issuer = _authenticationSettings.Issuer,
+                Audience = _authenticationSettings.Audience,
                 Expires = DateTime.UtcNow.AddMinutes(15),
                 SigningCredentials =
                     new SigningCredentials(key,
@@ -83,47 +85,47 @@ namespace AuthorizationAPI.Services.Services
             return new TokensDTO() { AccessToken = jwt, RefreshToken = rt };
         }
 
-        public async Task<CommonResponse<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO)
+        public async Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO)
         {
             //Check Email Registered
             var userDetailedDTO = await _userService.IsEmailRegistered(loginInfoDTO.Email, false);
             if(userDetailedDTO is null)
-                return new CommonResponse<TokensDTO>(false, MessageConstants.CheckCredsMessage);
+                return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage,false );
             //Check Email Password pair
             var enteredPasswordHash = await _userService.GetHashString($"{loginInfoDTO.Password}{userDetailedDTO.SecurityStamp}");
             if (!enteredPasswordHash.Equals(userDetailedDTO.PasswordHash))
-                return new CommonResponse<TokensDTO>(false, MessageConstants.CheckCredsMessage);
+                return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
 
             //Generate A&R Tokens
             var tokens = await GenerateTokenPair(userDetailedDTO.Id);
 
-            return new CommonResponse<TokensDTO>(true, MessageConstants.SuccessMessage, tokens);
+            return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
         }
 
-        public async Task<CommonResponse> SignOut(Guid rTokenId)
+        public async Task<ResponseMessage> SignOut(Guid rTokenId)
         {
             var refreshToken = (await _repositoryManager.RefreshToken.GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(rTokenId), false)).FirstOrDefault();
             if (refreshToken is null)
-                return new CommonResponse(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
             _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
-        public async Task<CommonResponse<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
+        public async Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
         {
             //Check Email Registered
             var userDetailedDTO = await _userService.IsEmailRegistered(registrationInfoDTO.Email, false);
             if (userDetailedDTO is not null)
-                return new CommonResponse<TokensDTO>(false, MessageConstants.EmailRegisteredMessage);
+                return new ResponseMessage<TokensDTO>(MessageConstants.EmailRegisteredMessage, false);
             //Create and Generate A&R Tokens
             var userId = await _userService.CreateUserAsync(registrationInfoDTO);
             if (userId.Equals(Guid.Empty))
-                return new CommonResponse<TokensDTO>(false, MessageConstants.FailedCreateMessage);
+                return new ResponseMessage<TokensDTO>(MessageConstants.FailedCreateMessage, false);
             var tokens = await GenerateTokenPair(userId);
 
-            return new CommonResponse<TokensDTO>(true, MessageConstants.SuccessMessage, tokens); ;
+            return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens); ;
         }
         private async Task<RefreshToken> IsRefreshTokeCorrect(Guid rTokenId, bool trackChanges)
         {
@@ -142,13 +144,13 @@ namespace AuthorizationAPI.Services.Services
 
             return refreshToken;
         }
-        public async Task<CommonResponse<TokensDTO>> Refresh(Guid rTokenId)
+        public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)
         {
             var refreshToken = await IsRefreshTokeCorrect(rTokenId, false);
             //Generate A&R Tokens
             var tokens = await GenerateTokenPair(refreshToken.UserId);
 
-            return new CommonResponse<TokensDTO>(true, MessageConstants.SuccessMessage, tokens);
+            return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
         }        
     }
 }

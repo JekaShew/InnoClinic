@@ -1,13 +1,14 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
-using AuthorizationAPI.Shared.DTOs;
+using AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace AuthorizationAPI.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserStatusesController : ControllerBase
+    public class UserStatusesController : BaseManualController
     {
         private readonly IUserStatusService _userStatusService;
         public UserStatusesController(IUserStatusService userStatusService)
@@ -16,53 +17,53 @@ namespace AuthorizationAPI.Presentation.Controllers
         }
 
         [HttpGet("{userStatusId}")]
-        [Authorize(Roles = "Administrator")]
-        public async Task<IActionResult> TakeUserStatusById(Guid userStatusId)
+        //[Authorize(Roles = "Administrator")]
+        public async Task<IActionResult> GetUserStatusById(Guid userStatusId)
         {
             var result = await _userStatusService.GetUserStatusByIdAsync(userStatusId);
             if (result.Flag == false)
-                return result.ResponseType;
+                return HandlePesponseMessage(result);
             return Ok(result);
         }
 
-        //[HttpGet]
+        [HttpGet]
         //[Authorize(Roles = "Administrator")]
-        //public async Task<IActionResult> TakeAllUserStatuses()
-        //{
-        //    var result = await _mediator.Send(new TakeUserStatusDTOListQuery() { });
-        //    if (!result.Any())
-        //        return NotFound("No User Statuses Found!");
-        //    return Ok(result);
-        //}
+        public async Task<IActionResult> GetAllUserStatuses()
+        {
+            var result = await _userStatusService.GetAllUserStatusesAsync();
+            if (result.Flag == false)
+                return HandlePesponseMessage(result);
+            return Ok(result);
+        }
 
-        //[HttpPost]
+        [HttpPost]
         //[Authorize(Roles = "Administrator")]
-        //public async Task<IActionResult> AddUserStatus([FromBody] UserStatusDTO userStatusDTO)
-        //{
-        //    var result = await _mediator.Send(new AddUserStatusCommand() { UserStatusDTO = userStatusDTO });
-        //    if (result.Flag == false)
-        //        return StatusCode(500, result.Message);
-        //    return Ok(result.Message);
-        //}
+        public async Task<IActionResult> AddUserStatus([FromBody] UserStatusForCreateDTO userStatusForCreateDTO)
+        {
+            var result = await _userStatusService.CreateUserStatusAsync(userStatusForCreateDTO);
+            if (result.Flag == false)
+                return HandlePesponseMessage(result);
+            return Ok(result);
+        }
 
-        //[HttpPut]
+        [HttpPut("/{userStatusId}")]
         //[Authorize(Roles = "Administrator")]
-        //public async Task<IActionResult> UpdateUserStatus([FromBody] UserStatusDTO userStatusDTO)
-        //{
-        //    var result = await _mediator.Send(new UpdateUserStatusCommand() { UserStatusDTO = userStatusDTO });
-        //    if (result.Flag == false)
-        //        return StatusCode(500, result.Message);
-        //    return Ok(result.Message);
-        //}
+        public async Task<IActionResult> UpdateUserStatus(Guid userStatusId, [FromBody] UserStatusForUpdateDTO userStatusForUpdateDTO)
+        {
+            var result = await _userStatusService.UpdateUserStatusAsync(userStatusId, userStatusForUpdateDTO);
+            if (result.Flag == false)
+                return HandlePesponseMessage(result);
+            return Ok(result);
+        }
 
-        //[HttpDelete("{userStatusId}")]
+        [HttpDelete("{userStatusId}")]
         //[Authorize(Roles = "Administrator")]
-        //public async Task<IActionResult> DeleteUserStatusById(Guid userStatusId)
-        //{
-        //    var result = await _mediator.Send(new DeleteUserStatusByIdCommand() { Id = userStatusId });
-        //    if (result.Flag == false)
-        //        return StatusCode(500, result.Message);
-        //    return Ok(result.Message);
-        //}
+        public async Task<IActionResult> DeleteUserStatusById(Guid userStatusId)
+        {
+            var result = await _userStatusService.DeleteUserStatusByIdAsync(userStatusId);
+            if (result.Flag == false)
+                return HandlePesponseMessage(result);
+            return Ok(result);
+        }
     }
 }

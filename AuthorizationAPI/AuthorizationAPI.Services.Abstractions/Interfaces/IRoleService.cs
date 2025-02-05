@@ -5,11 +5,11 @@ namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
     public interface IRoleService
     {
-        public Task<CommonResponse> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO);
-        public Task<CommonResponse> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO);
-        public Task<CommonResponse> DeleteRoleByIdAsync(Guid roleId);
-        public Task<CommonResponse<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync();
-        public Task<CommonResponse<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId);
+        public Task<ResponseMessage> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO);
+        public Task<ResponseMessage> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO);
+        public Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId);
+        public Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync();
+        public Task<ResponseMessage<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId);
 
     }
 }

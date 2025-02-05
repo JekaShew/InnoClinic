@@ -5,10 +5,10 @@ namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
     public interface IUserStatusService
     {
-        public Task<CommonResponse> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO);
-        public Task<CommonResponse> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO);
-        public Task<CommonResponse> DeleteUserStatusByIdAsync(Guid userStatusId);
-        public Task<CommonResponse<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync();
-        public Task<CommonResponse<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId);
+        public Task<ResponseMessage> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO);
+        public Task<ResponseMessage> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO);
+        public Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId);
+        public Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync();
+        public Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId);
     }
 }

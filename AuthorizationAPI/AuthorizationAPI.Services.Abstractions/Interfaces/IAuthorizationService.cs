@@ -6,9 +6,9 @@ namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
     public interface IAuthorizationService
     {
-        public Task<CommonResponse<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO);
-        public Task<CommonResponse> SignOut(Guid rTokenId);
-        public Task<CommonResponse<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO);
-        public Task<CommonResponse<TokensDTO>> Refresh(Guid rTokenId);
+        public Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO);
+        public Task<ResponseMessage> SignOut(Guid rTokenId);
+        public Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO);
+        public Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId);
     }
 }

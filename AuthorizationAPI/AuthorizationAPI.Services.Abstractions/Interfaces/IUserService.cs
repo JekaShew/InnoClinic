@@ -6,19 +6,20 @@ namespace AuthorizationAPI.Services.Abstractions.Interfaces
 {
     public interface IUserService
     {
+        public Task<ResponseMessage<List<UserInfoDTO>>> GetAllUsersInfo();
+        public Task<ResponseMessage<UserDetailedDTO>> GetUserDetailedInfo(Guid userId);
+        public Task<ResponseMessage> DeleteCurrentAccount();
+        public Task<ResponseMessage> DeleteUserById(Guid userId);
+        public Task<ResponseMessage> UpdateUserInfo(Guid userId, UserForUpdateDTO userForUpdateDTO);
+        public Task<ResponseMessage> ChangePasswordByOldPassword(string oldPassword, string newPassword);
+        public Task<ResponseMessage> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword);
+        public Task<ResponseMessage> ChangeForgottenPasswordByEmail(string email);
+        public Task<ResponseMessage> ChangeUserStatusOfUser(UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO);
+        public Task<ResponseMessage> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPirDTO);
+       
         public Task<Guid> CreateUserAsync(RegistrationInfoDTO registrationInfoDTO);
-        public Task<UserDetailedDTO> IsEmailRegistered(string email, bool trackChanges);
         public Task<UserDetailedDTO> IsCurrentUserAdministrator();
-        public Task<CommonResponse> DeleteAccountById();
-        public Task<CommonResponse> DeleteUserById(Guid userId);
-        public Task<CommonResponse<List<UserInfoDTO>>> TakeAllUsersInfo();
-        public Task<CommonResponse<UserDetailedDTO>> GetUserDetailedInfo(Guid userId);
-        public Task<CommonResponse> UpdateUserInfo(UserInfoDTO userInfoDTO);
-        public Task<CommonResponse> ChangeUserStatusOfUser(UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO);
-        public Task<CommonResponse> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPirDTO);
-        public Task<CommonResponse> ChangePasswordByOldPassword(string oldPassword, string newPassword);
-        public Task<CommonResponse> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword);
-        public Task<CommonResponse> ChangeForgottenPasswordByEmail(string email);
+        public Task<UserDetailedDTO> IsEmailRegistered(string email, bool trackChanges);
         public Task<string> GetHashString(string stringToHash);
 
     }

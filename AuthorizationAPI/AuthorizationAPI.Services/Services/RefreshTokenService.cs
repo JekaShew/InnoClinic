@@ -17,73 +17,73 @@ namespace AuthorizationAPI.Services.Services
             _userService = userService;
         }
 
-        public async Task<CommonResponse> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
+        public async Task<ResponseMessage> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
         {
             var userAdmin = await _userService.IsCurrentUserAdministrator();
             if (userAdmin is null)
-                return new CommonResponse(false, MessageConstants.ForbiddenMessage);
+                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
             var refreshToken = (await _repositoryManager.RefreshToken
                     .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(refreshTokenId), true))
                     .FirstOrDefault();
             if (refreshToken is null)
-                return new CommonResponse(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
             _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessDeleteMessage);
+            return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
         }
 
-        public async Task<CommonResponse> RevokeRefreshTokenByRefreshTokenId(Guid rTokenId)
+        public async Task<ResponseMessage> RevokeRefreshTokenByRefreshTokenId(Guid rTokenId)
         {
             var userAdmin = await _userService.IsCurrentUserAdministrator();
             if (userAdmin is null)
-                return new CommonResponse(false, MessageConstants.ForbiddenMessage);
+                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
             var refreshToken = (await _repositoryManager.RefreshToken
                     .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(rTokenId), true))
                     .FirstOrDefault(); 
             if(refreshToken is null)
-                return new CommonResponse(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
             refreshToken.IsRevoked = true;
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
-        public async Task<CommonResponse<IEnumerable<UserLoggedInInfoDTO>>> TakeAllLoggedInUsers()
+        public async Task<ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>> GetAllLoggedInUsers()
         {
             var userAdmin = await _userService.IsCurrentUserAdministrator();
             if (userAdmin is null)
-                return new CommonResponse<IEnumerable<UserLoggedInInfoDTO>>(false, MessageConstants.ForbiddenMessage);
+                return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.ForbiddenMessage, false);
 
             var refreshTokenCollection = await _repositoryManager.RefreshToken
                     .GetAllRefreshTokensAsync(false);
             if(!refreshTokenCollection.Any())
-                return new CommonResponse<IEnumerable<UserLoggedInInfoDTO>>(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.NotFoundMessage, false);
 
             var userLoggedInInfoDTOs = refreshTokenCollection.Select(rt => RefreshTokenMapper.RefreshTokenToUserLoggedInInfoDTO(rt));
 
-            return new CommonResponse<IEnumerable<UserLoggedInInfoDTO>>(true, MessageConstants.SuccessMessage, userLoggedInInfoDTOs);
+            return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.SuccessMessage, true, userLoggedInInfoDTOs);
         }
 
-        public async Task<CommonResponse<RefreshTokenInfoDTO>> TakeRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
+        public async Task<ResponseMessage<RefreshTokenInfoDTO>> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
         {
             var userAdmin = await _userService.IsCurrentUserAdministrator();
             if (userAdmin is null)
-                return new CommonResponse<RefreshTokenInfoDTO>(false, MessageConstants.ForbiddenMessage);
+                return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.ForbiddenMessage, false);
 
             var refreshToken = (await _repositoryManager.RefreshToken
                     .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(refreshTokenId), false))
                     .FirstOrDefault();
             if (refreshToken is null)
-                return new CommonResponse<RefreshTokenInfoDTO>(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.NotFoundMessage, false);
 
             var refreshTokenInfoDTO = RefreshTokenMapper.RefreshTokenToRefreshTokenInfoDTO(refreshToken);
 
-            return new CommonResponse<RefreshTokenInfoDTO>(true, MessageConstants.SuccessMessage, refreshTokenInfoDTO);
+            return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.SuccessMessage, true, refreshTokenInfoDTO);
         }
     }
 }

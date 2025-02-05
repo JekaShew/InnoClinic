@@ -7,7 +7,7 @@ namespace AuthorizationAPI.Persistance.Repositories
 {
     public abstract class BaseRepository<T> : IBaseRepository<T>  where T : class
     {
-        protected AuthDBContext _authDBContext;
+        protected AuthDBContext _authDBContext { get; set; }
         public BaseRepository(AuthDBContext authDBContext)
         {
             _authDBContext = authDBContext;

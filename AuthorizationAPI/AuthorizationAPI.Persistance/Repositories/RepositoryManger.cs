@@ -5,7 +5,7 @@ namespace AuthorizationAPI.Persistance.Repositories
 {
     public class RepositoryManger : IRepositoryManager
     {
-        private AuthDBContext _authDBContext;
+        private AuthDBContext _authDBContext ;
         private IRoleRepository _roleRepository;
         private IUserRepository _userRepository;
         private IUserStatusRepository _userStatusRepository;

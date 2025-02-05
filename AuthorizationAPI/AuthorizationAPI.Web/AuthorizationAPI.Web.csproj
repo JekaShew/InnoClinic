@@ -32,4 +32,8 @@
     <ProjectReference Include="..\AuthorizationAPI.Services\AuthorizationAPI.Services.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\" />
+  </ItemGroup>
+
 </Project>

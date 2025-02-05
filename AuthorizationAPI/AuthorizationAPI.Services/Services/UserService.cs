@@ -20,9 +20,6 @@ namespace AuthorizationAPI.Services.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         public UserService(
                 IHttpContextAccessor httpContextAccessor,
-                IUserRepository userRepository,
-                IUserStatusRepository userStatusRepository,
-                IRoleRepository roleRepository,
                 IRepositoryManager repositoryManager)
         {
             _httpContextAccessor = httpContextAccessor;
@@ -116,14 +113,14 @@ namespace AuthorizationAPI.Services.Services
             return newUser.Id;
         }
 
-        public async Task<CommonResponse> DeleteAccountById()
+        public async Task<ResponseMessage> DeleteCurrentAccount()
         {
             var deletedUserStatus = (await _repositoryManager
                     .UserStatus
                     .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(DBConstants.DeletedUserStatusId), false))
                     .FirstOrDefault();
             if(deletedUserStatus is null || deletedUserStatus.Id.Equals(Guid.Empty))
-                return new CommonResponse(false, MessageConstants.CheckDBDataMessage);
+                return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
             
             var currentUserId = TakeCurrentUserId();
             var currentUser = (await _repositoryManager.User
@@ -133,14 +130,14 @@ namespace AuthorizationAPI.Services.Services
             currentUser.UserStatusId = deletedUserStatus.Id;
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
-        public async Task<CommonResponse> DeleteUserById(Guid userId)
+        public async Task<ResponseMessage> DeleteUserById(Guid userId)
         {
             var adminUser = await IsCurrentUserAdministrator();
             if(adminUser is null)
-                return new CommonResponse(false, MessageConstants.ForbiddenMessage);
+                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
             var userToDelete = (await _repositoryManager.User
                     .GetUsersWithExpressionAsync(u => u.Id.Equals(userId), false))
@@ -148,73 +145,82 @@ namespace AuthorizationAPI.Services.Services
             _repositoryManager.User.DeleteUser(userToDelete);
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessDeleteMessage);
+            return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
         }
 
-        public async Task<CommonResponse<List<UserInfoDTO>>> TakeAllUsersInfo()
+        public async Task<ResponseMessage<List<UserInfoDTO>>> GetAllUsersInfo()
         {
             var users = await _repositoryManager.User.GetAllUsersAsync(false);
             var userInfoDTOs = users.Select(u => UserMapper.UserToUserInfoDTO(u)).ToList();
 
-            return new CommonResponse<List<UserInfoDTO>>(true, MessageConstants.SuccessMessage, userInfoDTOs);
+            return new ResponseMessage<List<UserInfoDTO>>(MessageConstants.SuccessMessage, true, userInfoDTOs);
         }
 
-        public async Task<CommonResponse<UserDetailedDTO>> GetUserDetailedInfo(Guid userId)
+        public async Task<ResponseMessage<UserDetailedDTO>> GetUserDetailedInfo(Guid userId)
         {
             var adminUser = await IsCurrentUserAdministrator();
             if(adminUser is null)
-                return new CommonResponse<UserDetailedDTO>(false, MessageConstants.ForbiddenMessage, null);
+                return new ResponseMessage<UserDetailedDTO>(MessageConstants.ForbiddenMessage, false);
 
             var user = (await _repositoryManager.User
                     .GetUsersWithExpressionAsync(u => u.Id.Equals(userId),false))
                     .FirstOrDefault();
             var userDetailedInfoDTO = UserMapper.UserToUserDetailedDTO(user);
 
-            return new CommonResponse<UserDetailedDTO>(true, MessageConstants.SuccessMessage, userDetailedInfoDTO);
+            return new ResponseMessage<UserDetailedDTO>(MessageConstants.SuccessMessage, true, userDetailedInfoDTO);
         }
 
-        public async Task<CommonResponse> UpdateUserInfo(UserInfoDTO userInfoDTO)
+        public async Task<ResponseMessage> UpdateUserInfo(Guid userId, UserForUpdateDTO userForUpdateDTO)
         {
             var currentUserId = TakeCurrentUserId();
             var user = (await _repositoryManager.User
-                    .GetUsersWithExpressionAsync(u => u.Email.Equals(userInfoDTO.Email), true))
+                    .GetUsersWithExpressionAsync(u => u.Id.Equals(userId), true))
                     .FirstOrDefault();
             if (!user.Id.Equals(currentUserId.Value))
-                return new CommonResponse(false, MessageConstants.ForbiddenMessage);
+                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
-            user = UserMapper.UserInfoDTOToUser(userInfoDTO);
+            user = UserMapper.UserForUpdateDTOToUser(userForUpdateDTO);
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
         //Implement
-        public Task<CommonResponse> ChangeForgottenPasswordByEmail(string email)
+        public Task<ResponseMessage> ChangeForgottenPasswordByEmail(string email)
         {
+            // send activate code to newEmail
             throw new NotImplementedException();
         }
 
-        public async Task<CommonResponse> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword)
+        public Task<ResponseMessage> ChangeEmail(string password, string newEmail)
+        {
+            //check currentUser??
+            //check password
+            //send activate code to newEmail
+            throw new NotImplementedException();
+        }
+
+        public async Task<ResponseMessage> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword)
         {
             var user = (await _repositoryManager.User
                     .GetUsersWithExpressionAsync(u => u.Email.Equals(emailSecretPhrasePairDTO.Email), true))
                     .FirstOrDefault();
             if (user is null)
-                return new CommonResponse(false, MessageConstants.CheckCredsMessage);
+                return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
 
             var enteredSecretPhraseHash = await GetHashString($"{emailSecretPhrasePairDTO.SecretPhrase}{user.SecurityStamp}");
 
             if (!enteredSecretPhraseHash.Equals(user.SecretPhraseHash))
-                return new CommonResponse(false, MessageConstants.CheckCredsMessage);
+                return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
 
             user.PasswordHash = await GetHashString($"{newPassword}{user.SecurityStamp}");
 
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
-        public async Task<CommonResponse> ChangePasswordByOldPassword(string oldPassword, string newPassword)
+        public async Task<ResponseMessage> ChangePasswordByOldPassword(string oldPassword, string newPassword)
         {
             var currentUserId = TakeCurrentUserId();
 
@@ -224,60 +230,60 @@ namespace AuthorizationAPI.Services.Services
 
             var enteredPasswordHash = await GetHashString($"{oldPassword}{user.SecurityStamp}");
             if (!enteredPasswordHash.Equals(user.PasswordHash))
-                return new CommonResponse(false, MessageConstants.CheckCredsMessage);
+                return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
 
             user.PasswordHash = await GetHashString($"{newPassword}{user.SecurityStamp}");
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
-        public async Task<CommonResponse> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPairDTO)
+        public async Task<ResponseMessage> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPairDTO)
         {
             var adminUser = await IsCurrentUserAdministrator();
             if (adminUser is null)
-                return new CommonResponse<UserDetailedDTO>(false, MessageConstants.ForbiddenMessage, null);
+                return new ResponseMessage<UserDetailedDTO>(MessageConstants.ForbiddenMessage, false);
 
             var role = (await _repositoryManager.Role
                     .GetRolesWithExpressionAsync(r => r.Id.Equals(userIdRoleIdPairDTO.RoleId),false))
                     .FirstOrDefault();
             if (role is null)
-                return new CommonResponse(false, MessageConstants.CheckDBDataMessage);
+                return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
 
             var user = (await _repositoryManager.User
                     .GetUsersWithExpressionAsync(u => u.Id.Equals(userIdRoleIdPairDTO.UserId), true))
                     .FirstOrDefault();
             if (user is null)
-                return new CommonResponse(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
             user.RoleId = userIdRoleIdPairDTO.RoleId;
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
 
-        public async Task<CommonResponse> ChangeUserStatusOfUser(UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO)
+        public async Task<ResponseMessage> ChangeUserStatusOfUser(UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO)
         {
             var adminUser = await IsCurrentUserAdministrator();
             if (adminUser is null)
-                return new CommonResponse<UserDetailedDTO>(false, MessageConstants.ForbiddenMessage, null);
+                return new ResponseMessage<UserDetailedDTO>(MessageConstants.ForbiddenMessage, false);
 
             var userStatus = (await _repositoryManager.UserStatus
                     .GetUserStatusesWithExpressionAsync(us => us.Id.Equals(userIdUserStatusIdPairDTO.UserStatusId), false))
                     .FirstOrDefault();
             if (userStatus is null)
-                return new CommonResponse(false, MessageConstants.CheckDBDataMessage);
+                return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
 
             var user = (await _repositoryManager.User
                     .GetUsersWithExpressionAsync(u => u.Id.Equals(userIdUserStatusIdPairDTO.UserId), true))
                     .FirstOrDefault();
             if (user is null)
-                return new CommonResponse(false, MessageConstants.NotFoundMessage);
+                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
             user.UserStatusId = userIdUserStatusIdPairDTO.UserStatusId;
             await _repositoryManager.SaveChangesAsync();
 
-            return new CommonResponse(true, MessageConstants.SuccessMessage);
+            return new ResponseMessage(MessageConstants.SuccessMessage, true);
         }
     }
 }

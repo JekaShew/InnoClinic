@@ -38,11 +38,6 @@ namespace AuthorizationAPI.Persistance.Extensions
             //Registration of Repositories
             services.AddScoped<IRepositoryManager, RepositoryManger>();
 
-            //services.AddScoped<IUserStatusRepository, UserStatusRepository>();
-            //services.AddScoped<IUserRepository, UserRepository>();
-            //services.AddScoped<IRoleRepository, RoleRepository>();
-            //services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
             return services;
         }
     }
