@@ -2,13 +2,12 @@
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using InnoClinic.CommonLibrary.Response;
 
-namespace AuthorizationAPI.Services.Abstractions.Interfaces
+namespace AuthorizationAPI.Services.Abstractions.Interfaces;
+
+public interface IAuthorizationService
 {
-    public interface IAuthorizationService
-    {
-        public Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO);
-        public Task<ResponseMessage> SignOut(Guid rTokenId);
-        public Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO);
-        public Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId);
-    }
+    public Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO);
+    public Task<ResponseMessage> SignOut(Guid rTokenId);
+    public Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO);
+    public Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId);
 }

@@ -1,9 +1,8 @@
-﻿namespace AuthorizationAPI.Services.Extensions
+﻿namespace AuthorizationAPI.Services.Extensions;
+
+public class AuthenticationSettings
 {
-    public class AuthenticationSettings
-    {
-        public string SecretKey { get; set; }
-        public string Issuer { get; set; }
-        public string Audience { get; set; }
-    }
+    public string SecretKey { get; set; }
+    public string Issuer { get; set; }
+    public string Audience { get; set; }
 }

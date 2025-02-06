@@ -1,8 +1,7 @@
-﻿namespace AuthorizationAPI.Shared.DTOs.UserStatusDTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
+
+public class UserStatusInfoDTO
 {
-    public class UserStatusInfoDTO
-    {
-        public string Title { get; set; }
-        public string? Description { get; set; }
-    }
+    public string Title { get; set; }
+    public string? Description { get; set; }
 }

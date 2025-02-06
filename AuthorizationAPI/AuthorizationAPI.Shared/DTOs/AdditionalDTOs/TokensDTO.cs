@@ -1,8 +1,7 @@
-﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
+
+public class TokensDTO
 {
-    public class TokensDTO
-    {
-        public string AccessToken { get; set; }
-        public string RefreshToken { get; set; }
-    }
+    public string AccessToken { get; set; }
+    public string RefreshToken { get; set; }
 }

@@ -1,8 +1,7 @@
-﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
+
+public class UserIdUserStatusIdPairDTO
 {
-    public class UserIdUserStatusIdPairDTO
-    {
-        public Guid UserId { get; set; }
-        public Guid UserStatusId { get; set; }
-    }
+    public Guid UserId { get; set; }
+    public Guid UserStatusId { get; set; }
 }

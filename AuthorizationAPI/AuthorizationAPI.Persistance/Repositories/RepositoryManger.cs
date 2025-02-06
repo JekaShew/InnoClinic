@@ -1,65 +1,64 @@
 ﻿using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Persistance.Data;
 
-namespace AuthorizationAPI.Persistance.Repositories
+namespace AuthorizationAPI.Persistance.Repositories;
+
+public class RepositoryManger : IRepositoryManager
 {
-    public class RepositoryManger : IRepositoryManager
+    private AuthDBContext _authDBContext;
+    private IRoleRepository _roleRepository;
+    private IUserRepository _userRepository;
+    private IUserStatusRepository _userStatusRepository;
+    private IRefreshTokenRepository _refreshTokenRepository;
+    public RepositoryManger(AuthDBContext authDBContext)
     {
-        private AuthDBContext _authDBContext ;
-        //private IRoleRepository _roleRepository;
-        //private IUserRepository _userRepository;
-        private IUserStatusRepository _userStatusRepository;
-        //private IRefreshTokenRepository _refreshTokenRepository;
-        public RepositoryManger(AuthDBContext authDBContext)
+        _authDBContext = authDBContext;
+    }
+    public IRoleRepository Role
+    {
+        get
         {
-            _authDBContext = authDBContext;
+            if (_roleRepository is null)
+                _roleRepository = new RoleRepository(_authDBContext);
+
+            return _roleRepository;
         }
-        //public IRoleRepository Role
-        //{
-        //    get
-        //    {
-        //        if (_roleRepository is null)
-        //            _roleRepository = new RoleRepository(_authDBContext);
+    }
 
-        //        return _roleRepository;
-        //    }
-        //}
-
-        public IUserStatusRepository UserStatus
+    public IUserStatusRepository UserStatus
+    {
+        get
         {
-            get
-            {
-                if (_userStatusRepository is null)
-                    _userStatusRepository = new UserStatusRepository(_authDBContext);
+            if (_userStatusRepository is null)
+                _userStatusRepository = new UserStatusRepository(_authDBContext);
 
-                return _userStatusRepository;
-            }
+            return _userStatusRepository;
         }
+    }
 
-        //public IUserRepository User
-        //{
-        //    get
-        //    {
-        //        if (_userRepository is null)
-        //            _userRepository = new UserRepository(_authDBContext);
-
-        //        return _userRepository;
-        //    }
-        //}
-        //public IRefreshTokenRepository RefreshToken
-        //{
-        //    get
-        //    {
-        //        if (_refreshTokenRepository is null)
-        //            _refreshTokenRepository = new RefreshTokenRepository(_authDBContext);
-
-        //        return _refreshTokenRepository;
-        //    }
-        //}
-
-        public async Task SaveChangesAsync()
+    public IUserRepository User
+    {
+        get
         {
-            await _authDBContext.SaveChangesAsync();
+            if (_userRepository is null)
+                _userRepository = new UserRepository(_authDBContext);
+
+            return _userRepository;
         }
+    }
+    public IRefreshTokenRepository RefreshToken
+    {
+        get
+        {
+            if (_refreshTokenRepository is null)
+                _refreshTokenRepository = new RefreshTokenRepository(_authDBContext);
+
+            return _refreshTokenRepository;
+        }
+    }
+
+    public async Task SaveChangesAsync()
+    {
+        await _authDBContext.SaveChangesAsync();
     }
 }

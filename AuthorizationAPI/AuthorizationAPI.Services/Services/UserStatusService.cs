@@ -3,96 +3,115 @@ using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 
-namespace AuthorizationAPI.Services.Services
+namespace AuthorizationAPI.Services.Services;
+
+public class UserStatusService : IUserStatusService
 {
-    public class UserStatusService : IUserStatusService
+    private readonly IValidator<UserStatusForCreateDTO> _userStatusForCreateValidator;
+    private readonly IValidator<UserStatusForUpdateDTO> _userStatusForUpdateValidator;
+
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly IUserService _userService;
+    public UserStatusService(
+            IRepositoryManager repositoryManager, 
+            IUserService userService, 
+            IValidator<UserStatusForCreateDTO> userStatusForCreateDTOValidator,
+            IValidator<UserStatusForUpdateDTO> userStatusForUpdateDTOValidator)
     {
-        private readonly IRepositoryManager _repositoryManager;
-        //private readonly IUserService _userService;
-        public UserStatusService(IRepositoryManager repositoryManager)//, IUserService userService)
-        {
-            _repositoryManager = repositoryManager;
-            //_userService = userService;
-        }
-        public async Task<ResponseMessage> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
-        {
-            //var userAdmin = await _userService.IsCurrentUserAdministrator();
-            //if (userAdmin is null)
-            //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        _repositoryManager = repositoryManager;
+        _userService = userService;
+        _userStatusForCreateValidator = userStatusForCreateDTOValidator;
+        _userStatusForUpdateValidator = userStatusForUpdateDTOValidator;
+    }
+    public async Task<ResponseMessage> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
+    {
+        var validationResult = await _userStatusForCreateValidator.ValidateAsync(userStatusForCreateDTO);
+        if (!validationResult.IsValid)
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
 
-            var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
-            _repositoryManager.UserStatus.CreateUserStatus(userStatus);
-            await _repositoryManager.SaveChangesAsync();
-            
-            return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
-        }
+        //var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //if (userAdmin is null)
+        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
-        public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
-        {
-            //var userAdmin = await _userService.IsCurrentUserAdministrator();
-            //if (userAdmin is null)
-            //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
+        _repositoryManager.UserStatus.CreateUserStatus(userStatus);
+        await _repositoryManager.SaveChangesAsync();
+        
+        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+    }
 
-            var userStatus = (await _repositoryManager.UserStatus
-                    .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), false))
-                    .FirstOrDefault();
-            if (userStatus is null)
-                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+    public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
+    {
+        var userAdmin = await _userService.IsCurrentUserAdministrator();
+        if (userAdmin is null)
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
-            _repositoryManager.UserStatus.DeleteUserStatus(userStatus);
-            await _repositoryManager.SaveChangesAsync();
+        var userStatus = (await _repositoryManager.UserStatus
+                .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), false))
+                .FirstOrDefault();
+        if (userStatus is null)
+            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
-            return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
-        }
+        _repositoryManager.UserStatus.DeleteUserStatus(userStatus);
+        await _repositoryManager.SaveChangesAsync();
 
-        public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
-        {
-            //var userAdmin = await _userService.IsCurrentUserAdministrator();
-            //if (userAdmin is null)
-            //    return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.ForbiddenMessage, false);
+        return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+    }
 
-            var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync(false);
-            if (!userStatuses.Any())
-                return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.NotFoundMessage, false);
-            var userStatusInfoDTOs = userStatuses.Select(us => UserStatusMapper.UserStatusToUserStatusInfoDTO(us));
+    public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
+    {
+        //var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //if (userAdmin is null)
+        //    return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.ForbiddenMessage, false);
 
-            return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.SuccessMessage, true,  userStatusInfoDTOs);
-        }
+        var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync(false);
+        if (!userStatuses.Any())
+            return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.NotFoundMessage, false);
+        var userStatusInfoDTOs = userStatuses.Select(us => UserStatusMapper.UserStatusToUserStatusInfoDTO(us));
 
-        public async Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId)
-        {
-            //var userAdmin = await _userService.IsCurrentUserAdministrator();
-            //if (userAdmin is null)
-            //    return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.SuccessMessage, true,  userStatusInfoDTOs);
+    }
 
-            var userStatus = (await _repositoryManager.UserStatus
-                    .GetUserStatusesWithExpressionAsync(us => us.Id.Equals(userStatusId), false))
-                    .FirstOrDefault();
-            if (userStatus is null)
-                return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.NotFoundMessage, false);
-            var userStatusInfoDTO = UserStatusMapper.UserStatusToUserStatusInfoDTO(userStatus);
+    public async Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId)
+    {
+        //var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //if (userAdmin is null)
+        //    return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
 
-            return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.SuccessMessage,true, userStatusInfoDTO);
-        }
+        var userStatus = (await _repositoryManager.UserStatus
+                .GetUserStatusesWithExpressionAsync(us => us.Id.Equals(userStatusId), false))
+                .FirstOrDefault();
+        if (userStatus is null)
+            return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.NotFoundMessage, false);
 
-        public async Task<ResponseMessage> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO)
-        {
-            //var userAdmin = await _userService.IsCurrentUserAdministrator();
-            //if (userAdmin is null)
-            //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        var userStatusInfoDTO = UserStatusMapper.UserStatusToUserStatusInfoDTO(userStatus);
 
-            var userStatus = (await _repositoryManager.UserStatus
-                    .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), true))
-                    .FirstOrDefault();
-            if (userStatus is null)
-                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.SuccessMessage,true, userStatusInfoDTO);
+    }
 
-            userStatus = UserStatusMapper.UserStatusForUpdateDTOToUserStatus(userStatusForUpdateDTO);
-            await _repositoryManager.SaveChangesAsync();
+    public async Task<ResponseMessage> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO)
+    {
+        var validationResult = await _userStatusForUpdateValidator.ValidateAsync(userStatusForUpdateDTO);
+        if (!validationResult.IsValid)
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
 
-            return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
-        }
+        //var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //if (userAdmin is null)
+        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+
+        var userStatus = (await _repositoryManager.UserStatus
+                .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), true))
+                .FirstOrDefault();
+        if (userStatus is null)
+            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+
+        userStatus = UserStatusMapper.UserStatusForUpdateDTOToUserStatus(userStatusForUpdateDTO);
+        await _repositoryManager.SaveChangesAsync();
+
+        return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
     }
 }

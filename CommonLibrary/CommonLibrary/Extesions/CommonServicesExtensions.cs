@@ -5,50 +5,47 @@ using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using Serilog.Events;
 
-namespace InnoClinic.CommonLibrary.Exceptions
+namespace InnoClinic.CommonLibrary.Exceptions;
+
+public static class CommonServicesExtensions
 {
-    public static class CommonServicesExtensions
+    public static IServiceCollection AddCommonServices(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        string serilogFile)
     {
-        public static IServiceCollection AddCommonServices(
-            this IServiceCollection services,
-            IConfiguration configuration,
-            string serilogFile)
-        {
-            // DB MongoDB
-            //if (dbConnectionStringKey.Key.Equals("MongoDB"))
-            //    services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
-            //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
+        // DB MongoDB
+        //if (dbConnectionStringKey.Key.Equals("MongoDB"))
+        //    services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
+        //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
 
-            //Serilog
-            Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
+        //Serilog
+        Log.Logger = new LoggerConfiguration()
+        .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)
+        .Enrich.FromLogContext()
+        .WriteTo.File($"{serilogFile}.log")
+        .CreateBootstrapLogger();
+
+        services.AddSerilog((services, lc) => lc
+            .ReadFrom.Configuration(configuration)
+            .ReadFrom.Services(services)
             .Enrich.FromLogContext()
-            .WriteTo.File($"{serilogFile}.log")
-            .CreateBootstrapLogger();
+            .WriteTo.Console(Serilog.Events.LogEventLevel.Error)
+            .WriteTo.File($"{serilogFile}.log"));
 
-            services.AddSerilog((services, lc) => lc
-                .ReadFrom.Configuration(configuration)
-                .ReadFrom.Services(services)
-                .Enrich.FromLogContext()
-                .WriteTo.Console(Serilog.Events.LogEventLevel.Error)
-                .WriteTo.File($"{serilogFile}.log"));
+        // Global Exception Handler
+        services.AddProblemDetails();
+        services.AddExceptionHandler<GlobalExceptionHandler>();
 
-            // Global Exception Handler
-            services.AddProblemDetails();
-            services.AddExceptionHandler<GlobalExceptionHandler>();
+        // JWT Authentication Scheme
+        JWTAuthenticationScheme.AddJWTAuthenticationScheme(services, configuration);
 
-            // JWT Authentication Scheme
-            JWTAuthenticationScheme.AddJWTAuthenticationScheme(services, configuration);
+        return services;
+    }
+    public static IApplicationBuilder UseCommonPolicies(this IApplicationBuilder app)
+    {
+        app.UseExceptionHandler(opt => { });
 
-            return services;
-        }
-        public static IApplicationBuilder UseCommonPolicies(this IApplicationBuilder app)
-        {
-            app.UseExceptionHandler(opt => { });
-            // Global Response Handler
-            app.UseMiddleware<GlobalResponseHandler>();
-
-            return app;
-        }
+        return app;
     }
 }
