@@ -12,8 +12,11 @@ namespace AuthorizationAPI.Services.Extensions
         {
             services.Configure<AuthenticationSettings>(configuration.GetSection("Authentication"));
 
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IAuthorizationService, AuthorizationService>();
+            //services.AddScoped<IUserStatusService, UserStatusService>();
+            //services.AddScoped<IRoleService, RoleService>();
+            //services.AddScoped<IRefreshTokenService, RefreshTokenService>();
+            //services.AddScoped<IUserService, UserService>();
+            //services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddFluentValidationMethod(configuration);
 
             return services;

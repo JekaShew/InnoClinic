@@ -9,19 +9,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Domain", "Domain", "{B49DA5
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{A13D2922-B5E2-4AA3-8D2F-1D05B339F945}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Web", "AuthorizationAPI.Web\AuthorizationAPI.Web.csproj", "{73C9A4C8-DB77-4CD9-A9C7-E20542B3AE87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Web", "AuthorizationAPI.Web\AuthorizationAPI.Web.csproj", "{73C9A4C8-DB77-4CD9-A9C7-E20542B3AE87}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8671501-90C0-4256-99FE-ED1FA7C9EE8D} = {C8671501-90C0-4256-99FE-ED1FA7C9EE8D}
+		{E924C1DB-C507-423E-A4AB-D26D61512652} = {E924C1DB-C507-423E-A4AB-D26D61512652}
+	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Domain", "AuthorizationAPI.Domain\AuthorizationAPI.Domain.csproj", "{2B5FC3D7-876C-4785-B3D3-9AFC4A13240D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Domain", "AuthorizationAPI.Domain\AuthorizationAPI.Domain.csproj", "{2B5FC3D7-876C-4785-B3D3-9AFC4A13240D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Persistance", "AuthorizationAPI.Persistance\AuthorizationAPI.Persistance.csproj", "{27DF9186-56A1-4FA9-9EDB-8EC2285C0233}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Persistance", "AuthorizationAPI.Persistance\AuthorizationAPI.Persistance.csproj", "{27DF9186-56A1-4FA9-9EDB-8EC2285C0233}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Presentation", "AuthorizationAPI.Presentation\AuthorizationAPI.Presentation.csproj", "{F2F69F71-0577-41CB-827E-7002B2072657}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Presentation", "AuthorizationAPI.Presentation\AuthorizationAPI.Presentation.csproj", "{F2F69F71-0577-41CB-827E-7002B2072657}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Services", "AuthorizationAPI.Services\AuthorizationAPI.Services.csproj", "{1D0943EC-5D6B-43CC-A6CA-082D46A97E60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Services", "AuthorizationAPI.Services\AuthorizationAPI.Services.csproj", "{1D0943EC-5D6B-43CC-A6CA-082D46A97E60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Services.Abstractions", "AuthorizationAPI.Services.Abstractions\AuthorizationAPI.Services.Abstractions.csproj", "{537E9364-4DC0-4E91-BDD0-83C0C596A21B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Services.Abstractions", "AuthorizationAPI.Services.Abstractions\AuthorizationAPI.Services.Abstractions.csproj", "{537E9364-4DC0-4E91-BDD0-83C0C596A21B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthorizationAPI.Shared", "AuthorizationAPI.Shared\AuthorizationAPI.Shared.csproj", "{E924C1DB-C507-423E-A4AB-D26D61512652}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationAPI.Shared", "AuthorizationAPI.Shared\AuthorizationAPI.Shared.csproj", "{E924C1DB-C507-423E-A4AB-D26D61512652}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLibrary", "..\CommonLibrary\CommonLibrary\CommonLibrary.csproj", "{C8671501-90C0-4256-99FE-ED1FA7C9EE8D}"
 EndProject

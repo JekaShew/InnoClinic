@@ -2,10 +2,10 @@
 {
     public interface IRepositoryManager
     {
-        IRoleRepository Role { get; }
+        //IRoleRepository Role { get; }
         IUserStatusRepository UserStatus { get; }
-        IUserRepository User { get; }
-        IRefreshTokenRepository RefreshToken { get; }
+        //IUserRepository User { get; }
+        //IRefreshTokenRepository RefreshToken { get; }
         Task SaveChangesAsync();
     }
 }

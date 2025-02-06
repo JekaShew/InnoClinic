@@ -18,7 +18,7 @@ namespace AuthorizationAPI.Persistance.Extensions
             return services;
         }
 
-        private static IServiceCollection AddMSSQLDBContextMethod(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddMSSQLDBContextMethod(this IServiceCollection services, IConfiguration configuration)
         {
             // MSSQL DB
             services.AddDbContext<AuthDBContext>(options =>

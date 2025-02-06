@@ -33,7 +33,7 @@ namespace AuthorizationAPI.Presentation.Controllers
                 return StatusCode(400, responseMessage.Message.Value);
 
             if (responseMessage.Message.Key.Equals("404"))
-                return StatusCode(404, responseMessage.Message.Value);
+                return NotFound(); // StatusCode(404, responseMessage.Message.Value);
 
             if (responseMessage.Message.Key.Equals("403"))
                 return StatusCode(403, responseMessage.Message.Value);

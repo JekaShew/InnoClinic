@@ -6,24 +6,24 @@ namespace AuthorizationAPI.Persistance.Repositories
     public class RepositoryManger : IRepositoryManager
     {
         private AuthDBContext _authDBContext ;
-        private IRoleRepository _roleRepository;
-        private IUserRepository _userRepository;
+        //private IRoleRepository _roleRepository;
+        //private IUserRepository _userRepository;
         private IUserStatusRepository _userStatusRepository;
-        private IRefreshTokenRepository _refreshTokenRepository;
+        //private IRefreshTokenRepository _refreshTokenRepository;
         public RepositoryManger(AuthDBContext authDBContext)
         {
             _authDBContext = authDBContext;
         }
-        public IRoleRepository Role
-        {
-            get
-            {
-                if (_roleRepository is null)
-                    _roleRepository = new RoleRepository(_authDBContext);
+        //public IRoleRepository Role
+        //{
+        //    get
+        //    {
+        //        if (_roleRepository is null)
+        //            _roleRepository = new RoleRepository(_authDBContext);
 
-                return _roleRepository;
-            }
-        }
+        //        return _roleRepository;
+        //    }
+        //}
 
         public IUserStatusRepository UserStatus
         {
@@ -36,26 +36,26 @@ namespace AuthorizationAPI.Persistance.Repositories
             }
         }
 
-        public IUserRepository User
-        {
-            get
-            {
-                if (_userRepository is null)
-                    _userRepository = new UserRepository(_authDBContext);
+        //public IUserRepository User
+        //{
+        //    get
+        //    {
+        //        if (_userRepository is null)
+        //            _userRepository = new UserRepository(_authDBContext);
 
-                return _userRepository;
-            }
-        }
-        public IRefreshTokenRepository RefreshToken
-        {
-            get
-            {
-                if (_refreshTokenRepository is null)
-                    _refreshTokenRepository = new RefreshTokenRepository(_authDBContext);
+        //        return _userRepository;
+        //    }
+        //}
+        //public IRefreshTokenRepository RefreshToken
+        //{
+        //    get
+        //    {
+        //        if (_refreshTokenRepository is null)
+        //            _refreshTokenRepository = new RefreshTokenRepository(_authDBContext);
 
-                return _refreshTokenRepository;
-            }
-        }
+        //        return _refreshTokenRepository;
+        //    }
+        //}
 
         public async Task SaveChangesAsync()
         {

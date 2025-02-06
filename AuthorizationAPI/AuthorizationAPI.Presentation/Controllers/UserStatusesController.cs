@@ -8,7 +8,7 @@ namespace AuthorizationAPI.Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserStatusesController : BaseManualController
+    public class UserStatusesController : ControllerBase
     {
         private readonly IUserStatusService _userStatusService;
         public UserStatusesController(IUserStatusService userStatusService)
@@ -16,13 +16,13 @@ namespace AuthorizationAPI.Presentation.Controllers
             _userStatusService = userStatusService;
         }
 
-        [HttpGet("{userStatusId}")]
+        [HttpGet("{userStatusId:guid}")]
         //[Authorize(Roles = "Administrator")]
         public async Task<IActionResult> GetUserStatusById(Guid userStatusId)
         {
             var result = await _userStatusService.GetUserStatusByIdAsync(userStatusId);
-            if (result.Flag == false)
-                return HandlePesponseMessage(result);
+            //if (result.Flag == false)
+            //    return HandlePesponseMessage(result);
             return Ok(result);
         }
 
@@ -31,8 +31,8 @@ namespace AuthorizationAPI.Presentation.Controllers
         public async Task<IActionResult> GetAllUserStatuses()
         {
             var result = await _userStatusService.GetAllUserStatusesAsync();
-            if (result.Flag == false)
-                return HandlePesponseMessage(result);
+            //if (result.Flag == false)
+            //    return HandlePesponseMessage(result);
             return Ok(result);
         }
 
@@ -41,8 +41,8 @@ namespace AuthorizationAPI.Presentation.Controllers
         public async Task<IActionResult> AddUserStatus([FromBody] UserStatusForCreateDTO userStatusForCreateDTO)
         {
             var result = await _userStatusService.CreateUserStatusAsync(userStatusForCreateDTO);
-            if (result.Flag == false)
-                return HandlePesponseMessage(result);
+            //if (result.Flag == false)
+            //    return HandlePesponseMessage(result);
             return Ok(result);
         }
 
@@ -51,8 +51,8 @@ namespace AuthorizationAPI.Presentation.Controllers
         public async Task<IActionResult> UpdateUserStatus(Guid userStatusId, [FromBody] UserStatusForUpdateDTO userStatusForUpdateDTO)
         {
             var result = await _userStatusService.UpdateUserStatusAsync(userStatusId, userStatusForUpdateDTO);
-            if (result.Flag == false)
-                return HandlePesponseMessage(result);
+            //if (result.Flag == false)
+            //    return HandlePesponseMessage(result);
             return Ok(result);
         }
 
@@ -61,8 +61,8 @@ namespace AuthorizationAPI.Presentation.Controllers
         public async Task<IActionResult> DeleteUserStatusById(Guid userStatusId)
         {
             var result = await _userStatusService.DeleteUserStatusByIdAsync(userStatusId);
-            if (result.Flag == false)
-                return HandlePesponseMessage(result);
+            //if (result.Flag == false)
+            //    return HandlePesponseMessage(result);
             return Ok(result);
         }
     }

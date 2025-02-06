@@ -7,92 +7,92 @@ using InnoClinic.CommonLibrary.Response;
 
 namespace AuthorizationAPI.Services.Services
 {
-    public class RoleService : IRoleService
+    public class RoleService //: IRoleService
     {
-        private readonly IRepositoryManager _repositoryManager;
-        private readonly IUserService _userService;
-        public RoleService(IRepositoryManager repositoryManager, IUserService userService)
-        {
-            _repositoryManager = repositoryManager; 
-            _userService = userService;
-        }
-        public async Task<ResponseMessage> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
-        {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        //private readonly IRepositoryManager _repositoryManager;
+        //private readonly IUserService _userService;
+        //public RoleService(IRepositoryManager repositoryManager, IUserService userService)
+        //{
+        //    _repositoryManager = repositoryManager; 
+        //    _userService = userService;
+        //}
+        //public async Task<ResponseMessage> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
+        //{
+        //    var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //    if (userAdmin is null)
+        //        return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
-            var role = RoleMapper.RoleForCreateDTOToRole(roleForCreateDTO);
-            _repositoryManager.Role.CreateRole(role);
-            await _repositoryManager.SaveChangesAsync();
+        //    var role = RoleMapper.RoleForCreateDTOToRole(roleForCreateDTO);
+        //    _repositoryManager.Role.CreateRole(role);
+        //    await _repositoryManager.SaveChangesAsync();
 
-            return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
-        }
+        //    return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+        //}
 
-        public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)
-        {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        //public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)
+        //{
+        //    var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //    if (userAdmin is null)
+        //        return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
-            var role = (await _repositoryManager.Role
-                    .GetRolesWithExpressionAsync(r => r.Id.Equals(roleId), false))
-                    .FirstOrDefault();
-            if (role is null)
-                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        //    var role = (await _repositoryManager.Role
+        //            .GetRolesWithExpressionAsync(r => r.Id.Equals(roleId), false))
+        //            .FirstOrDefault();
+        //    if (role is null)
+        //        return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
-            _repositoryManager.Role.DeleteRole(role);
-            await _repositoryManager.SaveChangesAsync();
+        //    _repositoryManager.Role.DeleteRole(role);
+        //    await _repositoryManager.SaveChangesAsync();
 
-            return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
-        }
+        //    return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+        //}
 
-        public async Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync()
-        {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.ForbiddenMessage, false);
+        //public async Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync()
+        //{
+        //    var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //    if (userAdmin is null)
+        //        return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.ForbiddenMessage, false);
 
-            var roles = await _repositoryManager.Role.GetAllRolesAsync(false);
-            if (!roles.Any())
-                return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.NotFoundMessage, false);
-            var roleInfoDTOs = roles.Select( r => RoleMapper.RoleToRoleInfoDTO(r));
+        //    var roles = await _repositoryManager.Role.GetAllRolesAsync(false);
+        //    if (!roles.Any())
+        //        return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.NotFoundMessage, false);
+        //    var roleInfoDTOs = roles.Select( r => RoleMapper.RoleToRoleInfoDTO(r));
 
-            return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.SuccessMessage, true, roleInfoDTOs); 
-        }
+        //    return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.SuccessMessage, true, roleInfoDTOs); 
+        //}
 
-        public async Task<ResponseMessage<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId)
-        {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        //public async Task<ResponseMessage<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId)
+        //{
+        //    var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //    if (userAdmin is null)
+        //        return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
 
-            var role = (await _repositoryManager.Role
-                    .GetRolesWithExpressionAsync(r => r.Id.Equals(roleId), false))
-                    .FirstOrDefault();
-            if (role is null)
-                return new ResponseMessage<RoleInfoDTO> (MessageConstants.NotFoundMessage, false);
-            var roleInfoDTO = RoleMapper.RoleToRoleInfoDTO(role);
+        //    var role = (await _repositoryManager.Role
+        //            .GetRolesWithExpressionAsync(r => r.Id.Equals(roleId), false))
+        //            .FirstOrDefault();
+        //    if (role is null)
+        //        return new ResponseMessage<RoleInfoDTO> (MessageConstants.NotFoundMessage, false);
+        //    var roleInfoDTO = RoleMapper.RoleToRoleInfoDTO(role);
 
-            return new ResponseMessage<RoleInfoDTO>(MessageConstants.SuccessMessage, true, roleInfoDTO);
-        }
+        //    return new ResponseMessage<RoleInfoDTO>(MessageConstants.SuccessMessage, true, roleInfoDTO);
+        //}
 
-        public async Task<ResponseMessage> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO)
-        {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        //public async Task<ResponseMessage> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO)
+        //{
+        //    var userAdmin = await _userService.IsCurrentUserAdministrator();
+        //    if (userAdmin is null)
+        //        return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
-            var role = (await _repositoryManager.Role
-                    .GetRolesWithExpressionAsync(r => r.Id.Equals(roleId), true))
-                    .FirstOrDefault();
-            if (role is null)
-                return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        //    var role = (await _repositoryManager.Role
+        //            .GetRolesWithExpressionAsync(r => r.Id.Equals(roleId), true))
+        //            .FirstOrDefault();
+        //    if (role is null)
+        //        return new ResponseMessage(MessageConstants.NotFoundMessage, false);
 
-            role = RoleMapper.RoleForUpdateDTOToRole(roleForUpdateDTO);
-            await _repositoryManager.SaveChangesAsync();
+        //    role = RoleMapper.RoleForUpdateDTOToRole(roleForUpdateDTO);
+        //    await _repositoryManager.SaveChangesAsync();
 
-            return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
-        }
+        //    return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
+        //}
     }
 }

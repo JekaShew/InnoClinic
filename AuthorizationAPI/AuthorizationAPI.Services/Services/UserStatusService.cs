@@ -10,17 +10,17 @@ namespace AuthorizationAPI.Services.Services
     public class UserStatusService : IUserStatusService
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly IUserService _userService;
-        public UserStatusService(IRepositoryManager repositoryManager, IUserService userService)
+        //private readonly IUserService _userService;
+        public UserStatusService(IRepositoryManager repositoryManager)//, IUserService userService)
         {
             _repositoryManager = repositoryManager;
-            _userService = userService;
+            //_userService = userService;
         }
         public async Task<ResponseMessage> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
         {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+            //var userAdmin = await _userService.IsCurrentUserAdministrator();
+            //if (userAdmin is null)
+            //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
             var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
             _repositoryManager.UserStatus.CreateUserStatus(userStatus);
@@ -31,9 +31,9 @@ namespace AuthorizationAPI.Services.Services
 
         public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
         {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+            //var userAdmin = await _userService.IsCurrentUserAdministrator();
+            //if (userAdmin is null)
+            //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
             var userStatus = (await _repositoryManager.UserStatus
                     .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), false))
@@ -49,9 +49,9 @@ namespace AuthorizationAPI.Services.Services
 
         public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
         {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.ForbiddenMessage, false);
+            //var userAdmin = await _userService.IsCurrentUserAdministrator();
+            //if (userAdmin is null)
+            //    return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.ForbiddenMessage, false);
 
             var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync(false);
             if (!userStatuses.Any())
@@ -63,9 +63,9 @@ namespace AuthorizationAPI.Services.Services
 
         public async Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId)
         {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
+            //var userAdmin = await _userService.IsCurrentUserAdministrator();
+            //if (userAdmin is null)
+            //    return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
 
             var userStatus = (await _repositoryManager.UserStatus
                     .GetUserStatusesWithExpressionAsync(us => us.Id.Equals(userStatusId), false))
@@ -79,9 +79,9 @@ namespace AuthorizationAPI.Services.Services
 
         public async Task<ResponseMessage> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO)
         {
-            var userAdmin = await _userService.IsCurrentUserAdministrator();
-            if (userAdmin is null)
-                return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+            //var userAdmin = await _userService.IsCurrentUserAdministrator();
+            //if (userAdmin is null)
+            //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
 
             var userStatus = (await _repositoryManager.UserStatus
                     .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), true))
