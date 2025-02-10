@@ -6,34 +6,64 @@ using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories;
 
-public class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefreshTokenRepository
+public class RefreshTokenRepository : /*BaseRepository<RefreshToken>,*/ IRefreshTokenRepository
 {
-    public RefreshTokenRepository(AuthDBContext authDBContext) : base(authDBContext) 
-    { }
+    private readonly AuthDBContext _authDBContext;
 
-    public async Task<IEnumerable<RefreshToken>> GetAllRefreshTokensAsync(bool trackChanges)
+    public RefreshTokenRepository(AuthDBContext authDBContext) /*: base(authDBContext)*/
     {
-        return await GetAll(trackChanges).ToListAsync();
+        _authDBContext = authDBContext;
     }
 
-    public async Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression, bool trackChanges)
+    public async Task<IEnumerable<RefreshToken>> GetAllRefreshTokensAsync()
     {
-        return await GetWithExpression(expression,trackChanges).ToListAsync();
+        return await _authDBContext.RefreshTokens
+                .Include(u => u.User)
+                    .ThenInclude(r => r.Role)
+                .Include(u =>  u.User)
+                    .ThenInclude(us => us.UserStatus)
+                .AsNoTracking()
+                .ToListAsync();
     }
 
-    public void CreateRefreshToken(RefreshToken refreshToken)
+    public async Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId)
     {
-        Create(refreshToken);
+        return await _authDBContext.RefreshTokens
+                .Include(u => u.User)
+                    .ThenInclude(r => r.Role)
+                .Include(u => u.User)
+                    .ThenInclude(us => us.UserStatus)
+                .AsNoTracking()
+                .FirstOrDefaultAsync( rt => rt.Id.Equals(refreshTokenId));
+    }
+
+    public async Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression)
+    {
+        return await _authDBContext.RefreshTokens
+                .Include(u => u.User)
+                    .ThenInclude(r => r.Role)
+                .Include(u => u.User)
+                    .ThenInclude(us => us.UserStatus)
+                .AsNoTracking()
+                .Where(expression)
+                .ToListAsync();
+    }
+
+    public async Task CreateRefreshTokenAsync(RefreshToken refreshToken)
+    {
+        await _authDBContext.RefreshTokens.AddAsync(refreshToken);
     }
 
     public void DeleteRefreshToken(RefreshToken refreshToken)
     {
-        Delete(refreshToken);
+        _authDBContext.RefreshTokens.Remove(refreshToken);
     }
 
-    public void UpdateRefreshToken(RefreshToken updatedRefreshToken)
+    public async Task UpdateRefreshTokenAsync(RefreshToken updatedRefreshToken)
     {
-        Update(updatedRefreshToken);
+        var refreshToken = await _authDBContext.RefreshTokens.FindAsync(updatedRefreshToken.Id);
+        _authDBContext.RefreshTokens.Entry(refreshToken).State = EntityState.Detached;
+        _authDBContext.RefreshTokens.Update(updatedRefreshToken);
     }
 }
 

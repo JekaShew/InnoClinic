@@ -2,12 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthorizationAPI.Domain.Data.Configuration;
+namespace AuthorizationAPI.Persistance.Data.Configuration;
 
 public class UserStatusConfiguration : IEntityTypeConfiguration<UserStatus>
 {
     public void Configure(EntityTypeBuilder<UserStatus> builder)
     {
+        builder.Property(r => r.Title)
+            .IsRequired()
+            .HasMaxLength(60);
+
         builder.HasData(
             new UserStatus
             {

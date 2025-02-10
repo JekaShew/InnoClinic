@@ -14,50 +14,26 @@ public class RepositoryManger : IRepositoryManager
     {
         _authDBContext = authDBContext;
     }
-    public IRoleRepository Role
+    public IRoleRepository Role 
     {
-        get
-        {
-            if (_roleRepository is null)
-                _roleRepository = new RoleRepository(_authDBContext);
-
-            return _roleRepository;
-        }
+        get => _roleRepository ?? new RoleRepository(_authDBContext); 
     }
-
+        
     public IUserStatusRepository UserStatus
     {
-        get
-        {
-            if (_userStatusRepository is null)
-                _userStatusRepository = new UserStatusRepository(_authDBContext);
-
-            return _userStatusRepository;
-        }
+        get => _userStatusRepository ?? new UserStatusRepository(_authDBContext);
     }
 
     public IUserRepository User
     {
-        get
-        {
-            if (_userRepository is null)
-                _userRepository = new UserRepository(_authDBContext);
-
-            return _userRepository;
-        }
+        get => _userRepository ?? new UserRepository(_authDBContext);
     }
     public IRefreshTokenRepository RefreshToken
     {
-        get
-        {
-            if (_refreshTokenRepository is null)
-                _refreshTokenRepository = new RefreshTokenRepository(_authDBContext);
-
-            return _refreshTokenRepository;
-        }
+        get => _refreshTokenRepository ?? new RefreshTokenRepository(_authDBContext);
     }
 
-    public async Task SaveChangesAsync()
+    public async Task Commit()
     {
         await _authDBContext.SaveChangesAsync();
     }

@@ -1,5 +1,5 @@
-﻿using AuthorizationAPI.Domain.Data.Configuration;
-using AuthorizationAPI.Domain.Data.Models;
+﻿using AuthorizationAPI.Domain.Data.Models;
+using AuthorizationAPI.Persistance.Data.Configuration;
 using Microsoft.EntityFrameworkCore;
 
 namespace AuthorizationAPI.Persistance.Data;
@@ -24,6 +24,7 @@ public class AuthDBContext(DbContextOptions<AuthDBContext> options) : DbContext(
         modelBuilder.ApplyConfiguration(new RoleConfiguration());
         modelBuilder.ApplyConfiguration(new UserStatusConfiguration());
         modelBuilder.ApplyConfiguration(new UserConfiguration());
+        modelBuilder.ApplyConfiguration(new RefreshTokenConfiguration());
 
         base.OnModelCreating(modelBuilder);
     }

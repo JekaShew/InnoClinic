@@ -6,5 +6,5 @@ public interface IRepositoryManager
     IUserStatusRepository UserStatus { get; }
     IUserRepository User { get; }
     IRefreshTokenRepository RefreshToken { get; }
-    Task SaveChangesAsync();
+    Task Commit();
 }

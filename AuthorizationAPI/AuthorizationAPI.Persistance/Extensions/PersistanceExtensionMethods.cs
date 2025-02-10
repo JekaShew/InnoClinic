@@ -13,7 +13,7 @@ public static class PersistanceExtensionMethods
     public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration configuration)
     {
         AddMSSQLDBContextMethod(services, configuration);
-        AddPersistanceRepostitoriesMethod(services, configuration);
+        AddPersistanceRepostitoriesMethod(services);
     
         return services;
     }
@@ -34,7 +34,7 @@ public static class PersistanceExtensionMethods
         return services;
     }
 
-    private static IServiceCollection AddPersistanceRepostitoriesMethod(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddPersistanceRepostitoriesMethod(this IServiceCollection services)
     {
         // Registration of Repositories
         services.AddScoped<IRepositoryManager, RepositoryManger>();

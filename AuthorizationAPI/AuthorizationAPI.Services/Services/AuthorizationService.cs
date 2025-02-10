@@ -18,8 +18,8 @@ namespace AuthorizationAPI.Services.Services;
 
 public class AuthorizationService : IAuthorizationService
 {
-    private readonly IValidator<LoginInfoDTO> _loginInfoDTOValidator;
-    private readonly IValidator<RegistrationInfoDTO> _registrationInfoDTOValidator;
+    private readonly IValidator<LoginInfoDTO> _loginInfoValidator;
+    private readonly IValidator<RegistrationInfoDTO> _registrationInfoValidator;
 
     private readonly IRepositoryManager _repositoryManager;
     private readonly IUserService _userService;
@@ -28,20 +28,137 @@ public class AuthorizationService : IAuthorizationService
             IOptions<AuthenticationSettings> options,
             IRepositoryManager repositoryManager,
             IUserService userService,
-            IValidator<LoginInfoDTO> loginInfoDTOValidator,
-            IValidator<RegistrationInfoDTO> registrationInfoDTOValidator)
+            IValidator<LoginInfoDTO> loginInfoValidator,
+            IValidator<RegistrationInfoDTO> registrationInfoValidator)
     {
         _authenticationSettings = options.Value;
         _repositoryManager = repositoryManager;
         _userService = userService;
-        _loginInfoDTOValidator = loginInfoDTOValidator;
-        _registrationInfoDTOValidator = registrationInfoDTOValidator;
+        _loginInfoValidator = loginInfoValidator;
+        _registrationInfoValidator = registrationInfoValidator;
     }
     // Add methods ActivateUserByEmail-> default UserStatus change to "Not Activated"
+    
+    public async Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO)
+    {
+        var validationResult = await _loginInfoValidator.ValidateAsync(loginInfoDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        //Check Email Registered
+        var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(loginInfoDTO.Email);
+        if (!isEmailRegistered)
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+        }
+
+        var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
+        if (user != null)
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+        }
+
+        //Check Email Password pair
+        var enteredPasswordHash = await _userService.GetHashString($"{loginInfoDTO.Password}{user.SecurityStamp}");
+        if (!enteredPasswordHash.Equals(user.PasswordHash))
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+        }  
+
+        //Generate A&R Tokens
+        var tokens = await GenerateTokenPair(user.Id);
+        if(tokens.AccessToken.IsNullOrEmpty() || tokens.RefreshToken.IsNullOrEmpty())
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.FailedMessage, false);
+        }
+
+        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
+    }
+
+    public async Task<ResponseMessage> SignOut(Guid refreshTokenId)
+    {
+        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
+        if (refreshToken is null)
+        {
+            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        } 
+
+        _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
+        await _repositoryManager.Commit();
+
+        return new ResponseMessage(MessageConstants.SuccessMessage, true);
+    }
+
+    public async Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
+    {
+        var validationResult = await _registrationInfoValidator.ValidateAsync(registrationInfoDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        //Check Email Registered
+        var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(registrationInfoDTO.Email);
+        if (!isEmailRegistered)
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+        }
+
+        //Create and Generate A&R Tokens
+        var userId = await _userService.CreateUserAsync(registrationInfoDTO);
+        if (userId.Equals(Guid.Empty))
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.FailedCreateMessage, false);
+        }     
+
+        var tokens = await GenerateTokenPair(userId);
+
+        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens); ;
+    }
+    
+    public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)
+    {
+        var refreshToken = await IsRefreshTokeCorrect(rTokenId, false);
+        if (refreshToken is null)
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.FailedMessage, false);
+        }
+           
+        //Generate A&R Tokens
+        var tokens = await GenerateTokenPair(refreshToken.UserId);
+
+        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
+    }
+
+    private async Task<RefreshToken> IsRefreshTokeCorrect(Guid rTokenId, bool trackChanges)
+    {
+        //Check is RefreshToken Correct
+        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(rTokenId);
+        if (refreshToken is null)
+        {
+            return null;
+        }    
+
+        if (refreshToken.IsRevoked)
+        {
+            return null;
+        }   
+
+        if (refreshToken.ExpireDate <= DateTime.UtcNow
+                || refreshToken.ExpireDate.Equals(DateTime.MinValue))
+        {
+            return null;
+        }
+
+        return refreshToken;
+    }
+
     private async Task<string> GenerateJwtTokenStringByUserId(Guid userId)
     {
-        var user = (await _repositoryManager.User.GetUsersWithExpressionAsync(u => u.Id.Equals(userId), false)).FirstOrDefault();
-        var role = (await _repositoryManager.Role.GetRolesWithExpressionAsync(r => r.Id.Equals(user.RoleId), false)).FirstOrDefault();
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId);
+        var role = await _repositoryManager.Role.GetRoleByIdAsync(user.RoleId);
 
         var claims = new List<Claim>()
         {
@@ -67,6 +184,7 @@ public class AuthorizationService : IAuthorizationService
 
         var jwtToken = jwtHandler.CreateToken(tokenDescriptor);
         var tokenString = jwtHandler.WriteToken(jwtToken);
+
         return tokenString;
     }
 
@@ -80,8 +198,8 @@ public class AuthorizationService : IAuthorizationService
             ExpireDate = DateTime.UtcNow.AddMinutes(120),
         };
 
-        _repositoryManager.RefreshToken.CreateRefreshToken(refreshToken);
-        await _repositoryManager.SaveChangesAsync();
+        await _repositoryManager.RefreshToken.CreateRefreshTokenAsync(refreshToken);
+        await _repositoryManager.Commit();
 
         return refreshToken.Id.ToString();
     }
@@ -90,89 +208,8 @@ public class AuthorizationService : IAuthorizationService
     {
         var jwt = await GenerateJwtTokenStringByUserId(userId);
         var rt = await GenerateRefreshTokenByUserId(userId);
+
         return new TokensDTO() { AccessToken = jwt, RefreshToken = rt };
     }
 
-    public async Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO)
-    {
-        var validationResult = await _loginInfoDTOValidator.ValidateAsync(loginInfoDTO);
-        if (!validationResult.IsValid)
-            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
-
-        //Check Email Registered
-        var userDetailedDTO = await _userService.IsEmailRegistered(loginInfoDTO.Email, false);
-        if (userDetailedDTO is null)
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
-
-        //Check Email Password pair
-        var enteredPasswordHash = await _userService.GetHashString($"{loginInfoDTO.Password}{userDetailedDTO.SecurityStamp}");
-        if (!enteredPasswordHash.Equals(userDetailedDTO.PasswordHash))
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
-
-        //Generate A&R Tokens
-        var tokens = await GenerateTokenPair(userDetailedDTO.Id);
-
-        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
-    }
-
-    public async Task<ResponseMessage> SignOut(Guid rTokenId)
-    {
-        var refreshToken = (await _repositoryManager.RefreshToken.GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(rTokenId), false)).FirstOrDefault();
-        if (refreshToken is null)
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
-
-        _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
-        await _repositoryManager.SaveChangesAsync();
-
-        return new ResponseMessage(MessageConstants.SuccessMessage, true);
-    }
-
-    public async Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
-    {
-        var validationResult = await _registrationInfoDTOValidator.ValidateAsync(registrationInfoDTO);
-        if (!validationResult.IsValid)
-            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
-
-        //Check Email Registered
-        var userDetailedDTO = await _userService.IsEmailRegistered(registrationInfoDTO.Email, false);
-        if (userDetailedDTO is not null)
-            return new ResponseMessage<TokensDTO>(MessageConstants.EmailRegisteredMessage, false);
-
-        //Create and Generate A&R Tokens
-        var userId = await _userService.CreateUserAsync(registrationInfoDTO);
-        if (userId.Equals(Guid.Empty))
-            return new ResponseMessage<TokensDTO>(MessageConstants.FailedCreateMessage, false);
-
-        var tokens = await GenerateTokenPair(userId);
-
-        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens); ;
-    }
-    private async Task<RefreshToken> IsRefreshTokeCorrect(Guid rTokenId, bool trackChanges)
-    {
-        //Check is RefreshToken Correct
-        var refreshToken = (await _repositoryManager.RefreshToken
-                .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(rTokenId), trackChanges))
-                .FirstOrDefault();
-        if (refreshToken is null)
-            return null;
-
-        if (refreshToken.IsRevoked == true)
-            return null;
-
-        if (refreshToken.ExpireDate <= DateTime.UtcNow 
-                || refreshToken.ExpireDate.Equals(DateTime.MinValue))
-            return null;
-
-        return refreshToken;
-    }
-    public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)
-    {
-        var refreshToken = await IsRefreshTokeCorrect(rTokenId, false);
-        if (refreshToken is null)
-            return new ResponseMessage<TokensDTO>(MessageConstants.FailedMessage, false);
-        //Generate A&R Tokens
-        var tokens = await GenerateTokenPair(refreshToken.UserId);
-
-        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
-    }
 }

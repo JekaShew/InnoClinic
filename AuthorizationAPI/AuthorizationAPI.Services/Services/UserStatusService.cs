@@ -19,58 +19,72 @@ public class UserStatusService : IUserStatusService
     public UserStatusService(
             IRepositoryManager repositoryManager, 
             IUserService userService, 
-            IValidator<UserStatusForCreateDTO> userStatusForCreateDTOValidator,
-            IValidator<UserStatusForUpdateDTO> userStatusForUpdateDTOValidator)
+            IValidator<UserStatusForCreateDTO> userStatusForCreateValidator,
+            IValidator<UserStatusForUpdateDTO> userStatusForUpdateValidator)
     {
         _repositoryManager = repositoryManager;
         _userService = userService;
-        _userStatusForCreateValidator = userStatusForCreateDTOValidator;
-        _userStatusForUpdateValidator = userStatusForUpdateDTOValidator;
+        _userStatusForCreateValidator = userStatusForCreateValidator;
+        _userStatusForUpdateValidator = userStatusForUpdateValidator;
     }
     public async Task<ResponseMessage> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
     {
         var validationResult = await _userStatusForCreateValidator.ValidateAsync(userStatusForCreateDTO);
         if (!validationResult.IsValid)
+        {
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
 
-        //var userAdmin = await _userService.IsCurrentUserAdministrator();
-        //if (userAdmin is null)
+        //var currentUserId = _userService.GetCurrenUserId();
+        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        //if (!isAdmin)
+        //{
         //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-
+        //}
+        
         var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
-        _repositoryManager.UserStatus.CreateUserStatus(userStatus);
-        await _repositoryManager.SaveChangesAsync();
+        await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
+        await _repositoryManager.Commit();
         
         return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
     }
 
     public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
     {
-        var userAdmin = await _userService.IsCurrentUserAdministrator();
-        if (userAdmin is null)
+        var currentUserId = _userService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
             return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }
 
-        var userStatus = (await _repositoryManager.UserStatus
-                .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), false))
-                .FirstOrDefault();
+        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId);
         if (userStatus is null)
+        {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
-
+        }
+            
         _repositoryManager.UserStatus.DeleteUserStatus(userStatus);
-        await _repositoryManager.SaveChangesAsync();
+        await _repositoryManager.Commit();
 
         return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
     }
 
     public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
     {
-        //var userAdmin = await _userService.IsCurrentUserAdministrator();
-        //if (userAdmin is null)
+        //var currentUserId = _userService.GetCurrenUserId();
+        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        //if (!isAdmin)
+        //{
         //    return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.ForbiddenMessage, false);
+        //}
 
-        var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync(false);
+        var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync();
         if (!userStatuses.Any())
+        {
             return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.NotFoundMessage, false);
+        }
+            
         var userStatusInfoDTOs = userStatuses.Select(us => UserStatusMapper.UserStatusToUserStatusInfoDTO(us));
 
         return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.SuccessMessage, true,  userStatusInfoDTOs);
@@ -78,15 +92,18 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId)
     {
-        //var userAdmin = await _userService.IsCurrentUserAdministrator();
-        //if (userAdmin is null)
-        //    return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        var currentUserId = _userService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
+            return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        }
 
-        var userStatus = (await _repositoryManager.UserStatus
-                .GetUserStatusesWithExpressionAsync(us => us.Id.Equals(userStatusId), false))
-                .FirstOrDefault();
+        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId);
         if (userStatus is null)
+        {
             return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.NotFoundMessage, false);
+        }
 
         var userStatusInfoDTO = UserStatusMapper.UserStatusToUserStatusInfoDTO(userStatus);
 
@@ -97,20 +114,25 @@ public class UserStatusService : IUserStatusService
     {
         var validationResult = await _userStatusForUpdateValidator.ValidateAsync(userStatusForUpdateDTO);
         if (!validationResult.IsValid)
+        {
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
 
-        //var userAdmin = await _userService.IsCurrentUserAdministrator();
-        //if (userAdmin is null)
+        //var currentUserId = _userService.GetCurrenUserId();
+        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        //if (!isAdmin)
+        //{
         //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        //}
 
-        var userStatus = (await _repositoryManager.UserStatus
-                .GetUserStatusesWithExpressionAsync(r => r.Id.Equals(userStatusId), true))
-                .FirstOrDefault();
+        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId, true);
         if (userStatus is null)
+        {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        }
 
         userStatus = UserStatusMapper.UserStatusForUpdateDTOToUserStatus(userStatusForUpdateDTO);
-        await _repositoryManager.SaveChangesAsync();
+        await _repositoryManager.Commit();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
     }

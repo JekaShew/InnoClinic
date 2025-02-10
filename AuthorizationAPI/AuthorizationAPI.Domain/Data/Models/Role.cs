@@ -6,7 +6,7 @@ public class Role
 {
     public Guid Id { get; set; }
     [Required]
-    [MinLength(2), MaxLength(60)]
+    [MinLength(2)]
     public string Title { get; set; }
     public string? Description { get; set; }
 

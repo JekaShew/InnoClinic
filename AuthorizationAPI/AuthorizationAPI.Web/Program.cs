@@ -5,7 +5,7 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(AuthorizationAPI.Presentation.ReferenceAssembly).Assembly);
+    .AddApplicationPart(typeof(AuthorizationAPI.Presentation.Controllers.UsersController).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

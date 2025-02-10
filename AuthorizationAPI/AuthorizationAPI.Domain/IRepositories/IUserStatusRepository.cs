@@ -5,9 +5,10 @@ namespace AuthorizationAPI.Domain.IRepositories;
 
 public interface IUserStatusRepository
 {
-    public void CreateUserStatus(UserStatus userStatus);
-    public Task<IEnumerable<UserStatus>> GetAllUserStatusesAsync(bool trackChanges);
-    public void UpdateUserStatus(UserStatus userStatus);
+    public Task CreateUserStatusAsync(UserStatus userStatus);
+    public Task<IEnumerable<UserStatus>> GetAllUserStatusesAsync(bool trackChanges = false);
+    public Task<UserStatus> GetUserStatusByIdAsync(Guid userStatusId,bool trackChanges = false);
+    public Task UpdateUserStatusAsync(UserStatus userStatus);
     public void DeleteUserStatus(UserStatus userStatus);
-    public Task<IEnumerable<UserStatus>> GetUserStatusesWithExpressionAsync(Expression<Func<UserStatus, bool>> expression, bool trackChanges);
+    public Task<IEnumerable<UserStatus>> GetUserStatusesWithExpressionAsync(Expression<Func<UserStatus, bool>> expression, bool trackChanges = false);
 }

@@ -6,7 +6,7 @@ namespace AuthorizationAPI.Services.Abstractions.Interfaces;
 
 public interface IUserService
 {
-    public Task<ResponseMessage<List<UserInfoDTO>>> GetAllUsersInfo();
+    public Task<ResponseMessage<IEnumerable<UserInfoDTO>>> GetAllUsersInfo();
     public Task<ResponseMessage<UserDetailedDTO>> GetUserDetailedInfo(Guid userId);
     public Task<ResponseMessage> DeleteCurrentAccount();
     public Task<ResponseMessage> DeleteUserById(Guid userId);
@@ -18,7 +18,6 @@ public interface IUserService
     public Task<ResponseMessage> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPirDTO);
    
     public Task<Guid> CreateUserAsync(RegistrationInfoDTO registrationInfoDTO);
-    public Task<UserDetailedDTO> IsCurrentUserAdministrator();
-    public Task<UserDetailedDTO> IsEmailRegistered(string email, bool trackChanges);
     public Task<string> GetHashString(string stringToHash);
+    public Guid? GetCurrentUserId();
 }

@@ -5,9 +5,10 @@ namespace AuthorizationAPI.Domain.IRepositories;
 
 public interface IRefreshTokenRepository
 {
-    public void CreateRefreshToken(RefreshToken refreshToken);
-    public Task<IEnumerable<RefreshToken>> GetAllRefreshTokensAsync(bool trackChanges);
-    public void UpdateRefreshToken(RefreshToken refreshToken);
+    public Task CreateRefreshTokenAsync(RefreshToken refreshToken);
+    public Task<IEnumerable<RefreshToken>> GetAllRefreshTokensAsync();
+    public Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId, bool trackChanges = false);
+    public Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
     public void DeleteRefreshToken(RefreshToken refreshToken);
-    public Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression, bool trackChanges);
+    public Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression);
 }

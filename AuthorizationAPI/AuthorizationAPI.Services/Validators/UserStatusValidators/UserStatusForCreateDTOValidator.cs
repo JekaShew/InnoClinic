@@ -11,6 +11,7 @@ public class UserStatusForCreateDTOValidator : AbstractValidator<UserStatusForCr
           .NotEmpty()
           .NotNull()
           .MinimumLength(2)
+          .MaximumLength(60)
           .WithMessage("The User Status's Title is required and should be at least 2 symbols long!");
     }
 }

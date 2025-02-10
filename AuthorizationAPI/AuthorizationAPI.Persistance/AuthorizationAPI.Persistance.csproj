@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AuthorizationAPI.Domain\AuthorizationAPI.Domain.csproj" />
+    <ProjectReference Include="..\AuthorizationAPI.Shared\AuthorizationAPI.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

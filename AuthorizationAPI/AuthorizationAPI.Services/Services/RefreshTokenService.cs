@@ -11,7 +11,9 @@ public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IRepositoryManager _repositoryManager;
     private readonly IUserService _userService;
-    public RefreshTokenService(IRepositoryManager repositoryManager, IUserService userService)
+    public RefreshTokenService(
+            IRepositoryManager repositoryManager, 
+            IUserService userService)
     {
         _repositoryManager = repositoryManager;
         _userService = userService;
@@ -19,50 +21,61 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
     {
-        var userAdmin = await _userService.IsCurrentUserAdministrator();
-        if (userAdmin is null)
+        var currentUserId = _userService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
             return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }
 
-        var refreshToken = (await _repositoryManager.RefreshToken
-                .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(refreshTokenId), true))
-                .FirstOrDefault();
+        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
+        {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        }
 
         _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
-        await _repositoryManager.SaveChangesAsync();
+        await _repositoryManager.Commit();
 
         return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
     }
 
-    public async Task<ResponseMessage> RevokeRefreshTokenByRefreshTokenId(Guid rTokenId)
+    public async Task<ResponseMessage> RevokeRefreshTokenByRefreshTokenId(Guid refreshTokenId)
     {
-        var userAdmin = await _userService.IsCurrentUserAdministrator();
-        if (userAdmin is null)
+        var currentUserId = _userService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
             return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }
 
-        var refreshToken = (await _repositoryManager.RefreshToken
-                .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(rTokenId), true))
-                .FirstOrDefault();
+        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId, true);
         if (refreshToken is null)
+        {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        }
 
         refreshToken.IsRevoked = true;
-        await _repositoryManager.SaveChangesAsync();
+        await _repositoryManager.Commit();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
 
     public async Task<ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>> GetAllLoggedInUsers()
     {
-        var userAdmin = await _userService.IsCurrentUserAdministrator();
-        if (userAdmin is null)
+        var currentUserId = _userService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
             return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.ForbiddenMessage, false);
+        }
 
         var refreshTokenCollection = await _repositoryManager.RefreshToken
-                .GetAllRefreshTokensAsync(false);
+                .GetAllRefreshTokensAsync();
         if (!refreshTokenCollection.Any())
+        {
             return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.NotFoundMessage, false);
+        }         
 
         var userLoggedInInfoDTOs = refreshTokenCollection.Select(rt => RefreshTokenMapper.RefreshTokenToUserLoggedInInfoDTO(rt));
 
@@ -71,15 +84,18 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage<RefreshTokenInfoDTO>> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
     {
-        var userAdmin = await _userService.IsCurrentUserAdministrator();
-        if (userAdmin is null)
+        var currentUserId = _userService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
             return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        }
 
-        var refreshToken = (await _repositoryManager.RefreshToken
-                .GetRefreshTokensWithExpressionAsync(rt => rt.Id.Equals(refreshTokenId), false))
-                .FirstOrDefault();
+        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
+        {
             return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.NotFoundMessage, false);
+        }
 
         var refreshTokenInfoDTO = RefreshTokenMapper.RefreshTokenToRefreshTokenInfoDTO(refreshToken);
 
