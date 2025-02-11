@@ -37,7 +37,7 @@ public static class PersistanceExtensionMethods
     private static IServiceCollection AddPersistanceRepostitoriesMethod(this IServiceCollection services)
     {
         // Registration of Repositories
-        services.AddScoped<IRepositoryManager, RepositoryManger>();
+        services.AddScoped<IRepositoryManager, EFCoreRepositoryManger>();
 
         return services;
     }

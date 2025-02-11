@@ -8,12 +8,12 @@ using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories;
 
-public class UserRepository : /*BaseRepository<User>,*/ IUserRepository
+public class UserRepository : IUserRepository
 {
     private readonly AuthDBContext _authDBContext;
 
-    public UserRepository(AuthDBContext authDBContext) /*: base(authDBContext) */
-    {
+    public UserRepository(AuthDBContext authDBContext)
+    { 
         _authDBContext = authDBContext;
     }
 

@@ -44,7 +44,7 @@ public class RoleService : IRoleService
 
         var role = RoleMapper.RoleForCreateDTOToRole(roleForCreateDTO);
         await _repositoryManager.Role.CreateRoleAsync(role);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
     }
@@ -65,7 +65,7 @@ public class RoleService : IRoleService
         }
            
         _repositoryManager.Role.DeleteRole(role);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
     }
@@ -132,7 +132,7 @@ public class RoleService : IRoleService
         }
   
         role = RoleMapper.RoleForUpdateDTOToRole(roleForUpdateDTO);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
     }

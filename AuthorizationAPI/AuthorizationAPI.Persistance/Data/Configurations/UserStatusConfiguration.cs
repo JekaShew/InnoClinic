@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AuthorizationAPI.Persistance.Data.Configuration;
+namespace AuthorizationAPI.Persistance.Data.Configurations;
 
 public class UserStatusConfiguration : IEntityTypeConfiguration<UserStatus>
 {

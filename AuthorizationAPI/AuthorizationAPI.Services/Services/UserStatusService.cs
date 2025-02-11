@@ -44,7 +44,7 @@ public class UserStatusService : IUserStatusService
         
         var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
         await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
         
         return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
     }
@@ -65,7 +65,7 @@ public class UserStatusService : IUserStatusService
         }
             
         _repositoryManager.UserStatus.DeleteUserStatus(userStatus);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
     }
@@ -132,7 +132,7 @@ public class UserStatusService : IUserStatusService
         }
 
         userStatus = UserStatusMapper.UserStatusForUpdateDTOToUserStatus(userStatusForUpdateDTO);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
     }

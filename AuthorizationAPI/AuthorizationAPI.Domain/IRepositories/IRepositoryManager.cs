@@ -1,4 +1,6 @@
-﻿namespace AuthorizationAPI.Domain.IRepositories;
+﻿using System.Transactions;
+
+namespace AuthorizationAPI.Domain.IRepositories;
 
 public interface IRepositoryManager
 {
@@ -6,5 +8,7 @@ public interface IRepositoryManager
     IUserStatusRepository UserStatus { get; }
     IUserRepository User { get; }
     IRefreshTokenRepository RefreshToken { get; }
-    Task Commit();
+    abstract Task CommitAsync();
+    abstract Task RollbackAsync();
+    abstract Task BeginAsync();
 }

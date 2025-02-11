@@ -2,6 +2,8 @@ using AuthorizationAPI.Persistance.Extensions;
 using InnoClinic.CommonLibrary.Exceptions;
 using AuthorizationAPI.Services.Extensions;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers()
@@ -38,6 +40,13 @@ builder.Services.AddSwaggerGen(c =>
             new List<string>()
         }
     });
+
+    var swaggerAssambly = Assembly
+        .GetAssembly(typeof(AuthorizationAPI.Presentation.Controllers.AuthorizationController));
+    var swaggerPath = Path.GetDirectoryName(swaggerAssambly.Location);
+    var xmlFile = $"{swaggerAssambly.GetName().Name}.xml";
+    var xmlPath = Path.Combine(swaggerPath, xmlFile);
+    c.IncludeXmlComments(xmlPath);
 });
 
 CommonServicesExtensions.AddCommonServices(builder.Services, builder.Configuration, builder.Configuration["AuthSerolog:FileName"]);

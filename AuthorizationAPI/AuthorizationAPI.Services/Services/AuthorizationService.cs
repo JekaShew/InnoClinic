@@ -23,9 +23,9 @@ public class AuthorizationService : IAuthorizationService
 
     private readonly IRepositoryManager _repositoryManager;
     private readonly IUserService _userService;
-    private readonly AuthenticationSettings _authenticationSettings;
+    private readonly AuthorizationJWTSettings _authenticationSettings;
     public AuthorizationService(
-            IOptions<AuthenticationSettings> options,
+            IOptions<AuthorizationJWTSettings> options,
             IRepositoryManager repositoryManager,
             IUserService userService,
             IValidator<LoginInfoDTO> loginInfoValidator,
@@ -55,11 +55,16 @@ public class AuthorizationService : IAuthorizationService
         }
 
         var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
-        if (user != null)
+        if (user is null)
         {
             return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
         }
 
+        if(user.UserStatusId.Equals(DBConstants.DeletedUserStatusId) 
+            || user.UserStatusId.Equals(DBConstants.BannedUserStatusId))
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.ForbiddenMessage, false);
+        }
         //Check Email Password pair
         var enteredPasswordHash = await _userService.GetHashString($"{loginInfoDTO.Password}{user.SecurityStamp}");
         if (!enteredPasswordHash.Equals(user.PasswordHash))
@@ -86,7 +91,7 @@ public class AuthorizationService : IAuthorizationService
         } 
 
         _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
@@ -101,9 +106,9 @@ public class AuthorizationService : IAuthorizationService
 
         //Check Email Registered
         var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(registrationInfoDTO.Email);
-        if (!isEmailRegistered)
+        if (isEmailRegistered)
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+            return new ResponseMessage<TokensDTO>(MessageConstants.EmailRegisteredMessage, false);
         }
 
         //Create and Generate A&R Tokens
@@ -159,6 +164,10 @@ public class AuthorizationService : IAuthorizationService
     {
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         var role = await _repositoryManager.Role.GetRoleByIdAsync(user.RoleId);
+        if (user is null || role is null)
+        {
+            return null;
+        }
 
         var claims = new List<Claim>()
         {
@@ -199,7 +208,7 @@ public class AuthorizationService : IAuthorizationService
         };
 
         await _repositoryManager.RefreshToken.CreateRefreshTokenAsync(refreshToken);
-        await _repositoryManager.Commit();
+        await _repositoryManager.CommitAsync();
 
         return refreshToken.Id.ToString();
     }
@@ -211,5 +220,4 @@ public class AuthorizationService : IAuthorizationService
 
         return new TokensDTO() { AccessToken = jwt, RefreshToken = rt };
     }
-
 }

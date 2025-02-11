@@ -12,7 +12,11 @@ public static class ApplicationServicesExtesionMethods
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.Configure<AuthenticationSettings>(configuration.GetSection("Authentication"));
+        services.AddOptions<AuthorizationJWTSettings>()
+            .Bind(configuration.GetSection(AuthorizationJWTSettings.ConfigurationSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         // Registration of Services
         services.AddScoped<IUserStatusService, UserStatusService>();
         services.AddScoped<IRoleService, RoleService>();

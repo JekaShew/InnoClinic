@@ -4,6 +4,10 @@ namespace AuthorizationAPI.Domain.Data.Models;
 
 public class User
 {
+    public User()
+    {
+        RegistrationDate = DateTime.UtcNow;
+    }
     public Guid Id { get; set; }
     [Required]
     [MinLength(2)]

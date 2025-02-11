@@ -1,6 +1,10 @@
-﻿using InnoClinic.CommonLibrary.Exceptions;
+﻿using CommonLibrary.Response.FailMesssages;
+using InnoClinic.CommonLibrary.Exceptions;
+using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using System.Net.Http;
+using System;
 
 namespace InnoClinic.CommonLibrary.Middleware;
 
@@ -19,56 +23,65 @@ public class GlobalExceptionHandler : IExceptionHandler
 
         if(exception is TaskCanceledException || exception is TimeoutException) 
         {
-            httpContext.Response.StatusCode = (int)StatusCodes.Status408RequestTimeout;
-
-            var problemDetailsContext = new ProblemDetailsContext
-            {
-                HttpContext = httpContext,
-                ProblemDetails =
-                {
-                   Title = "Alert!",
-                    Detail = "Request timeout! Please, try again!",
-                    Type = exception.GetType().Name,
-                    Status = (int)StatusCodes.Status408RequestTimeout
-                },
-                Exception = exception
-            };
-
-            return await ModifyExceptopnResponse(problemDetailsContext);
+            //httpContext.Response.StatusCode = (int)StatusCodes.Status408RequestTimeout;
+            return await ModifyExceptionResponse(
+                httpContext, 
+                new RequestTimeoutMessage(
+                    exception.GetType().Name,
+                    exception.Message
+                ));
+            //var problemDetailsContext = new ProblemDetailsContext
+            //{
+            //    HttpContext = httpContext,
+            //    ProblemDetails =
+            //    {
+            //        Title = "Alert!",
+            //        Detail = "Request timeout! Please, try again!",
+            //        Type = exception.GetType().Name,
+            //        Status = (int)StatusCodes.Status408RequestTimeout
+            //    },
+            //    Exception = exception
+            //};
         }
 
         if(exception is ValidationAppException validationException)
         {
-            httpContext.Response.StatusCode = (int)StatusCodes.Status422UnprocessableEntity;
+            //httpContext.Response.StatusCode = (int)StatusCodes.Status422UnprocessableEntity;
+            await ModifyExceptionResponse(
+                httpContext,
+                new ValidationErrorMessage(
+                    exception.Message,
+                    validationException.Errors
+                ));
 
-            await httpContext.Response.WriteAsJsonAsync(
-                new
-                {
-                    Type = exception.GetType().Name,
-                    Title = exception.Message,
-                    Errors = validationException.Errors,
-                    StatusCode = (int)StatusCodes.Status422UnprocessableEntity
-                });
             return true;
         }
 
-        return await ModifyExceptopnResponse(
-            new ProblemDetailsContext 
-            {
-                HttpContext = httpContext,
-                ProblemDetails = 
-                {
-                  Title = "Error!",
-                  Detail = "Oops! Something went wrong! Internal server error occured! Please, try again!",
-                  Type = exception.GetType().Name,
-                  Status = (int)StatusCodes.Status500InternalServerError
-                },
-                Exception = exception
-            });
+        return await ModifyExceptionResponse( 
+            httpContext,
+            new ServerErrorMessage(
+                exception.GetType().Name,
+                exception.Message
+            ));
+
+        //new ProblemDetailsContext 
+        //    {
+        //        HttpContext = httpContext,
+        //        ProblemDetails = 
+        //        {
+        //          Title = "Error!",
+        //          Detail = "Oops! Something went wrong! Internal server error occured! Please, try again!",
+        //          Type = exception.GetType().Name,
+        //          Status = (int)StatusCodes.Status500InternalServerError
+        //        },
+        //        Exception = exception
+        //    });
     }
 
-    private async Task<bool> ModifyExceptopnResponse(ProblemDetailsContext problemDetailsContext)
+    private async Task<bool> ModifyExceptionResponse(HttpContext httpContext, FailMessage failMessage)
     {
-        return await this._problemDetailsService.TryWriteAsync(problemDetailsContext);
+        await httpContext.Response.WriteAsJsonAsync(failMessage);
+
+        return true;
     }
 }  

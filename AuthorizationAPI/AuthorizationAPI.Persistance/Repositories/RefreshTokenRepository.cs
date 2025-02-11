@@ -26,15 +26,23 @@ public class RefreshTokenRepository : /*BaseRepository<RefreshToken>,*/ IRefresh
                 .ToListAsync();
     }
 
-    public async Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId)
+    public async Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId, bool trackChanges)
     {
-        return await _authDBContext.RefreshTokens
-                .Include(u => u.User)
-                    .ThenInclude(r => r.Role)
-                .Include(u => u.User)
-                    .ThenInclude(us => us.UserStatus)
-                .AsNoTracking()
-                .FirstOrDefaultAsync( rt => rt.Id.Equals(refreshTokenId));
+        return trackChanges ?
+                await _authDBContext.RefreshTokens
+                    .Include(u => u.User)
+                        .ThenInclude(r => r.Role)
+                    .Include(u => u.User)
+                        .ThenInclude(us => us.UserStatus)
+                    .FirstOrDefaultAsync(rt => rt.Id.Equals(refreshTokenId))
+                 :
+                 await _authDBContext.RefreshTokens
+                    .Include(u => u.User)
+                        .ThenInclude(r => r.Role)
+                    .Include(u => u.User)
+                        .ThenInclude(us => us.UserStatus)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(rt => rt.Id.Equals(refreshTokenId));
     }
 
     public async Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression)

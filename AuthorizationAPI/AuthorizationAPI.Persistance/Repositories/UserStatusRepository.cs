@@ -26,15 +26,23 @@ public class UserStatusRepository : /*BaseRepository<UserStatus>,*/ IUserStatusR
     public async Task<UserStatus> GetUserStatusByIdAsync(Guid userStatusId, bool trackChanges)
     {
         return trackChanges ?
-            await _authDBContext.UserStatuses.FirstOrDefaultAsync(us => us.Id.Equals(userStatusId)):
-            await _authDBContext.UserStatuses.AsNoTracking().FirstOrDefaultAsync(us => us.Id.Equals(userStatusId));
+            await _authDBContext.UserStatuses
+                .FirstOrDefaultAsync(us => us.Id.Equals(userStatusId)):
+            await _authDBContext.UserStatuses
+                .AsNoTracking()
+                .FirstOrDefaultAsync(us => us.Id.Equals(userStatusId));
     }
 
     public async Task<IEnumerable<UserStatus>> GetUserStatusesWithExpressionAsync(Expression<Func<UserStatus, bool>> expression, bool trackChanges)
     {
         return trackChanges ?
-            await _authDBContext.UserStatuses.Where(expression).ToListAsync() :
-            await _authDBContext.UserStatuses.AsNoTracking().Where(expression).ToListAsync();
+            await _authDBContext.UserStatuses
+                .Where(expression)
+                .ToListAsync() :
+            await _authDBContext.UserStatuses
+                .AsNoTracking()
+                .Where(expression)
+                .ToListAsync();
     }
 
     public async Task CreateUserStatusAsync(UserStatus userStatus)
