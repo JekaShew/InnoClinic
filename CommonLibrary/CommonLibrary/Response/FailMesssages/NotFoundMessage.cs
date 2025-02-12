@@ -2,11 +2,11 @@
 
 namespace CommonLibrary.Response.FailMesssages
 {
-    public class NotFoundMessage : FailMessage
+    public class NotFoundMessage //: FailMessage
     {
         [DefaultValue(404)]
         public int StatusCode { get; }
-        public NotFoundMessage(string message) : base(message)
+        public NotFoundMessage(string message) //: base(message)
         { }
     }
 }

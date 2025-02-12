@@ -1,5 +1,4 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
-using AuthorizationAPI.Shared.DTOs.RoleDTOs;
 using AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
 using CommonLibrary.Response.FailMesssages;
 using CommonLibrary.Response.SuccessMessages;
@@ -23,19 +22,19 @@ public class UserStatusesController : ResponseMessageHandler
     /// <returns>Single User Status</returns>
     [HttpGet("{userStatusId:guid}")]
     [ProducesResponseType(typeof(SuccessMessage<UserStatusInfoDTO>), 200)]
-    [ProducesResponseType(typeof(BadRequestMessage), 400)]
-    [ProducesResponseType(typeof(ForbiddenMessage), 403)]
-    [ProducesResponseType(typeof(NotFoundMessage), 404)]
-    [ProducesResponseType(typeof(RequestTimeoutMessage), 408)]
-    [ProducesResponseType(typeof(ValidationErrorMessage), 422)]
-    [ProducesResponseType(typeof(ServerErrorMessage), 500)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetUserStatusById(Guid userStatusId)
     {
         var result = await _userStatusService.GetUserStatusByIdAsync(userStatusId);
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return Ok(new SuccessMessage<object>(result.Message.Value, result.Value));
+        return new SuccessMessage<UserStatusInfoDTO>(result.Message.Value, result.Value);
     }
 
     /// <summary>
@@ -44,19 +43,19 @@ public class UserStatusesController : ResponseMessageHandler
     /// <returns>The User Statuses list</returns>
     [HttpGet]
     [ProducesResponseType(typeof(SuccessMessage<IEnumerable<UserStatusInfoDTO>>), 200)]
-    [ProducesResponseType(typeof(BadRequestMessage), 400)]
-    [ProducesResponseType(typeof(ForbiddenMessage), 403)]
-    [ProducesResponseType(typeof(NotFoundMessage), 404)]
-    [ProducesResponseType(typeof(RequestTimeoutMessage), 408)]
-    [ProducesResponseType(typeof(ValidationErrorMessage), 422)]
-    [ProducesResponseType(typeof(ServerErrorMessage), 500)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAllUserStatuses()
     {
         var result = await _userStatusService.GetAllUserStatusesAsync();
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return Ok(new SuccessMessage<object>(result.Message.Value, result.Value));
+        return new SuccessMessage<IEnumerable<UserStatusInfoDTO>>(result.Message.Value, result.Value);
     }
 
     /// <summary>
@@ -64,20 +63,20 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(SuccessOnCreateMessage), 201)]
-    [ProducesResponseType(typeof(BadRequestMessage), 400)]
-    [ProducesResponseType(typeof(ForbiddenMessage), 403)]
-    [ProducesResponseType(typeof(NotFoundMessage), 404)]
-    [ProducesResponseType(typeof(RequestTimeoutMessage), 408)]
-    [ProducesResponseType(typeof(ValidationErrorMessage), 422)]
-    [ProducesResponseType(typeof(ServerErrorMessage), 500)]
+    [ProducesResponseType(typeof(SuccessMessage), 201)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> AddUserStatus([FromBody] UserStatusForCreateDTO userStatusForCreateDTO)
     {
         var result = await _userStatusService.CreateUserStatusAsync(userStatusForCreateDTO);
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return Ok(new SuccessOnCreateMessage(result.Message.Value));
+        return new SuccessMessage(result.Message.Value, 201);
     }
 
     /// <summary>
@@ -86,19 +85,19 @@ public class UserStatusesController : ResponseMessageHandler
     /// <returns>Message</returns>
     [HttpPut("/{userStatusId:guid}")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
-    [ProducesResponseType(typeof(BadRequestMessage), 400)]
-    [ProducesResponseType(typeof(ForbiddenMessage), 403)]
-    [ProducesResponseType(typeof(NotFoundMessage), 404)]
-    [ProducesResponseType(typeof(RequestTimeoutMessage), 408)]
-    [ProducesResponseType(typeof(ValidationErrorMessage), 422)]
-    [ProducesResponseType(typeof(ServerErrorMessage), 500)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> UpdateUserStatus(Guid userStatusId, [FromBody] UserStatusForUpdateDTO userStatusForUpdateDTO)
     {
         var result = await _userStatusService.UpdateUserStatusAsync(userStatusId, userStatusForUpdateDTO);
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return Ok(new SuccessMessage(result.Message.Value));
+        return new SuccessMessage(result.Message.Value);
     }
 
     /// <summary>
@@ -106,19 +105,19 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{userStatusId:guid}")]
-    [ProducesResponseType(typeof(SuccessOnDeleteMessage), 204)]
-    [ProducesResponseType(typeof(BadRequestMessage), 400)]
-    [ProducesResponseType(typeof(ForbiddenMessage), 403)]
-    [ProducesResponseType(typeof(NotFoundMessage), 404)]
-    [ProducesResponseType(typeof(RequestTimeoutMessage), 408)]
-    [ProducesResponseType(typeof(ValidationErrorMessage), 422)]
-    [ProducesResponseType(typeof(ServerErrorMessage), 500)]
+    [ProducesResponseType(typeof(SuccessMessage), 204)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteUserStatusById(Guid userStatusId)
     {
         var result = await _userStatusService.DeleteUserStatusByIdAsync(userStatusId);
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return Ok(new SuccessOnDeleteMessage(result.Message.Value));
+        return new SuccessMessage(result.Message.Value, 204);
     }
 }

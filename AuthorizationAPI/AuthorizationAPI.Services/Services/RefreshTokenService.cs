@@ -4,6 +4,7 @@ using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.RefreshTokenDTOs;
 using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace AuthorizationAPI.Services.Services;
 
@@ -55,7 +56,7 @@ public class RefreshTokenService : IRefreshTokenService
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
 
-        refreshToken.IsRevoked = true;
+        refreshToken.IsRevoked = !refreshToken.IsRevoked;
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);

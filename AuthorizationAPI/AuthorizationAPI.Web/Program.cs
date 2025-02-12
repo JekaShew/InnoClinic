@@ -6,7 +6,12 @@ using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddControllers()
+builder.Services.AddControllers(config =>
+    {
+        config.RespectBrowserAcceptHeader = true;
+        config.ReturnHttpNotAcceptable = true;
+    })
+    .AddNewtonsoftJson()
     .AddApplicationPart(typeof(AuthorizationAPI.Presentation.Controllers.UsersController).Assembly);
 
 builder.Services.AddEndpointsApiExplorer();

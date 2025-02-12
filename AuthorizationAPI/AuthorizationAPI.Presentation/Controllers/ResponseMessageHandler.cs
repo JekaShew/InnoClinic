@@ -11,32 +11,50 @@ public class ResponseMessageHandler : ControllerBase
     public IActionResult HandleResponseMessage(ResponseMessage? responseMessage)
     {
         if (responseMessage.Message.Key.Equals(MessageConstants.Base400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+        
         if (responseMessage.Message.Key.Equals(MessageConstants.Create400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+        
         if (responseMessage.Message.Key.Equals(MessageConstants.Delete400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+        
         if (responseMessage.Message.Key.Equals(MessageConstants.Update400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+       
         if (responseMessage.Message.Key.Equals(MessageConstants.Base404))
-            return NotFound(new NotFoundMessage(responseMessage.Message.Value)); 
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 404);
+        }
+             
         if (responseMessage.Message.Key.Equals(MessageConstants.Base403))
-            return StatusCode(403, new ForbiddenMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 403);
+        }
+              
         if (responseMessage.Message.Key.Equals(MessageConstants.CheckDB400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+        
         if (responseMessage.Message.Key.Equals(MessageConstants.CheckCreds400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+        
         if (responseMessage.Message.Key.Equals(MessageConstants.EmailRegistered400))
-            return BadRequest(new BadRequestMessage(responseMessage.Message.Value));
-
-        return StatusCode(500, new FailMessage(responseMessage.Message.Value));
+        {
+            return new FailMessage(responseMessage.Message.Value, 400);
+        }
+        
+        return new FailMessage(responseMessage.Message.Value, 500);
     }
 }

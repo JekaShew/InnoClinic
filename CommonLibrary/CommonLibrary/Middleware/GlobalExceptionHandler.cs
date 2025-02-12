@@ -25,11 +25,13 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             //httpContext.Response.StatusCode = (int)StatusCodes.Status408RequestTimeout;
             return await ModifyExceptionResponse(
-                httpContext, 
-                new RequestTimeoutMessage(
-                    exception.GetType().Name,
-                    exception.Message
-                ));
+                httpContext,
+                new FailMessage(exception.Message, 408 ));
+               
+                //new RequestTimeoutMessage(
+                //    exception.GetType().Name,
+                //    exception.Message
+                //));
             //var problemDetailsContext = new ProblemDetailsContext
             //{
             //    HttpContext = httpContext,
@@ -49,20 +51,22 @@ public class GlobalExceptionHandler : IExceptionHandler
             //httpContext.Response.StatusCode = (int)StatusCodes.Status422UnprocessableEntity;
             await ModifyExceptionResponse(
                 httpContext,
-                new ValidationErrorMessage(
-                    exception.Message,
-                    validationException.Errors
-                ));
+                new FailMessage(validationException.Message, 500, validationException.Errors));
+            //new ValidationErrorMessage(
+            //        exception.Message,
+            //        validationException.Errors
+            //    ));
 
             return true;
         }
 
         return await ModifyExceptionResponse( 
             httpContext,
-            new ServerErrorMessage(
-                exception.GetType().Name,
-                exception.Message
-            ));
+            new FailMessage(exception.Message, 500));
+        //new ServerErrorMessage(
+        //        exception.GetType().Name,
+        //        exception.Message
+        //    ));
 
         //new ProblemDetailsContext 
         //    {

@@ -8,6 +8,7 @@ using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -17,7 +18,7 @@ namespace AuthorizationAPI.Services.Services;
 public class UserService : IUserService
 {
     private readonly IValidator<OldNewPasswordPairDTO> _oldNewPasswordPairValidator;
-    private readonly IValidator<EmailSecretPhrasePairDTO> _emailSecretPhrasePairValidator;
+    private readonly IValidator<EmailSecretPhraseNewPasswordDTO> _emailSecretPhraseNewPasswordValidator;
     private readonly IValidator<UserForUpdateDTO> _userForUpdateValidator;
 
     private readonly IRepositoryManager _repositoryManager;
@@ -26,13 +27,13 @@ public class UserService : IUserService
             IHttpContextAccessor httpContextAccessor,
             IRepositoryManager repositoryManager,
             IValidator<OldNewPasswordPairDTO> oldNewPasswordPairValidator,
-            IValidator<EmailSecretPhrasePairDTO> emailSecretPhrasePairValidator,
+            IValidator<EmailSecretPhraseNewPasswordDTO> emailSecretPhraseNewPasswordValidator,
             IValidator<UserForUpdateDTO> userForUpdateValidator)
     {
         _httpContextAccessor = httpContextAccessor;
         _repositoryManager = repositoryManager;
         _oldNewPasswordPairValidator = oldNewPasswordPairValidator;
-        _emailSecretPhrasePairValidator = emailSecretPhrasePairValidator;
+        _emailSecretPhraseNewPasswordValidator = emailSecretPhraseNewPasswordValidator;
         _userForUpdateValidator = userForUpdateValidator;
     }
     // Add methods ChangeOldEmailByEmail
@@ -72,7 +73,7 @@ public class UserService : IUserService
 
     public async Task<Guid> CreateUserAsync(RegistrationInfoDTO registrationInfoDTO)
     {
-        var defaultRole = await _repositoryManager.Role.GetRoleByIdAsync(DBConstants.PatientRoleId); 
+        var defaultRole = await _repositoryManager.Role.GetRoleByIdAsync(DBConstants.PatientRoleId);
         if (defaultRole is null || defaultRole.Id.Equals(Guid.Empty))
         {
             return Guid.Empty;
@@ -187,7 +188,7 @@ public class UserService : IUserService
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
-           
+
         if (!user.Id.Equals(currentUserId.Value))
         {
             return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
@@ -213,32 +214,6 @@ public class UserService : IUserService
         throw new NotImplementedException();
     }
 
-    public async Task<ResponseMessage> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhrasePairDTO emailSecretPhrasePairDTO, string newPassword)
-    {
-        var validationResult = await _emailSecretPhrasePairValidator.ValidateAsync(emailSecretPhrasePairDTO);
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
-        }
-
-        var user = await _repositoryManager.User.GetUserByEmailAsync(emailSecretPhrasePairDTO.Email, true);
-        if (user is null)
-        {
-            return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
-        }
-
-        var enteredSecretPhraseHash = await GetHashString($"{emailSecretPhrasePairDTO.SecretPhrase}{user.SecurityStamp}");
-        if (!enteredSecretPhraseHash.Equals(user.SecretPhraseHash))
-        {
-            return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
-        }
-           
-        user.PasswordHash = await GetHashString($"{newPassword}{user.SecurityStamp}");
-        await _repositoryManager.CommitAsync();
-
-        return new ResponseMessage(MessageConstants.SuccessMessage, true);
-    }
-
     public async Task<ResponseMessage> ChangePasswordByOldPassword(OldNewPasswordPairDTO oldNewPasswordPairDTO)
     {
         var validationResult = await _oldNewPasswordPairValidator.ValidateAsync(oldNewPasswordPairDTO);
@@ -261,35 +236,40 @@ public class UserService : IUserService
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
 
-    public async Task<ResponseMessage> ChangeRoleOfUser(UserIdRoleIdPairDTO userIdRoleIdPairDTO)
+    public async Task<ResponseMessage> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhraseNewPasswordDTO emailSecretPhraseNewPasswordDTO)
     {
-        var currentUserId = GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
+        var validationResult = await _emailSecretPhraseNewPasswordValidator.ValidateAsync(emailSecretPhraseNewPasswordDTO);
+        if (!validationResult.IsValid)
         {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var role = await _repositoryManager.Role.GetRoleByIdAsync(userIdRoleIdPairDTO.RoleId);
-        if (role is null)
-        {
-            return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
-        }
-
-        var user = await _repositoryManager.User.GetUserByIdAsync(userIdRoleIdPairDTO.UserId, true);
+        var user = await _repositoryManager.User.GetUserByEmailAsync(emailSecretPhraseNewPasswordDTO.Email, true);
         if (user is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
         }
-          
-        user.RoleId = userIdRoleIdPairDTO.RoleId;
+
+        var enteredSecretPhraseHash = await GetHashString($"{emailSecretPhraseNewPasswordDTO.SecretPhrase}{user.SecurityStamp}");
+        if (!enteredSecretPhraseHash.Equals(user.SecretPhraseHash))
+        {
+            return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
+        }
+
+        user.PasswordHash = await GetHashString($"{emailSecretPhraseNewPasswordDTO.NewPassword}{user.SecurityStamp}");
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
 
-    public async Task<ResponseMessage> ChangeUserStatusOfUser(UserIdUserStatusIdPairDTO userIdUserStatusIdPairDTO)
+    public async Task<ResponseMessage> ChangeUserStatusOfUser(Guid userId, JsonPatchDocument<UserInfoDTO> patchDocForUserInfoDTO)
     {
+        var patchOperation = patchDocForUserInfoDTO.Operations.First().op;
+        if (!patchOperation.Equals(PatchConstants.ReplaceOperation))
+        {
+            return new ResponseMessage(MessageConstants.FailedMessage, false);
+        }
+
         var currentUserId = GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
@@ -297,19 +277,74 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         }
 
-        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userIdUserStatusIdPairDTO.UserStatusId);
+        Guid patchValueGuid = Guid.Empty;
+        var patchValue = patchDocForUserInfoDTO.Operations.First().value.ToString();
+        if (patchValue is null
+            || !Guid.TryParse(patchValue, out patchValueGuid)
+                || patchValueGuid.Equals(Guid.Empty))
+        {
+            return new ResponseMessage(MessageConstants.FailedMessage, false);
+        }
+
+        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(patchValueGuid);
         if (userStatus is null)
         {
             return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
         }
 
-        var user = await _repositoryManager.User.GetUserByIdAsync(userIdUserStatusIdPairDTO.UserId);
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId, true);
         if (user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
 
-        user.UserStatusId = userIdUserStatusIdPairDTO.UserStatusId;
+        var userInfoDTO = UserMapper.UserToUserInfoDTO(user);
+        patchDocForUserInfoDTO.ApplyTo(userInfoDTO);
+        user = UserMapper.UserInfoDTOToUser(userInfoDTO);
+        await _repositoryManager.CommitAsync();
+
+        return new ResponseMessage(MessageConstants.SuccessMessage, true);
+    }
+
+    public async Task<ResponseMessage> ChangeRoleOfUser(Guid userId, JsonPatchDocument<UserInfoDTO> patchDocForUserInfoDTO)
+    {
+        var patchOperation = patchDocForUserInfoDTO.Operations.First().op;
+        if (patchOperation.Equals(PatchConstants.ReplaceOperation))
+        {
+            return new ResponseMessage(MessageConstants.FailedMessage, false);
+        }
+
+        var currentUserId = GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }
+
+        Guid patchValueGuid = Guid.Empty;
+        var patchValue = patchDocForUserInfoDTO.Operations.First().value.ToString();
+        if (patchValue is null
+            || !Guid.TryParse(patchValue, out patchValueGuid)
+                || patchValueGuid.Equals(Guid.Empty))
+        {
+            return new ResponseMessage(MessageConstants.FailedMessage, false);
+        }
+
+        var role = await _repositoryManager.Role.GetRoleByIdAsync(patchValueGuid);
+        if (role is null)
+        {
+            return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
+        }
+
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId, true);
+        if (user is null)
+        {
+            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        }
+
+        var userInfoDTO = UserMapper.UserToUserInfoDTO(user);
+        patchDocForUserInfoDTO.ApplyTo(userInfoDTO);
+        user = UserMapper.UserInfoDTOToUser(userInfoDTO);
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
