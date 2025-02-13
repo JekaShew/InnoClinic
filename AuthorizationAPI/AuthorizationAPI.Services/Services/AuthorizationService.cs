@@ -5,17 +5,21 @@ using AuthorizationAPI.Services.Extensions;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
+using Azure.Core;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Encodings.Web;
 
 namespace AuthorizationAPI.Services.Services;
 
@@ -28,6 +32,7 @@ public class AuthorizationService : IAuthorizationService
     private readonly IEmailService _emailService;
     private readonly IUserService _userService;
     private readonly AuthorizationJWTSettings _authenticationSettings;
+
     public AuthorizationService(
             IOptions<AuthorizationJWTSettings> options,
             IRepositoryManager repositoryManager,
@@ -134,13 +139,14 @@ public class AuthorizationService : IAuthorizationService
 
         var callback = QueryHelpers.AddQueryString(registrationInfoDTO.UserUri!, callbackParameters);
 
-
         // Send Email
-        //var sendEmail = await SendEmail(registrationInfoDTO.Email, "Email Verification", confirmLink);
+        // add method that create link grabbing domain and setting up controller action that should be implemented
+        // 
+        var verificationLink = "http://localhost:5000/UserStatuses";
         var verificationEmailMetadata = new EmailMetadata(
                 registrationInfoDTO.Email,
                 EmailTemplates.VerificationTemplate.Key,
-                $"{EmailTemplates.VerificationTemplate.Value}{callback}");
+                $"{EmailTemplates.VerificationTemplate.Value} <a href='{HtmlEncoder.Default.Encode(verificationLink)}'>{verificationLink}</a>.");
         var sendEmail = await _emailService.SendSingleMail(verificationEmailMetadata); 
         if(!sendEmail)
         {
