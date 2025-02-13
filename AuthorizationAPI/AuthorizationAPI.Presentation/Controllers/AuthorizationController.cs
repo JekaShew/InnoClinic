@@ -1,8 +1,7 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
-using CommonLibrary.Response.FailMesssages;
-using CommonLibrary.Response.SuccessMessages;
+using CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers;

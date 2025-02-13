@@ -1,7 +1,6 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
-using CommonLibrary.Response.FailMesssages;
-using CommonLibrary.Response.SuccessMessages;
+using CommonLibrary.Response;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 

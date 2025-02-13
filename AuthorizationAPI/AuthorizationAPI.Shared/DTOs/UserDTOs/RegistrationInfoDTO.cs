@@ -9,4 +9,5 @@ public class RegistrationInfoDTO
     public string Phone { get; set; }
     public string Password { get; set; }
     public string SecretPhrase { get; set; }
+    public string? UserUri { get; set; }
 }

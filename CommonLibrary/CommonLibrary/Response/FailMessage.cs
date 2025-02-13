@@ -2,11 +2,11 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
-namespace CommonLibrary.Response.FailMesssages;
+namespace CommonLibrary.Response;
 
 public class FailMessage : IActionResult
 {
-    
+
     public int StatusCode { get; }
     public string Message { get; }
     [JsonIgnore]
@@ -19,13 +19,13 @@ public class FailMessage : IActionResult
         Message = message;
         InnerErrors = innerErrors;
 
-        if(innerErrors is not null)
-        Details = new
-        {
-            StatusCode = statusCode,
-            Message = message,
-            InnerErrors = innerErrors
-        };
+        if (innerErrors is not null)
+            Details = new
+            {
+                StatusCode = statusCode,
+                Message = message,
+                InnerErrors = innerErrors
+            };
 
         Details = new
         {
@@ -38,7 +38,7 @@ public class FailMessage : IActionResult
     {
         var response = context.HttpContext.Response;
         response.StatusCode = StatusCode;
-        response.ContentType = "plain/text";        
+        response.ContentType = "plain/text";
 
         await response.WriteAsJsonAsync(Details);
     }

@@ -24,8 +24,26 @@ public static class ApplicationServicesExtesionMethods
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IAuthorizationService, AuthorizationService>();
 
-        services.AddFluentValidationMethod();
+        services.AddScoped<IEmailService, FluentEmailService>();
 
+        services.AddFluentValidationMethod();
+        services.AddFluentEmailMethod(configuration);
+
+        return services;
+    }
+
+    private static IServiceCollection AddFluentEmailMethod(this IServiceCollection services, IConfiguration configuration)
+    {
+        // FluentEmail
+        var emailSettings = configuration.GetSection("EmailSettings");
+        var defaultFromEmail = emailSettings["FromEmails:Default"];
+        var host = emailSettings["SMTPSettings:Host"];
+        var port = emailSettings.GetValue<int>("SMTPSettings:Port");
+
+        services.AddFluentEmail(defaultFromEmail)
+           .AddSmtpSender(host, port);
+
+        
         return services;
     }
 

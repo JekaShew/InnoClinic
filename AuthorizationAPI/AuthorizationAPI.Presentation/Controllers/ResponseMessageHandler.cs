@@ -1,5 +1,5 @@
 ﻿using AuthorizationAPI.Shared.Constants;
-using CommonLibrary.Response.FailMesssages;
+using CommonLibrary.Response;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,7 +54,12 @@ public class ResponseMessageHandler : ControllerBase
         {
             return new FailMessage(responseMessage.Message.Value, 400);
         }
-        
+
+        if (responseMessage.Message.Key.Equals(MessageConstants.VerificationFail))
+        {
+            return new FailMessage(responseMessage.Message.Value, 500);
+        }
+
         return new FailMessage(responseMessage.Message.Value, 500);
     }
 }

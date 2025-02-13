@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
 
-namespace CommonLibrary.Response.SuccessMessages
+namespace CommonLibrary.Response
 {
     public class SuccessMessage : IActionResult
     {
         public int StatusCode { get; set; }
         public string Message { get; }
         [JsonIgnore]
-        public object Details {  get; set; }
+        public object Details { get; set; }
         public SuccessMessage(string message, int statusCode = 200)
         {
             Message = message;
