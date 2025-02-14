@@ -5,16 +5,19 @@ using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
+using FluentEmail.Core;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
 
 namespace AuthorizationAPI.Services.Services;
 
@@ -23,9 +26,11 @@ public class UserService : IUserService
     private readonly IValidator<OldNewPasswordPairDTO> _oldNewPasswordPairValidator;
     private readonly IValidator<EmailSecretPhraseNewPasswordDTO> _emailSecretPhraseNewPasswordValidator;
     private readonly IValidator<UserForUpdateDTO> _userForUpdateValidator;
+    private readonly IValidator<EmailPasswordPairDTO> _emailPasswordPairValidator;
 
     private readonly IRepositoryManager _repositoryManager;
     private readonly IAuthorizationService _authorizationService;
+    private readonly IEmailService _emailService;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IMemoryCache _memoryCache;
     public UserService(
@@ -34,16 +39,20 @@ public class UserService : IUserService
             IValidator<OldNewPasswordPairDTO> oldNewPasswordPairValidator,
             IValidator<EmailSecretPhraseNewPasswordDTO> emailSecretPhraseNewPasswordValidator,
             IValidator<UserForUpdateDTO> userForUpdateValidator,
+            IValidator<EmailPasswordPairDTO> emailPasswordPairValidator,
             IMemoryCache memoryCache,
-            IAuthorizationService authorizationService)
+            IAuthorizationService authorizationService,
+            IEmailService emailService)
     {
         _httpContextAccessor = httpContextAccessor;
         _repositoryManager = repositoryManager;
         _oldNewPasswordPairValidator = oldNewPasswordPairValidator;
         _emailSecretPhraseNewPasswordValidator = emailSecretPhraseNewPasswordValidator;
         _userForUpdateValidator = userForUpdateValidator;
+        _emailPasswordPairValidator = emailPasswordPairValidator;
         _memoryCache = memoryCache;
         _authorizationService = authorizationService;
+        _emailService = emailService;
     }
 
     public Guid? GetCurrentUserId()
@@ -363,7 +372,6 @@ public class UserService : IUserService
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
-
     }
 
     private async Task<ResponseMessage> ConfirmEmail(string email, string token)
@@ -379,24 +387,26 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
         var verificationToken = _authorizationService
-                .GenerateEmailConfirmationTokenByUserIdAndCurrentDateTime(email, dateTimeString!);
+                .GenerateEmailConfirmationTokenByEmailAndDateTime(email, dateTimeString!);
 
         if (!verificationToken.Equals(token))
         {
             return new ResponseMessage(MessageConstants.FailedMessage, false);
         }
 
-        return new ResponseMessage(MessageConstants.SuccessMessage, true);
-    }
+        _memoryCache.Remove(email);
 
-    public Task<ResponseMessage> ChangeForgottenPasswordByEmailRequest(string email)
-    {
-        // send activate code to newEmail
-        throw new NotImplementedException();
+        return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
 
     public async Task<ResponseMessage> ChangeForgottenPasswordByEmail(string token, string email, string newPassword)
     {
+        var validationResult = await _emailPasswordPairValidator.ValidateAsync(new EmailPasswordPairDTO() { NewEmail = email, Password = newPassword});
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
         var confirmEmail = await ConfirmEmail(email, token);
         if(!confirmEmail.Flag)
         {
@@ -415,13 +425,26 @@ public class UserService : IUserService
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
     }
 
+    public async Task<ResponseMessage> ChangeForgottenPasswordByEmailRequest(string email)
+    {
+        var isRegistered = await _repositoryManager.User.IsEmailRegistered(email);
+        if(!isRegistered)
+        {
+            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        }
+
+        return await _emailService.SendVerificationLetterToEmail(email);
+    }
+
     public async Task<ResponseMessage> ChangeEmailByPassword(EmailPasswordPairDTO emailPasswordPairDTO)
     {
-        //check currentUser
-        //check password
-        //send activate code to newEmail
-        var userId = GetCurrentUserId();
+        var validationResult = await _emailPasswordPairValidator.ValidateAsync(emailPasswordPairDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
 
+        var userId = GetCurrentUserId();
         var currentUser = await _repositoryManager.User.GetUserByIdAsync(userId.Value,true);
         if(currentUser is null)
         {
@@ -437,6 +460,6 @@ public class UserService : IUserService
         currentUser.Email = emailPasswordPairDTO.NewEmail;
         currentUser.UserStatusId = DBConstants.NonActivatedUserStatusId;
 
-        // send email confirm to new Email
+        return await _emailService.SendVerificationLetterToEmail(emailPasswordPairDTO.NewEmail);
     }
 }

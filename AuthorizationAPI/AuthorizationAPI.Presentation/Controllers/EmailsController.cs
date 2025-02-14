@@ -1,16 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc;
 
-namespace AuthorizationAPI.Presentation.Controllers
+namespace AuthorizationAPI.Presentation.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class EmailsController : ControllerBase
 {
-    internal class EmailsController
-    {
-        // implement send single form doctor custom message with subject
-        // implement send single form administrator custom message with subject
-        // implement send multy form doctor custom message with subject
-        // implement send multy form administrator custom message with subject 
-    }
+    // foreach check Authorize
+    // foreach check Roles
+    // where email metadata should be created??
+    // responses?
+
+    // for multy message noreply ONLY
+    // send subject string;  send body string 
+
+
+    // implement send single from doctor custom message with subject ONLY DOCTOR
+    // implement send single from administrator custom message with subject ONLY ADMINISTRATOR
+    // implement send single from noreply custom message with subject ONLY ADMINISTRATOR
+    // implement send multy custom message from NoReply with subject ONLY ADMINISTRATOR
 }

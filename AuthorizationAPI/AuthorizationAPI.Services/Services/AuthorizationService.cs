@@ -8,14 +8,12 @@ using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace AuthorizationAPI.Services.Services;
 
@@ -70,11 +68,11 @@ public class AuthorizationService : IAuthorizationService
             return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
         }
 
-        if(user.UserStatusId.Equals(DBConstants.DeletedUserStatusId) 
-            || user.UserStatusId.Equals(DBConstants.BannedUserStatusId))
+        if(!user.UserStatusId.Equals(DBConstants.ActivatedUserStatusId))
         {
             return new ResponseMessage<TokensDTO>(MessageConstants.ForbiddenMessage, false);
         }
+
         //Check Email Password pair
         var enteredPasswordHash = await _userService.GetHashString($"{loginInfoDTO.Password}{user.SecurityStamp}");
         if (!enteredPasswordHash.Equals(user.PasswordHash))
@@ -128,35 +126,7 @@ public class AuthorizationService : IAuthorizationService
             return new ResponseMessage(MessageConstants.FailedCreateMessage, false);
         }
 
-        // Setup Confirmation Message with confirm Link 
-        var currentDateTimeString = DateTime.UtcNow.ToString();
-        var confirmEmailToken = GenerateEmailConfirmationTokenByEmailAndDateTime(registrationInfoDTO.Email, currentDateTimeString);
-        var cacheEntryOptions = new MemoryCacheEntryOptions()
-            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
-            .SetSize(1)
-            .SetPriority(CacheItemPriority.High);
-        _memoryCache.Set(registrationInfoDTO.Email, currentDateTimeString, cacheEntryOptions);
-
-        var callbackParameters = new Dictionary<string, string>
-        {
-            {"token", confirmEmailToken },
-            {"email", registrationInfoDTO.Email}
-        };
-        // how to grab domain address and url of action to confirmEmail
-        var callback = QueryHelpers.AddQueryString("http://localhost:5000/api/Users/verifyemail", callbackParameters);
-
-        // Send Email
-        var verificationEmailMetadata = new EmailMetadata(
-                registrationInfoDTO.Email,
-                EmailTemplates.VerificationTemplate.Key,
-                $"{EmailTemplates.VerificationTemplate.Value} <a href='{HtmlEncoder.Default.Encode(callback)}'>{callback}</a>.");
-        var sendEmail = await _emailService.SendSingleMail(verificationEmailMetadata); 
-        if(!sendEmail)
-        {
-            return new ResponseMessage(MessageConstants.FailEmailVerificationMessage ,false);
-        }
-
-        return new ResponseMessage(MessageConstants.SuccessMessage, true);
+        return await _emailService.SendVerificationLetterToEmail(registrationInfoDTO.Email);
     }
     
     public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)

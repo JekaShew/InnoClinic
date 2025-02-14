@@ -62,7 +62,7 @@ public class AuthorizationController : ResponseMessageHandler
     /// </summary>
     /// <returns>Access and Refresh Tokens</returns>
     [HttpPost("signup")]
-    [ProducesResponseType(typeof(SuccessMessage<TokensDTO>), 201)]
+    [ProducesResponseType(typeof(SuccessMessage), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -74,7 +74,7 @@ public class AuthorizationController : ResponseMessageHandler
         var result = await _authorizationService.SignUp(registrationInfoDTO);
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
+        return new SuccessMessage(result.Message.Value, 201);
     }
 
     /// <summary>
@@ -97,7 +97,7 @@ public class AuthorizationController : ResponseMessageHandler
             return HandleResponseMessage(result);
         return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
     }
-    // Resend Verification Email by what???
+    // Resend Verification Email by what??? email???
     /// <summary>
     /// Refreshing Access and Refresh Tokens by Refresh Token Id
     /// </summary>

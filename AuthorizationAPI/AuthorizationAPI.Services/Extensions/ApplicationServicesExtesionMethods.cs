@@ -17,6 +17,11 @@ public static class ApplicationServicesExtesionMethods
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        services.AddOptions<FromEmailsSettings>()
+            .Bind(configuration.GetSection(FromEmailsSettings.ConfigurationSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
         // Registration of Services
         services.AddScoped<IUserStatusService, UserStatusService>();
         services.AddScoped<IRoleService, RoleService>();
