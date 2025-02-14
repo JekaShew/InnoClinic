@@ -5,18 +5,14 @@ using AuthorizationAPI.Services.Extensions;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
-using Azure.Core;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
-using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -31,6 +27,8 @@ public class AuthorizationService : IAuthorizationService
     private readonly IRepositoryManager _repositoryManager;
     private readonly IEmailService _emailService;
     private readonly IUserService _userService;
+
+    private readonly IMemoryCache _memoryCache;
     private readonly AuthorizationJWTSettings _authenticationSettings;
 
     public AuthorizationService(
@@ -39,7 +37,8 @@ public class AuthorizationService : IAuthorizationService
             IUserService userService,
             IValidator<LoginInfoDTO> loginInfoValidator,
             IValidator<RegistrationInfoDTO> registrationInfoValidator,
-            IEmailService emailService)
+            IEmailService emailService,
+            IMemoryCache memoryCache)
     {
         _authenticationSettings = options.Value;
         _repositoryManager = repositoryManager;
@@ -47,8 +46,8 @@ public class AuthorizationService : IAuthorizationService
         _loginInfoValidator = loginInfoValidator;
         _registrationInfoValidator = registrationInfoValidator;
         _emailService = emailService;
+        _memoryCache = memoryCache;
     }
-    // Add methods ActivateUserByEmail-> default UserStatus change to "Not Activated"
 
     public async Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO)
     {
@@ -107,7 +106,7 @@ public class AuthorizationService : IAuthorizationService
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
 
-    public async Task<ResponseMessage<TokensDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
+    public async Task<ResponseMessage> SignUp(RegistrationInfoDTO registrationInfoDTO)
     {
         var validationResult = await _registrationInfoValidator.ValidateAsync(registrationInfoDTO);
         if (!validationResult.IsValid)
@@ -119,43 +118,45 @@ public class AuthorizationService : IAuthorizationService
         var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(registrationInfoDTO.Email);
         if (isEmailRegistered)
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.EmailRegisteredMessage, false);
+            return new ResponseMessage(MessageConstants.EmailRegisteredMessage, false);
         }
 
         // Create User 
         var userId = await _userService.CreateUserAsync(registrationInfoDTO);
         if (userId.Equals(Guid.Empty))
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.FailedCreateMessage, false);
+            return new ResponseMessage(MessageConstants.FailedCreateMessage, false);
         }
 
-        // Setup Confirmation Message with confirm Link
-        var confirmToken = GenerateEmailConfirmationTokenByUserId(userId);
+        // Setup Confirmation Message with confirm Link 
+        var currentDateTimeString = DateTime.UtcNow.ToString();
+        var confirmEmailToken = GenerateEmailConfirmationTokenByEmailAndDateTime(registrationInfoDTO.Email, currentDateTimeString);
+        var cacheEntryOptions = new MemoryCacheEntryOptions()
+            .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
+            .SetSize(1)
+            .SetPriority(CacheItemPriority.High);
+        _memoryCache.Set(registrationInfoDTO.Email, currentDateTimeString, cacheEntryOptions);
+
         var callbackParameters = new Dictionary<string, string>
         {
-            {"token", confirmToken },
+            {"token", confirmEmailToken },
             {"email", registrationInfoDTO.Email}
         };
-
-        var callback = QueryHelpers.AddQueryString(registrationInfoDTO.UserUri!, callbackParameters);
+        // how to grab domain address and url of action to confirmEmail
+        var callback = QueryHelpers.AddQueryString("http://localhost:5000/api/Users/verifyemail", callbackParameters);
 
         // Send Email
-        // add method that create link grabbing domain and setting up controller action that should be implemented
-        // 
-        var verificationLink = "http://localhost:5000/UserStatuses";
         var verificationEmailMetadata = new EmailMetadata(
                 registrationInfoDTO.Email,
                 EmailTemplates.VerificationTemplate.Key,
-                $"{EmailTemplates.VerificationTemplate.Value} <a href='{HtmlEncoder.Default.Encode(verificationLink)}'>{verificationLink}</a>.");
+                $"{EmailTemplates.VerificationTemplate.Value} <a href='{HtmlEncoder.Default.Encode(callback)}'>{callback}</a>.");
         var sendEmail = await _emailService.SendSingleMail(verificationEmailMetadata); 
         if(!sendEmail)
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.FailEmailVerificationMessage ,false);
+            return new ResponseMessage(MessageConstants.FailEmailVerificationMessage ,false);
         }
-        // Generate A&R Tokens
-        var tokens = await GenerateTokenPair(userId);
 
-        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
+        return new ResponseMessage(MessageConstants.SuccessMessage, true);
     }
     
     public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)
@@ -171,28 +172,38 @@ public class AuthorizationService : IAuthorizationService
 
         return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
     }
-    private async Task<bool> SendEmail(string email, string subject, string message)
+
+    public string GenerateEmailConfirmationTokenByEmailAndDateTime(string email, string dateTimeString)
     {
-        // Send Email
-        MailMessage mailMessage = new MailMessage();
-        SmtpClient smtpClient = new SmtpClient();
-        mailMessage.From = new MailAddress("");
-        mailMessage.To.Add(email);
-        mailMessage.Subject = subject;
-        mailMessage.IsBodyHtml = true;
-        mailMessage.Body = message;
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes($"{email}{dateTimeString}"));
+        var emailConfirmationToken = Convert.ToBase64String(symmetricSecurityKey.Key);
 
-        smtpClient.Port = 123;
-        smtpClient.Host = "localhost";
-
-        smtpClient.EnableSsl = false;
-        smtpClient.UseDefaultCredentials = false;
-        smtpClient.Credentials = new NetworkCredential("" ,"");
-        smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
-
-        smtpClient.Send(mailMessage);
-        return true;
+        return emailConfirmationToken;
     }
+
+    //private async Task<bool> SendEmail(string email, string subject, string message)
+    //{
+    //    // Send Email
+    //    MailMessage mailMessage = new MailMessage();
+    //    SmtpClient smtpClient = new SmtpClient();
+    //    mailMessage.From = new MailAddress("");
+    //    mailMessage.To.Add(email);
+    //    mailMessage.Subject = subject;
+    //    mailMessage.IsBodyHtml = true;
+    //    mailMessage.Body = message;
+
+    //    smtpClient.Port = 25;
+    //    smtpClient.Host = "localhost";
+
+    //    smtpClient.EnableSsl = false;
+    //    smtpClient.UseDefaultCredentials = false;
+    //    smtpClient.Credentials = new NetworkCredential("" ,"");
+    //    smtpClient.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+    //    smtpClient.Send(mailMessage);
+    //    return true;
+    //}
+
     private async Task<RefreshToken> IsRefreshTokeCorrect(Guid rTokenId, bool trackChanges)
     {
         //Check is RefreshToken Correct
@@ -216,19 +227,11 @@ public class AuthorizationService : IAuthorizationService
         return refreshToken;
     }
 
-    private string GenerateEmailConfirmationTokenByUserId(Guid userId)
-    {
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userId.ToString()));
-        var emailConfirmationToken = Convert.ToBase64String(symmetricSecurityKey.Key);
-
-        return emailConfirmationToken;
-    }
-
     private async Task<string> GenerateJwtTokenStringByUserId(Guid userId)
     {
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         var role = await _repositoryManager.Role.GetRoleByIdAsync(user.RoleId);
-        if (user is null || role is null)
+        if (user is null || role is null || !user.UserStatusId.Equals(DBConstants.ActivatedUserStatusId))
         {
             return null;
         }

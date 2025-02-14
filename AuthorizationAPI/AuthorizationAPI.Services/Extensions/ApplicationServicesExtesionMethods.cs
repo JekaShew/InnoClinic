@@ -28,7 +28,10 @@ public static class ApplicationServicesExtesionMethods
 
         services.AddFluentValidationMethod();
         services.AddFluentEmailMethod(configuration);
-
+        services.AddMemoryCache(opt =>
+        {
+            opt.SizeLimit = 1000;
+        });
         return services;
     }
 

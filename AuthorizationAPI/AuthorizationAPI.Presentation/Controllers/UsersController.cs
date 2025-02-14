@@ -1,8 +1,11 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
+using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using CommonLibrary.Response;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using System.Runtime.CompilerServices;
 
 namespace AuthorizationAPI.Presentation.Controllers;
 
@@ -62,7 +65,7 @@ public class UsersController : ResponseMessageHandler
     /// Updates selected User 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("/{userId:guid}")]
+    [HttpPut("{userId:guid}")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -82,7 +85,7 @@ public class UsersController : ResponseMessageHandler
     /// Deletes User By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("/deletecurrentaccount")]
+    [HttpPut("deletecurrentaccount")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -124,7 +127,7 @@ public class UsersController : ResponseMessageHandler
     /// Updates User's password by verifying Old User's Password
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("/changepasswordbyoldpassword")]
+    [HttpPut("changepasswordbyoldpassword")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -145,7 +148,7 @@ public class UsersController : ResponseMessageHandler
     /// Updates User's password by verifying User's Email and Secret Phrase
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("/changeforgottenpasswordbysecretphrase")]
+    [HttpPut("changeforgottenpasswordbysecretphrase")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -161,25 +164,11 @@ public class UsersController : ResponseMessageHandler
         return new SuccessMessage(result.Message.Value);
     }
 
-    ////Implement
-    //[HttpPut("/changeforgottenpasswordbyemail")]
-    //[ProducesResponseType(typeof(SuccessMessage), 200)]
-    //[ProducesResponseType(typeof(FailMessage), 400)]
-    //[ProducesResponseType(typeof(FailMessage), 403)]
-    //[ProducesResponseType(typeof(FailMessage), 404)]
-    //[ProducesResponseType(typeof(FailMessage), 408)]
-    //[ProducesResponseType(typeof(FailMessage), 422)]
-    //[ProducesResponseType(typeof(FailMessage), 500)]
-    //public async Task<IActionResult> ChangeForgottenPasswordByEmail([FromBody] string email)
-    //{
-    //    return NotFound("Service  unavailable.");
-    //}
-
     /// <summary>
     /// Changes User's status
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPatch("/{userId:guid}/changeuserstatusofuser")]
+    [HttpPatch("{userId:guid}changeuserstatusofuser")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -200,7 +189,7 @@ public class UsersController : ResponseMessageHandler
     /// Changes User's role
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPatch("/{userId:guid}/changeroleofuser")]
+    [HttpPatch("{userId:guid}changeroleofuser")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -212,6 +201,88 @@ public class UsersController : ResponseMessageHandler
     public async Task<IActionResult> ChangeRoleOfUser(Guid userId, [FromBody] JsonPatchDocument<UserInfoDTO> patchDocForUserInfoDTO)
     {
         var result = await _userService.ChangeRoleOfUser(userId, patchDocForUserInfoDTO);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage(result.Message.Value);
+    }
+
+    /// <summary>
+    /// Changes User Status to Activated by confirming email
+    /// </summary>
+    /// <returns>Message</returns>
+    [HttpGet("verifyemail")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string token,[FromQuery] string email)
+    {
+        var result = await _userService.ActivateUser(email, token);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage(result.Message.Value);
+    }
+
+    // change email By Password
+    [HttpPut("changeemailbypassword")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> ChangeEmailByPassword([FromBody] EmailPasswordPairDTO emailPasswordPairDTO)
+    {
+        var result = await _userService.ChangeEmailByPassword(emailPasswordPairDTO);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage(result.Message.Value);
+    }
+
+    // make unique token by adding dateTimeUtcNow and adding it into memoryCache like 
+    // memory key is email value is datimeutcNow to string
+    // if check -> generate with data and userId and equals 
+
+
+    //user clicks button write Email clicks verify-> change passwordRequest(Email) sends letter to Email
+    // go to Get chanepasswordByEmail(query query) inserts new password -> clicks ok 
+
+    [HttpPost("changeforgottenpasswordbyemailrequest")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> ChangeForgottenPasswordByEmailRequest([FromBody] StringValue email)
+    {   
+        // Sends message to Email with Link -> clicks the link with token and email query parameters -> return Page where you can insert new Password
+        var result = await _userService.ChangeForgottenPasswordByEmailRequest(email.Value);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage(result.Message.Value);
+    }
+
+    [HttpPut("changeforgottenpasswordbyemail")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> ChangeForgottenPasswordByEmail([FromQuery] string token, [FromQuery] string email,[FromBody] StringValue newPassword)
+    {
+        // page with query Parameters and body with new Password
+        var result = await _userService.ChangeForgottenPasswordByEmail(token, email, newPassword.Value);
         if (!result.Flag)
             return HandleResponseMessage(result);
         return new SuccessMessage(result.Message.Value);

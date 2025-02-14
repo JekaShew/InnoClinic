@@ -62,7 +62,7 @@ public class AuthorizationController : ResponseMessageHandler
     /// </summary>
     /// <returns>Access and Refresh Tokens</returns>
     [HttpPost("signup")]
-    [ProducesResponseType(typeof(SuccessMessage<TokensDTO>), 200)]
+    [ProducesResponseType(typeof(SuccessMessage<TokensDTO>), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -97,4 +97,25 @@ public class AuthorizationController : ResponseMessageHandler
             return HandleResponseMessage(result);
         return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
     }
+    // Resend Verification Email by what???
+    /// <summary>
+    /// Refreshing Access and Refresh Tokens by Refresh Token Id
+    /// </summary>
+    /// <returns>Access and Refresh Tokens</returns>
+    //[HttpPost("resendemailverification")]
+    //[ProducesResponseType(typeof(SuccessMessage), 200)]
+    //[ProducesResponseType(typeof(FailMessage), 400)]
+    //[ProducesResponseType(typeof(FailMessage), 403)]
+    //[ProducesResponseType(typeof(FailMessage), 404)]
+    //[ProducesResponseType(typeof(FailMessage), 408)]
+    //[ProducesResponseType(typeof(FailMessage), 422)]
+    //[ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    //public async Task<IActionResult> ResendEmailVerification([FromBody] GuidValue refreshTokenId)
+    //{
+    //    //var result = await _authorizationService.Se(refreshTokenId.Value);
+    //    //if (!result.Flag)
+    //    //    return HandleResponseMessage(result);
+    //    //return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
+    //}
 }

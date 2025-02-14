@@ -23,7 +23,7 @@ public static class PersistanceExtensionMethods
         // MSSQL DB
         services.AddDbContext<AuthDBContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("AuthDBHome"),
+                configuration.GetConnectionString("AuthDB"),
                 sqlserverOption =>
                 {
                     // if Migrations in different Assembly
