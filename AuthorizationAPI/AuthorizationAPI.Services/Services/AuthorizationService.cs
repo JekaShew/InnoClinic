@@ -8,6 +8,7 @@ using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -256,5 +257,34 @@ public class AuthorizationService : IAuthorizationService
         var rt = await GenerateRefreshTokenByUserId(userId);
 
         return new TokensDTO() { AccessToken = jwt, RefreshToken = rt };
+    }
+
+    public async Task<ResponseMessage> ResendEmailVerification(LoginInfoDTO loginInfoDTO)
+    {
+        var validationResult = await _loginInfoValidator.ValidateAsync(loginInfoDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(loginInfoDTO.Email);
+        if (!isEmailRegistered)
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+        }
+
+        var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
+        if (user is null)
+        {
+            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+        }
+
+        var enteredPasswordhash = await _userService.GetHashString($"{loginInfoDTO.Password}{user.SecurityStamp}");
+        if(!enteredPasswordhash.Equals(user.PasswordHash))
+        {
+            return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
+        }
+
+        return await _emailService.SendVerificationLetterToEmail(loginInfoDTO.Email);
     }
 }

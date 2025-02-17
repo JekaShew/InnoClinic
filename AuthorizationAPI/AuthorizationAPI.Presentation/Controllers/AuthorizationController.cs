@@ -2,6 +2,7 @@
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using CommonLibrary.Response;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers;
@@ -102,20 +103,20 @@ public class AuthorizationController : ResponseMessageHandler
     /// Refreshing Access and Refresh Tokens by Refresh Token Id
     /// </summary>
     /// <returns>Access and Refresh Tokens</returns>
-    //[HttpPost("resendemailverification")]
-    //[ProducesResponseType(typeof(SuccessMessage), 200)]
-    //[ProducesResponseType(typeof(FailMessage), 400)]
-    //[ProducesResponseType(typeof(FailMessage), 403)]
-    //[ProducesResponseType(typeof(FailMessage), 404)]
-    //[ProducesResponseType(typeof(FailMessage), 408)]
-    //[ProducesResponseType(typeof(FailMessage), 422)]
-    //[ProducesResponseType(typeof(FailMessage), 500)]
+    [HttpPost("resendemailverification")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize]
-    //public async Task<IActionResult> ResendEmailVerification([FromBody] GuidValue refreshTokenId)
-    //{
-    //    //var result = await _authorizationService.Se(refreshTokenId.Value);
-    //    //if (!result.Flag)
-    //    //    return HandleResponseMessage(result);
-    //    //return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
-    //}
+    public async Task<IActionResult> ResendEmailVerification([FromBody] LoginInfoDTO loginInfoDTO)
+    {
+        var result = await _authorizationService.ResendEmailVerefication(loginInfoDTO);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
+    }
 }

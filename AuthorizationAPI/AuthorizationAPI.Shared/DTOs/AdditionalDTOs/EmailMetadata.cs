@@ -1,13 +1,13 @@
 ﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
 {
-    public class EmailMetadata
+    public class EmailMetaData
     {
         public string ToAddress { get; set; }
         public string Subject { get; set; }
         public string? Body { get; set; }
         public Guid FromAdress { get; set; }
 
-        public EmailMetadata(
+        public EmailMetaData(
                 string toAddress,
                 string subject,
                 string? body = "",
