@@ -2,7 +2,6 @@
 using AuthorizationAPI.Shared.DTOs.RefreshTokenDTOs;
 using Riok.Mapperly.Abstractions;
 
-
 namespace AuthorizationAPI.Services.Mappers;
 
 [Mapper]

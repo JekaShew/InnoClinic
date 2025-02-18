@@ -12,6 +12,7 @@ namespace CommonLibrary.Response
         public object Details { get; set; }
         public SuccessMessage(string message, int statusCode = 200)
         {
+            StatusCode = statusCode;
             Message = message;
             Details = new
             {

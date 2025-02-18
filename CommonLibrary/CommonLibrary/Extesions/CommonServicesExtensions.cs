@@ -1,4 +1,5 @@
-﻿using InnoClinic.CommonLibrary.Middleware;
+﻿using CommonLibrary.CommonService;
+using InnoClinic.CommonLibrary.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,8 @@ public static class CommonServicesExtensions
         //if (dbConnectionStringKey.Key.Equals("MongoDB"))
         //    services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
         //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
-
+        // CommonService
+        services.AddScoped<ICommonService, CommonService>();
         //Serilog
         Log.Logger = new LoggerConfiguration()
         .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Information)

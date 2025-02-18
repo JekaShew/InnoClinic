@@ -1,47 +1,55 @@
-﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
+﻿using AuthorizationAPI.Domain.IRepositories;
+using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Extensions;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
-using AuthorizationAPI.Shared.DTOs.UserDTOs;
+using CommonLibrary.CommonService;
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using System.Text.Encodings.Web;
 
 namespace AuthorizationAPI.Services.Services;
 
 public class FluentEmailService : IEmailService
 {
+    private readonly FromEmailsSettings _fromEmailsSettings;
     private readonly IFluentEmail _fluentEmail;
     private readonly IFluentEmailFactory _fluentEmailFactory;
-    private readonly IAuthorizationService _authorizationService;
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly ICommonService _commonService;
     private readonly IMemoryCache _memoryCache;
-    private readonly FromEmailsSettings _fromEmailsSettings;
     private readonly IValidator<UserEmailDTO> _userEmailValidator;
     public FluentEmailService(
+            IOptions<FromEmailsSettings> options,
             IFluentEmail fluentEmail,
             IFluentEmailFactory fluentEmailFactory,
-            IAuthorizationService authorizationService,
             IMemoryCache memoryCache,
-            IValidator<UserEmailDTO> usrEmailValidator)
+            IValidator<UserEmailDTO> usrEmailValidator,
+            IRepositoryManager repositoryManager,
+            ICommonService commonService)
     {
+        _fromEmailsSettings = options.Value;
         _fluentEmail = fluentEmail;
         _fluentEmailFactory = fluentEmailFactory;
-        _authorizationService = authorizationService;
         _memoryCache = memoryCache;
         _userEmailValidator = usrEmailValidator;
+        _repositoryManager = repositoryManager;
+        _commonService = commonService;
     }
 
     public async Task<ResponseMessage> SendVerificationLetterToEmail(string email)
     {
         // Setup Confirmation Message with confirm Link 
         var currentDateTimeString = DateTime.UtcNow.ToString();
-        var confirmEmailToken = _authorizationService.GenerateEmailConfirmationTokenByEmailAndDateTime(email, currentDateTimeString);
+        var confirmEmailToken = GenerateEmailConfirmationTokenByEmailAndDateTime(email, currentDateTimeString);
         var cacheEntryOptions = new MemoryCacheEntryOptions()
             .SetAbsoluteExpiration(TimeSpan.FromMinutes(5))
             .SetSize(1)
@@ -70,34 +78,75 @@ public class FluentEmailService : IEmailService
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
     }
 
-    public async Task<ResponseMessage> SendUserEmail(IEnumerable<UserEmailDTO> userEmailDTOs,Guid roleId)
+    public async Task<ResponseMessage> SendUserEmail(IEnumerable<UserEmailDTO> userEmailDTOs,Guid userId, Guid roleId = default)
     {
-        
-        foreach(var userEmailDTO in userEmailDTOs)
+        var emailMetaDatas = new List<EmailMetaData>();
+        var currentUserId = _commonService.GetCurrentUserId();
+        var currentUser = await _repositoryManager.User.GetUserByIdAsync(currentUserId.Value);
+        if (currentUser is null)
+        {
+            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+        }
+
+        bool isAdmin = currentUser.RoleId.Equals(DBConstants.AdministratorRoleId);
+        bool isDoctor = currentUser.RoleId.Equals(DBConstants.DoctorRoleId);
+
+        foreach (var userEmailDTO in userEmailDTOs)
         {
             var validationResult = await _userEmailValidator.ValidateAsync(userEmailDTO);
             if (!validationResult.IsValid)
             {
                 throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
             }
-
-            if (roleId is null)
+            
+            if (roleId.Equals(Guid.Empty) && isAdmin)
             {
                 var emailMetaData = new EmailMetaData(
                         userEmailDTO.ToAddress, 
                         userEmailDTO.Subject, 
-                        userEmailDTO.Subject, 
-                        roleId);
+                        userEmailDTO.Subject);
+
+                emailMetaDatas.Add(emailMetaData);
+                continue;
             }
+
+            if (roleId.Equals(DBConstants.DoctorRoleId) && isDoctor)
+            {
+                var emailMetaData = new EmailMetaData(
+                        userEmailDTO.ToAddress,
+                        userEmailDTO.Subject,
+                        userEmailDTO.Subject,
+                        roleId);
+
+                emailMetaDatas.Add(emailMetaData);
+                continue;
+            }
+
+            if (roleId.Equals(DBConstants.AdministratorRoleId) && isAdmin)
+            {
+                var emailMetaData = new EmailMetaData(
+                        userEmailDTO.ToAddress,
+                        userEmailDTO.Subject,
+                        userEmailDTO.Subject,
+                        roleId);
+
+                emailMetaDatas.Add(emailMetaData);
+                continue;
+            }
+
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         }
 
-        if(userEmailDTOs.Count() == 1)
+        bool response = 
+                userEmailDTOs.Count() == 1 ? 
+                    response = await SendSingleMail(emailMetaDatas.FirstOrDefault()) : 
+                    response = await SendMultipleConsumersMail(emailMetaDatas);
+        if(!response)
         {
-            var singelEmailMetaData = new EmailMetaData(userEmailDTOs.);
-
-            var sendSingle = await SendSingleMail()
+            return new ResponseMessage(MessageConstants.FailSendEmailMessage500, false);
         }
-        
+
+        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
     }
 
     public async Task<bool> SendMultipleConsumersMail(IEnumerable<EmailMetaData> emailMetadataList)
@@ -129,6 +178,14 @@ public class FluentEmailService : IEmailService
         return response.Successful;
     }
 
+    public string GenerateEmailConfirmationTokenByEmailAndDateTime(string email, string dateTimeString)
+    {
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes($"{email}{dateTimeString}"));
+        var emailConfirmationToken = Convert.ToBase64String(symmetricSecurityKey.Key);
+
+        return emailConfirmationToken;
+    }
+
     private async Task<SendResponse> FromAddressHandler(EmailMetaData emailMetadata)
     {
         var response = new SendResponse();
@@ -158,5 +215,4 @@ public class FluentEmailService : IEmailService
                 .Body(emailMetadata.Body)
                 .SendAsync();
     }
-    
 }

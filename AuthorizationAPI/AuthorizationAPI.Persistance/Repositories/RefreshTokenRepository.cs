@@ -6,11 +6,11 @@ using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories;
 
-public class RefreshTokenRepository : /*BaseRepository<RefreshToken>,*/ IRefreshTokenRepository
+public class RefreshTokenRepository : IRefreshTokenRepository
 {
     private readonly AuthDBContext _authDBContext;
 
-    public RefreshTokenRepository(AuthDBContext authDBContext) /*: base(authDBContext)*/
+    public RefreshTokenRepository(AuthDBContext authDBContext)
     {
         _authDBContext = authDBContext;
     }

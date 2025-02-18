@@ -8,7 +8,9 @@ public class UserStatusConfiguration : IEntityTypeConfiguration<UserStatus>
 {
     public void Configure(EntityTypeBuilder<UserStatus> builder)
     {
-        builder.Property(r => r.Title)
+        builder.HasIndex(us => us.Title).IsUnique();
+
+        builder.Property(us => us.Title)
             .IsRequired()
             .HasMaxLength(60);
 

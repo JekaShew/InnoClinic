@@ -7,11 +7,11 @@ using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories;
 
-public class UserStatusRepository : /*BaseRepository<UserStatus>,*/ IUserStatusRepository
+public class UserStatusRepository : IUserStatusRepository
 {
     private readonly AuthDBContext _authDBContext;
 
-    public UserStatusRepository(AuthDBContext authDBContext) /*: base(authDBContext)*/ 
+    public UserStatusRepository(AuthDBContext authDBContext) 
     {
         _authDBContext = authDBContext;
     }

@@ -1,7 +1,4 @@
-﻿using AuthorizationAPI.Shared.DTOs.RoleDTOs;
-using AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
-
-namespace AuthorizationAPI.Shared.DTOs.UserDTOs;
+﻿namespace AuthorizationAPI.Shared.DTOs.UserDTOs;
 
 public class UserInfoDTO
 {
@@ -10,6 +7,4 @@ public class UserInfoDTO
     public string SecondName { get; set; }
     public string Email { get; set; }
     public string? Phone { get; set; }
-    public UserStatusInfoDTO UserStatus { get; set; }
-    public RoleInfoDTO Role { get; set; }
 }

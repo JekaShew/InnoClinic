@@ -2,7 +2,6 @@
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using CommonLibrary.Response;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers;
@@ -47,7 +46,6 @@ public class AuthorizationController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize]
     public async Task<IActionResult> SignOut([FromBody] GuidValue refreshTokenId)
@@ -61,7 +59,7 @@ public class AuthorizationController : ResponseMessageHandler
     /// <summary>
     /// Signing Up with all Registration Info
     /// </summary>
-    /// <returns>Access and Refresh Tokens</returns>
+    /// <returns>Message</returns>
     [HttpPost("signup")]
     [ProducesResponseType(typeof(SuccessMessage), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
@@ -79,7 +77,7 @@ public class AuthorizationController : ResponseMessageHandler
     }
 
     /// <summary>
-    /// Refreshing Access and Refresh Tokens by Refresh Token Id
+    /// Refreshes Access and Refresh Tokens by Refresh Token Id
     /// </summary>
     /// <returns>Access and Refresh Tokens</returns>
     [HttpPost("refresh")]
@@ -98,11 +96,11 @@ public class AuthorizationController : ResponseMessageHandler
             return HandleResponseMessage(result);
         return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
     }
-    // Resend Verification Email by what??? email???
+
     /// <summary>
-    /// Refreshing Access and Refresh Tokens by Refresh Token Id
+    /// Resends verefication Letter to email by verifying Email and Password
     /// </summary>
-    /// <returns>Access and Refresh Tokens</returns>
+    /// <returns>Message</returns>
     [HttpPost("resendemailverification")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
@@ -111,12 +109,11 @@ public class AuthorizationController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize]
     public async Task<IActionResult> ResendEmailVerification([FromBody] LoginInfoDTO loginInfoDTO)
     {
-        var result = await _authorizationService.ResendEmailVerefication(loginInfoDTO);
+        var result = await _authorizationService.ResendEmailVerification(loginInfoDTO);
         if (!result.Flag)
             return HandleResponseMessage(result);
-        return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
+        return new SuccessMessage(result.Message.Value);
     }
 }

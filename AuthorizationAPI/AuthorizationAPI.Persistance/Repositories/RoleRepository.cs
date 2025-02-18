@@ -6,11 +6,11 @@ using System.Linq.Expressions;
 
 namespace AuthorizationAPI.Persistance.Repositories;
   
-public class RoleRepository : /*BaseRepository<Role>,*/ IRoleRepository 
+public class RoleRepository : IRoleRepository 
 {
     private readonly AuthDBContext _authDBContext;
 
-    public RoleRepository(AuthDBContext authDBContext) /*: base(authDBContext) */
+    public RoleRepository(AuthDBContext authDBContext) 
     {
         _authDBContext = authDBContext;
     }

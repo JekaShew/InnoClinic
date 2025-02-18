@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Riok.Mapperly.Abstractions;
+using System.ComponentModel.DataAnnotations;
 
 namespace AuthorizationAPI.Domain.Data.Models;
 

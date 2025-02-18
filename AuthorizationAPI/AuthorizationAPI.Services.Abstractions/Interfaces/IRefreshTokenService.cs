@@ -1,6 +1,5 @@
 ﻿using AuthorizationAPI.Shared.DTOs.RefreshTokenDTOs;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.JsonPatch;
 
 namespace AuthorizationAPI.Services.Abstractions.Interfaces;
 

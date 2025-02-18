@@ -1,22 +1,21 @@
-﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
-{
-    public class EmailMetaData
-    {
-        public string ToAddress { get; set; }
-        public string Subject { get; set; }
-        public string? Body { get; set; }
-        public Guid FromAdress { get; set; }
+﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 
-        public EmailMetaData(
-                string toAddress,
-                string subject,
-                string? body = "",
-                Guid? fromAdress = null)
-        {
-            ToAddress = toAddress;
-            Subject = subject;
-            Body = body;
-            FromAdress = fromAdress.Value;
-        }
+public class EmailMetaData
+{
+    public string ToAddress { get; set; }
+    public string Subject { get; set; }
+    public string? Body { get; set; }
+    public Guid FromAdress { get; set; }
+
+    public EmailMetaData(
+            string toAddress,
+            string subject,
+            string? body = "",
+            Guid fromAdress = default)
+    {
+        ToAddress = toAddress;
+        Subject = subject;
+        Body = body;
+        FromAdress = fromAdress;
     }
 }

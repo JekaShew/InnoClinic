@@ -25,7 +25,6 @@ public class RolesController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage),404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage),422)]
     [ProducesResponseType(typeof(FailMessage),500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetRoleById(Guid roleId)
@@ -46,7 +45,6 @@ public class RolesController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAllRoles()
@@ -109,7 +107,6 @@ public class RolesController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteRoleById(Guid roleId)

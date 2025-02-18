@@ -3,6 +3,7 @@ using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.UserStatusDTOs;
+using CommonLibrary.CommonService;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
@@ -15,15 +16,15 @@ public class UserStatusService : IUserStatusService
     private readonly IValidator<UserStatusForUpdateDTO> _userStatusForUpdateValidator;
 
     private readonly IRepositoryManager _repositoryManager;
-    private readonly IUserService _userService;
+    private readonly ICommonService _commonService;
     public UserStatusService(
-            IRepositoryManager repositoryManager, 
-            IUserService userService, 
+            IRepositoryManager repositoryManager,
+            ICommonService commonService,
             IValidator<UserStatusForCreateDTO> userStatusForCreateValidator,
             IValidator<UserStatusForUpdateDTO> userStatusForUpdateValidator)
     {
         _repositoryManager = repositoryManager;
-        _userService = userService;
+        _commonService = commonService;
         _userStatusForCreateValidator = userStatusForCreateValidator;
         _userStatusForUpdateValidator = userStatusForUpdateValidator;
     }
@@ -35,13 +36,13 @@ public class UserStatusService : IUserStatusService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        //var currentUserId = _userService.GetCurrenUserId();
+        //var currentUserId = _commonService.GetCurrenUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
         //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         //}
-        
+
         var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
         await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
         await _repositoryManager.CommitAsync();
@@ -51,7 +52,7 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -72,7 +73,7 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
     {
-        //var currentUserId = _userService.GetCurrenUserId();
+        //var currentUserId = _commonService.GetCurrenUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
@@ -92,7 +93,7 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -118,7 +119,7 @@ public class UserStatusService : IUserStatusService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        //var currentUserId = _userService.GetCurrenUserId();
+        //var currentUserId = _commonService.GetCurrenUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
@@ -131,7 +132,7 @@ public class UserStatusService : IUserStatusService
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
 
-        userStatus = UserStatusMapper.UserStatusForUpdateDTOToUserStatus(userStatusForUpdateDTO);
+        UserStatusMapper.UpdateUserStatusFromUserStatusForUpdateDTO(userStatusForUpdateDTO, userStatus);
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);

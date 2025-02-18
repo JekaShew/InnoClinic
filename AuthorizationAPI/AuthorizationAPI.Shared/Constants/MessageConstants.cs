@@ -15,7 +15,8 @@ public static class MessageConstants
     public const string CheckDB400 = "400CheckDB";
     public const string CheckCreds400 = "400CheckCreds";
     public const string EmailRegistered400 = "400EmailRegistered";
-    public const string VerificationFail = "500VeificationFail";
+    public const string VerificationFail500 = "500VeificationFail";
+    public const string SendEmailFail500 = "500SendEmailFail";
     public static KeyValuePair<string, string> SuccessMessage { get; } = 
         new KeyValuePair<string, string>(Base200, "Success!");
     public static KeyValuePair<string, string> FailedMessage { get; } = 
@@ -43,5 +44,7 @@ public static class MessageConstants
     public static KeyValuePair<string, string> EmailRegisteredMessage { get; } = 
         new KeyValuePair<string, string>(EmailRegistered400, "The Error occured on the server's side!");
     public static KeyValuePair<string, string> FailEmailVerificationMessage { get; } =
-        new KeyValuePair<string, string>(EmailRegistered400, "The Error occured while sending verification Message!!");
+        new KeyValuePair<string, string>(VerificationFail500, "The Error occured while sending verification Message!!");
+    public static KeyValuePair<string, string> FailSendEmailMessage500 { get; } =
+        new KeyValuePair<string, string>(SendEmailFail500, "The Error occured while sending Message!!");
 }

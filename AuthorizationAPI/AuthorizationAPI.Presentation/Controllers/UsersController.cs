@@ -4,8 +4,6 @@ using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using CommonLibrary.Response;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using System.Runtime.CompilerServices;
 
 namespace AuthorizationAPI.Presentation.Controllers;
 
@@ -20,28 +18,47 @@ public class UsersController : ResponseMessageHandler
     }
 
     /// <summary>
-    /// Gets selected User 
+    /// Gets selected User's information for User 
     /// </summary>
     /// <returns>Single User</returns>
     [HttpGet("{userId:guid}")]
+    [ProducesResponseType(typeof(SuccessMessage<UserInfoDTO>), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> GetUserInfoById(Guid userId)
+    {
+        var result = await _userService.GetUserInfoById(userId);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage<UserInfoDTO>(result.Message.Value, result.Value);
+    }
+
+    /// <summary>
+    /// Gets selected User's  detailed information for Administrator 
+    /// </summary>
+    /// <returns>Single User</returns>
+    [HttpGet("{userId:guid}/getbyadministrator")]
     [ProducesResponseType(typeof(SuccessMessage<UserDetailedDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize]
-    public async Task<IActionResult> GetUserInfoById(Guid userId)
+    //[Authorize(Roles="Administrator)]
+    public async Task<IActionResult> GetUserDetailedInfoById(Guid userId)
     {
-        var result = await _userService.GetUserDetailedInfo(userId);
+        var result = await _userService.GetUserDetailedInfoById(userId);
         if (!result.Flag)
             return HandleResponseMessage(result);
         return new SuccessMessage<UserDetailedDTO>(result.Message.Value, result.Value);
     }
 
     /// <summary>
-    /// Gets the list of all Users
+    /// Gets the list of all Users for Administrator
     /// </summary>
     /// <returns>The Users list</returns>
     [HttpGet]
@@ -50,7 +67,6 @@ public class UsersController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles ="Administrator")]
     public async Task<IActionResult> GetAllUsersInfo()
@@ -62,7 +78,7 @@ public class UsersController : ResponseMessageHandler
     }
 
     /// <summary>
-    /// Updates selected User 
+    /// Updates selected User by User
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{userId:guid}")]
@@ -81,8 +97,30 @@ public class UsersController : ResponseMessageHandler
             return HandleResponseMessage(result);
         return new SuccessMessage(result.Message.Value);
     }
+
     /// <summary>
-    /// Deletes User By Id
+    /// Updates selected User by Administrator
+    /// </summary>
+    /// <returns>Message</returns>
+    [HttpPut("{userId:guid}/updatebyadministrator")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> UpdateUserInfoByAdministrator(Guid userId, [FromBody] UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO)
+    {
+        var result = await _userService.UpdateUserInfoByAdministrator(userId, userForUpdateByAdministratorDTO);
+        if (!result.Flag)
+            return HandleResponseMessage(result);
+        return new SuccessMessage(result.Message.Value);
+    }
+
+    /// <summary>
+    /// Changes User's status to deleted by User
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("deletecurrentaccount")]
@@ -91,7 +129,6 @@ public class UsersController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize]
     public async Task<IActionResult> DeleteCurrentAccount()
@@ -103,7 +140,7 @@ public class UsersController : ResponseMessageHandler
     }
 
     /// <summary>
-    /// Deletes User By Id
+    /// Deletes User By Id for Administrator
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{userId:guid}")]
@@ -112,7 +149,6 @@ public class UsersController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles ="Administrator")]
     public async Task<IActionResult> DeleteUserById(Guid userId)
@@ -165,10 +201,10 @@ public class UsersController : ResponseMessageHandler
     }
 
     /// <summary>
-    /// Changes User's status
+    /// Changes User's status for Administrator
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPatch("{userId:guid}changeuserstatusofuser")]
+    [HttpPatch("{userId:guid}/changeuserstatusofuser")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -177,7 +213,7 @@ public class UsersController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> ChangeUserStatusOfUser(Guid userId, [FromBody] JsonPatchDocument<UserInfoDTO> patchDocForUserInfoDTO)
+    public async Task<IActionResult> ChangeUserStatusOfUser(Guid userId, [FromBody] JsonPatchDocument<UserForUpdateByAdministratorDTO> patchDocForUserInfoDTO)
     {
         var result = await _userService.ChangeUserStatusOfUser(userId, patchDocForUserInfoDTO);
         if (!result.Flag)
@@ -186,10 +222,10 @@ public class UsersController : ResponseMessageHandler
     }
 
     /// <summary>
-    /// Changes User's role
+    /// Changes User's role for Administrator
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPatch("{userId:guid}changeroleofuser")]
+    [HttpPatch("{userId:guid}/changeroleofuser")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -198,7 +234,7 @@ public class UsersController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> ChangeRoleOfUser(Guid userId, [FromBody] JsonPatchDocument<UserInfoDTO> patchDocForUserInfoDTO)
+    public async Task<IActionResult> ChangeRoleOfUser(Guid userId, [FromBody] JsonPatchDocument<UserForUpdateByAdministratorDTO> patchDocForUserInfoDTO)
     {
         var result = await _userService.ChangeRoleOfUser(userId, patchDocForUserInfoDTO);
         if (!result.Flag)
@@ -216,7 +252,6 @@ public class UsersController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     public async Task<IActionResult> VerifyEmail([FromQuery] string token,[FromQuery] string email)
     {
@@ -226,7 +261,10 @@ public class UsersController : ResponseMessageHandler
         return new SuccessMessage(result.Message.Value);
     }
 
-    // change email By Password
+    /// <summary>
+    /// Changes User's Email by verifying Email and Password, than user should verify new Email
+    /// </summary>
+    /// <returns>Message</returns>
     [HttpPut("changeemailbypassword")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
@@ -244,14 +282,10 @@ public class UsersController : ResponseMessageHandler
         return new SuccessMessage(result.Message.Value);
     }
 
-    // make unique token by adding dateTimeUtcNow and adding it into memoryCache like 
-    // memory key is email value is datimeutcNow to string
-    // if check -> generate with data and userId and equals 
-
-
-    //user clicks button write Email clicks verify-> change passwordRequest(Email) sends letter to Email
-    // go to Get chanepasswordByEmail(query query) inserts new password -> clicks ok 
-
+    /// <summary>
+    /// Makes verification request to User's Email to approve that it is user's desire to change password
+    /// </summary>
+    /// <returns>Message</returns>
     [HttpPost("changeforgottenpasswordbyemailrequest")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
@@ -268,8 +302,12 @@ public class UsersController : ResponseMessageHandler
         if (!result.Flag)
             return HandleResponseMessage(result);
         return new SuccessMessage(result.Message.Value);
-    }
+    } 
 
+    /// <summary>
+    /// Verifies and Changes User's Password
+    /// </summary>
+    /// <returns>Message</returns>
     [HttpPut("changeforgottenpasswordbyemail")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]

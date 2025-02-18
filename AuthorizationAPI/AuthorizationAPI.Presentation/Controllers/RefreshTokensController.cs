@@ -25,7 +25,7 @@ public class RefreshTokensController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
     {
@@ -45,7 +45,7 @@ public class RefreshTokensController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAllLoggedInUsers()
     {
@@ -65,7 +65,7 @@ public class RefreshTokensController : ResponseMessageHandler
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
     {
@@ -79,13 +79,13 @@ public class RefreshTokensController : ResponseMessageHandler
     /// Switches Revoke status of Refresh Token by Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{refreshTokenId:guid}")]
+    [HttpPut("{refreshTokenId:guid}/revoke")]
     [ProducesResponseType(typeof(SuccessMessage), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> RevokeRefreshTokenByRefreshTokenId(Guid refreshTokenId)
     {

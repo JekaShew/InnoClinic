@@ -55,7 +55,12 @@ public class ResponseMessageHandler : ControllerBase
             return new FailMessage(responseMessage.Message.Value, 400);
         }
 
-        if (responseMessage.Message.Key.Equals(MessageConstants.VerificationFail))
+        if (responseMessage.Message.Key.Equals(MessageConstants.FailEmailVerificationMessage))
+        {
+            return new FailMessage(responseMessage.Message.Value, 500);
+        }
+
+        if (responseMessage.Message.Key.Equals(MessageConstants.FailSendEmailMessage500))
         {
             return new FailMessage(responseMessage.Message.Value, 500);
         }

@@ -3,26 +3,26 @@ using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.RefreshTokenDTOs;
+using CommonLibrary.CommonService;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.JsonPatch;
 
 namespace AuthorizationAPI.Services.Services;
 
 public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IRepositoryManager _repositoryManager;
-    private readonly IUserService _userService;
+    private readonly ICommonService _commonService;
     public RefreshTokenService(
-            IRepositoryManager repositoryManager, 
-            IUserService userService)
+            IRepositoryManager repositoryManager,
+            ICommonService commonService)
     {
         _repositoryManager = repositoryManager;
-        _userService = userService;
+        _commonService = commonService;
     }
 
     public async Task<ResponseMessage> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -43,7 +43,7 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage> RevokeRefreshTokenByRefreshTokenId(Guid refreshTokenId)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -64,12 +64,12 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>> GetAllLoggedInUsers()
     {
-        //var currentUserId = _userService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.ForbiddenMessage, false);
-        //}
+        var currentUserId = _commonService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
+            return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.ForbiddenMessage, false);
+        }
 
         var refreshTokenCollection = await _repositoryManager.RefreshToken
                 .GetAllRefreshTokensAsync();
@@ -85,12 +85,12 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage<RefreshTokenInfoDTO>> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
     {
-        //var currentUserId = _userService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.ForbiddenMessage, false);
-        //}
+        var currentUserId = _commonService.GetCurrentUserId();
+        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
+        if (!isAdmin)
+        {
+            return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        }
 
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)

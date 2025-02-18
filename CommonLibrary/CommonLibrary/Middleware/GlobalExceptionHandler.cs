@@ -22,7 +22,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         {
             return await ModifyExceptionResponse(
                 httpContext,
-                new FailMessage(exception.Message, 408 ));
+                new FailMessage(exception.Message, 408));
         }
 
         if(exception is ValidationAppException validationException)
@@ -39,7 +39,11 @@ public class GlobalExceptionHandler : IExceptionHandler
 
     private async Task<bool> ModifyExceptionResponse(HttpContext httpContext, FailMessage failMessage)
     {
-        await httpContext.Response.WriteAsJsonAsync(failMessage);
+        var response = httpContext.Response;
+        response.StatusCode = failMessage.StatusCode;
+        response.ContentType = "application/json";
+
+        await httpContext.Response.WriteAsJsonAsync(failMessage.Details);
 
         return true;
     }

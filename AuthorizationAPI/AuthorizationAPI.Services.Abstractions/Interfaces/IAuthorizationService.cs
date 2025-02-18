@@ -10,6 +10,5 @@ public interface IAuthorizationService
     public Task<ResponseMessage> SignOut(Guid rTokenId);
     public Task<ResponseMessage> SignUp(RegistrationInfoDTO registrationInfoDTO);
     public Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId);
-    public string GenerateEmailConfirmationTokenByEmailAndDateTime(string email, string dateTimeString);
     public Task<ResponseMessage> ResendEmailVerification(LoginInfoDTO loginInfoDTO);
 }

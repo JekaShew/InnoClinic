@@ -7,7 +7,7 @@ namespace AuthorizationAPI.Services.Validators.EmailValidators
     {
         public UserEmailDTOValidator()
         {
-            RuleFor(e => e.Subject)
+            RuleFor(e => e.ToAddress)
                 .NotEmpty()
                 .NotNull()
                 .EmailAddress()

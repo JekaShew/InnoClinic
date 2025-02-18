@@ -3,6 +3,7 @@ using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.RoleDTOs;
+using CommonLibrary.CommonService;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
@@ -15,17 +16,19 @@ public class RoleService : IRoleService
     private readonly IValidator<RoleForUpdateDTO> _roleForUpdateValidator;
 
     private readonly IRepositoryManager _repositoryManager;
-    private readonly IUserService _userService;
+    private readonly ICommonService _commonService;
     public RoleService(
             IRepositoryManager repositoryManager,
-            IUserService userService,
+            ICommonService commonService,
             IValidator<RoleForCreateDTO> roleForCreateValidator,
-            IValidator<RoleForUpdateDTO> roleForUpdateValidator)
+            IValidator<RoleForUpdateDTO> roleForUpdateValidator
+            )
     {
         _repositoryManager = repositoryManager;
-        _userService = userService;
+        _commonService = commonService;
         _roleForCreateValidator = roleForCreateValidator;
         _roleForUpdateValidator = roleForUpdateValidator;
+        
     }
     public async Task<ResponseMessage> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
     {
@@ -35,7 +38,7 @@ public class RoleService : IRoleService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
         
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if(!isAdmin)
         {
@@ -51,7 +54,7 @@ public class RoleService : IRoleService
 
     public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -72,7 +75,7 @@ public class RoleService : IRoleService
 
     public async Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync()
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -92,7 +95,7 @@ public class RoleService : IRoleService
 
     public async Task<ResponseMessage<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId)
     {
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -118,7 +121,7 @@ public class RoleService : IRoleService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var currentUserId = _userService.GetCurrentUserId();
+        var currentUserId = _commonService.GetCurrentUserId();
         var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         if (!isAdmin)
         {
@@ -131,7 +134,7 @@ public class RoleService : IRoleService
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
   
-        role = RoleMapper.RoleForUpdateDTOToRole(roleForUpdateDTO);
+        RoleMapper.UpdateRoleFromRoleForUpdateDTO(roleForUpdateDTO, role);
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);

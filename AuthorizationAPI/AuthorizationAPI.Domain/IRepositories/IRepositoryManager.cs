@@ -1,6 +1,4 @@
-﻿using System.Transactions;
-
-namespace AuthorizationAPI.Domain.IRepositories;
+﻿namespace AuthorizationAPI.Domain.IRepositories;
 
 public interface IRepositoryManager
 {

@@ -1,7 +1,6 @@
-﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
+
+public class StringValue
 {
-    public class StringValue
-    {
-        public string Value { get; set; }
-    }
+    public string Value { get; set; }
 }

@@ -50,10 +50,10 @@ public class EFCoreRepositoryManger : IRepositoryManager
                 await _transaction.CommitAsync();
             }
         }
-        catch
+        catch(Exception ex)
         {
             await RollbackAsync();
-            throw new Exception();
+            throw new Exception(ex.Message, ex.InnerException);
         }
         finally
         {

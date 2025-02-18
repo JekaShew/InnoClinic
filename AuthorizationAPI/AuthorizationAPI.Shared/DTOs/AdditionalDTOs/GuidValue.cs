@@ -1,7 +1,6 @@
-﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs
+﻿namespace AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
+
+public class GuidValue
 {
-    public class GuidValue
-    {
-        public Guid Value { get; set; }
-    }
+    public Guid Value { get; set; }
 }

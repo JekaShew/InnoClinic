@@ -8,6 +8,8 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
 {
     public void Configure(EntityTypeBuilder<Role> builder)
     {
+        builder.HasIndex(r => r.Title).IsUnique();
+
         builder.Property(r => r.Title)
             .IsRequired()
             .HasMaxLength(60);
