@@ -7,6 +7,7 @@ public interface IRefreshTokenRepository
 {
     public Task CreateRefreshTokenAsync(RefreshToken refreshToken);
     public Task<IEnumerable<RefreshToken>> GetAllRefreshTokensAsync();
+    public Task<IEnumerable<RefreshToken>> GetAllExpiredRefreshTokensAsync();
     public Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId, bool trackChanges = false);
     public Task UpdateRefreshTokenAsync(RefreshToken refreshToken);
     public void DeleteRefreshToken(RefreshToken refreshToken);

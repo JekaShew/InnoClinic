@@ -26,6 +26,17 @@ public class RefreshTokenRepository : IRefreshTokenRepository
                 .ToListAsync();
     }
 
+    public async Task<IEnumerable<RefreshToken>> GetAllExpiredRefreshTokensAsync()
+    {
+        return await _authDBContext.RefreshTokens
+                .Where(rt =>
+                rt.ExpireDate.Equals(DateTime.MinValue)
+                ||
+                rt.ExpireDate <= DateTime.UtcNow)
+                .AsNoTracking()
+                .ToListAsync();
+    }
+
     public async Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId, bool trackChanges)
     {
         return trackChanges ?

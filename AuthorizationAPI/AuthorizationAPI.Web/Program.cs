@@ -4,6 +4,7 @@ using AuthorizationAPI.Services.Extensions;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using Hangfire;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(config =>
@@ -86,6 +87,8 @@ app.UseRouting();
 
 app.UseAuthorization();
 
+app.UseHangfireDashboard();
+app.StartBackgroundTasks();
 //app.UseEndpoints(endpoints =>
 //{
 //    endpoints.MapControllers();

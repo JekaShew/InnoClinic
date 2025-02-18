@@ -1,6 +1,8 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Services;
 using FluentValidation;
+using Hangfire;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -37,6 +39,8 @@ public static class ApplicationServicesExtesionMethods
         {
             opt.SizeLimit = 1000;
         });
+        services.AddHangFireMethod(configuration);
+        
         return services;
     }
 
@@ -51,7 +55,7 @@ public static class ApplicationServicesExtesionMethods
         services.AddFluentEmail(defaultFromEmail)
            .AddSmtpSender(host, port);
 
-        
+
         return services;
     }
 
@@ -61,5 +65,30 @@ public static class ApplicationServicesExtesionMethods
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         return services;
+    }
+
+    private static IServiceCollection AddHangFireMethod(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddScoped<BackgroundTasks>();
+        services.AddHangfire(config =>
+            config.UseSimpleAssemblyNameTypeSerializer()
+            .UseSimpleAssemblyNameTypeSerializer()
+            .UseSqlServerStorage(configuration.GetConnectionString("AuthDB"))
+        );
+
+        services.AddHangfireServer();
+
+
+        return services;
+    }
+    public static IApplicationBuilder StartBackgroundTasks(this IApplicationBuilder app)
+    {
+        IRecurringJobManager recurringJobManager = new RecurringJobManager();
+        recurringJobManager.AddOrUpdate<BackgroundTasks>(
+                "CleaningExpiredRefresTokens",
+                x => x.CleanExpiredRefreshTokensAsync(),
+                "*/15 * * * *");  // Crone = Every 15 Minutes 
+
+        return app;      
     }
 }
