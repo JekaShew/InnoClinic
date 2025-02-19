@@ -73,7 +73,7 @@ public static class ApplicationServicesExtesionMethods
         services.AddHangfire(config =>
             config.UseSimpleAssemblyNameTypeSerializer()
             .UseSimpleAssemblyNameTypeSerializer()
-            .UseSqlServerStorage(configuration.GetConnectionString("AuthDB"))
+            .UseSqlServerStorage(configuration.GetConnectionString("AuthDBDocker"))
         );
 
         services.AddHangfireServer();
@@ -83,6 +83,7 @@ public static class ApplicationServicesExtesionMethods
     }
     public static IApplicationBuilder StartBackgroundTasks(this IApplicationBuilder app)
     {
+        // Schedule Jobs
         IRecurringJobManager recurringJobManager = new RecurringJobManager();
         recurringJobManager.AddOrUpdate<BackgroundTasks>(
                 "CleaningExpiredRefresTokens",

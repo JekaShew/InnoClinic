@@ -1,6 +1,7 @@
 ﻿using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Persistance.Data;
 using AuthorizationAPI.Persistance.Repositories;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,15 +24,15 @@ public static class PersistanceExtensionMethods
         // MSSQL DB
         services.AddDbContext<AuthDBContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("AuthDB"),
+                configuration.GetConnectionString("AuthDBDocker"),
                 sqlserverOption =>
                 {
                     // if Migrations in different Assembly
-                    //sqlserverOption.MigrationsAssembly("AuthorizationAPI.Persistance");
+                    sqlserverOption.MigrationsAssembly("AuthorizationAPI.Persistance");
                     sqlserverOption.EnableRetryOnFailure();
                 }));
 
-        return services;
+            return services;
     }
 
     private static IServiceCollection AddPersistanceRepostitoriesMethod(this IServiceCollection services)
@@ -40,5 +41,20 @@ public static class PersistanceExtensionMethods
         services.AddScoped<IRepositoryManager, EFCoreRepositoryManger>();
 
         return services;
+    }
+
+    public static IApplicationBuilder ApplyMigrations(this IApplicationBuilder app)
+    {
+        using IServiceScope scope = app.ApplicationServices.CreateScope();
+
+        
+        using AuthDBContext authDBContext =
+                          scope.ServiceProvider.GetRequiredService<AuthDBContext>();
+        if(!authDBContext.Database.CanConnect())
+        {
+            authDBContext.Database.Migrate();
+        }    
+
+            return app;
     }
 }

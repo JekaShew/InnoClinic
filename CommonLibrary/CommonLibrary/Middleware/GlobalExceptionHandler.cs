@@ -1,9 +1,6 @@
 ﻿using InnoClinic.CommonLibrary.Exceptions;
-using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using System.Net.Http;
-using System;
 using CommonLibrary.Response;
 
 namespace InnoClinic.CommonLibrary.Middleware;

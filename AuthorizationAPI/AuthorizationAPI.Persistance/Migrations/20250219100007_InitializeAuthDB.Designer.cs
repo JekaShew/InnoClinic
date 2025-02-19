@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorizationAPI.Persistance.Migrations
 {
     [DbContext(typeof(AuthDBContext))]
-    [Migration("20250206063130_InitAuthDB")]
-    partial class InitAuthDB
+    [Migration("20250219100007_InitializeAuthDB")]
+    partial class InitializeAuthDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,7 +63,30 @@ namespace AuthorizationAPI.Persistance.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Title")
+                        .IsUnique();
+
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("73b795d3-4917-4219-a1a0-044fcc6606ea"),
+                            Description = "The role Administrator gives full admin rights.",
+                            Title = "Administrator"
+                        },
+                        new
+                        {
+                            Id = new Guid("0eec148a-43d6-4b32-afb6-1ecf3341be6d"),
+                            Description = "The role Doctor gives some administrative rights.",
+                            Title = "Doctor"
+                        },
+                        new
+                        {
+                            Id = new Guid("78b25fdf-7199-4066-b677-5bc465bc3d1a"),
+                            Description = "The role Patient gives small client rigts.",
+                            Title = "Patient"
+                        });
                 });
 
             modelBuilder.Entity("AuthorizationAPI.Domain.Data.Models.User", b =>
@@ -139,7 +162,36 @@ namespace AuthorizationAPI.Persistance.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Title")
+                        .IsUnique();
+
                     b.ToTable("UserStatuses");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("b9f67cf2-60de-48eb-82d0-8a5d6cde1b0f"),
+                            Description = "The Activated user status means that user has been already activated.",
+                            Title = "Activated"
+                        },
+                        new
+                        {
+                            Id = new Guid("a780b7f4-3c8b-4452-a426-e7abc1a46949"),
+                            Description = "The Non-Activated user status means that user hasn't been activated yet.",
+                            Title = "Non-Activated"
+                        },
+                        new
+                        {
+                            Id = new Guid("6c6feeba-0919-4266-b2d1-9f5b724db31a"),
+                            Description = "The Deleted user status means that User Deleted their account.",
+                            Title = "Deleted"
+                        },
+                        new
+                        {
+                            Id = new Guid("7b31946c-6d14-44dc-9f93-3a4c06db902e"),
+                            Description = "The Banned user status means that User was Banned by Administrator for some action.",
+                            Title = "Banned"
+                        });
                 });
 
             modelBuilder.Entity("AuthorizationAPI.Domain.Data.Models.RefreshToken", b =>
