@@ -1,39 +1,44 @@
-﻿using OfficesAPI.Domain.Data.Models;
+﻿using MongoDB.Driver;
+using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
-using System.Linq.Expressions;
+using OfficesAPI.Persistance.Data;
 
-namespace OfficesAPI.Persistance.Repositories
+namespace OfficesAPI.Persistance.Repositories;
+
+public class PhotoRepository : IPhotoRepository
 {
-    public class PhotoRepository : IPhotoRepository
+    private readonly IOfficesContext _officesContext;
+    private readonly IMongoCollection<Photo> _photoCollection;
+    public PhotoRepository(IOfficesContext officesContext)
     {
-        public Task<bool> AddPhoto(Photo photo)
-        {
-            throw new NotImplementedException();
-        }
+        _officesContext = officesContext;
+        _photoCollection= _officesContext.GetMongoCollection<Photo>("photos");
+    }
+    public void AddPhoto(Photo photo)
+    {
+        _officesContext.AddCommand(() => _photoCollection.InsertOneAsync(photo));
+    }
 
-        public Task<bool> DeletePhotoById(string photoId)
-        {
-            throw new NotImplementedException();
-        }
+    public void DeletePhotoById(string photoId)
+    {
+        var filter = Builders<Photo>.Filter.Eq(o => o.Id, photoId);
+        _officesContext.AddCommand(() => _photoCollection.DeleteOneAsync(filter));
+    }
 
-        public Task<List<Photo>> TakeAllPhotos()
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<List<Photo>> TakeAllPhotos()
+    {
+        return await _photoCollection.Find(FilterDefinition<Photo>.Empty).ToListAsync();
+    }
 
-        public Task<Photo> TakePhotoById(string photoId)
-        {
-            throw new NotImplementedException();
-        }
+    public async Task<Photo> TakePhotoById(string photoId)
+    {
+        var filter = Builders<Photo>.Filter.Eq(o => o.Id, photoId);
+        return await _photoCollection.Find(filter).FirstOrDefaultAsync();
+    }
 
-        public Task<Photo> TakePhotoDTOWithPredicate(Expression<Func<Photo, bool>> predicate)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> UpdatePhoto(Photo photo)
-        {
-            throw new NotImplementedException();
-        }
+    public void UpdatePhoto(Photo updatedPhoto)
+    {
+        var filter = Builders<Photo>.Filter.Eq(o => o.Id, updatedPhoto.Id);
+        _officesContext.AddCommand(() => _photoCollection.ReplaceOneAsync(filter, updatedPhoto));
     }
 }

@@ -2,7 +2,7 @@
 
 namespace OfficesAPI.Services.Services
 {
-    public class PhotoServices : IPhotoServices
+    public class PhotoService : IPhotoService
     {
 
     }

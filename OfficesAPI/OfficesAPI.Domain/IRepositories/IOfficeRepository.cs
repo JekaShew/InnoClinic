@@ -1,15 +1,12 @@
 ﻿using OfficesAPI.Domain.Data.Models;
-using System.Linq.Expressions;
 
-namespace OfficesAPI.Domain.IRepositories
+namespace OfficesAPI.Domain.IRepositories;
+
+public interface IOfficeRepository
 {
-    public interface IOfficeRepository
-    {
-        public Task<bool> AddOffice(Office office);
-        public Task<List<Office>> TakeAllOffices();
-        public Task<Office> TakeOfficeById(string officeId);
-        public Task<bool> UpdateOffice(Office office);
-        public Task<bool> DeleteOfficeById(string officeId);
-        //public Task<Office> TakeOfficeWithPredicate(Expression<Func<Office, bool>> predicate);
-    }
+    public void CreateOffice(Office office);
+    public Task<List<Office>> GetAllOfficesAsync();
+    public Task<Office> GetOfficeByIdAsync(string officeId);
+    public void UpdateOffice(Office office);
+    public void DeleteOfficeById(string officeId);
 }

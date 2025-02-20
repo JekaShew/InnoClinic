@@ -15,10 +15,7 @@ public static class CommonServicesExtensions
         IConfiguration configuration,
         string serilogFile)
     {
-        // DB MongoDB
-        //if (dbConnectionStringKey.Key.Equals("MongoDB"))
-        //    services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
-        //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
+        
         // CommonService
         services.AddScoped<ICommonService, CommonService>();
         //Serilog
