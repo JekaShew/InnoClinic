@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using OfficesAPI.Shared.DTOs;
+using OfficesAPI.Shared.DTOs.OfficeDTOs;
 
 namespace OfficesAPI.Services.Validators
 {

@@ -1,5 +1,5 @@
 ﻿using OfficesAPI.Domain.Data.Models;
-using OfficesAPI.Shared.DTOs;
+using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using Riok.Mapperly.Abstractions;
 using SharpCompress.Common;
 

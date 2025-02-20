@@ -1,5 +1,5 @@
 ﻿using InnoClinic.CommonLibrary.Response;
-using OfficesAPI.Shared.DTOs;
+using OfficesAPI.Shared.DTOs.OfficeDTOs;
 
 namespace OfficesAPI.Services.Abstractions.Interfaces
 {

@@ -2,11 +2,14 @@
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
+using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Shared.Constnts;
-using OfficesAPI.Shared.DTOs;
+using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using OfficesAPI.Shared.Mappers;
+using System.Net.WebSockets;
 
 namespace OfficesAPI.Services.Services;
 
@@ -16,7 +19,6 @@ public class OfficeService : IOfficeService
     private readonly IValidator<OfficeForUpdateDTO> _officeForUpdateValidator;
     private readonly ICommonService _commonService;
     private readonly IRepositoryManager _repositoryManager;
-
 
     public OfficeService(
         IValidator<OfficeForCreateDTO> officeForCreateValidator,
@@ -29,7 +31,8 @@ public class OfficeService : IOfficeService
         _commonService = commonService;
         _repositoryManager = repositoryManager;
     }
-    public async Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO)
+
+    public async Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, IEnumerable<IFormFile> images)
     {
         var validationResult = await _officeForCreateValidator.ValidateAsync(officeForCreateDTO);
         if (!validationResult.IsValid)
@@ -45,7 +48,33 @@ public class OfficeService : IOfficeService
         //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         //}
 
+        // IfromFile image from controller\
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
+        if(images.Any())
+        {
+            var photoList = new List<Photo>();
+            foreach (var image in images)
+            {
+                var photo = new Photo();
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    image.OpenReadStream().CopyTo(memoryStream);
+                    photo.Url = Convert.ToBase64String(memoryStream.ToArray());
+                }
+
+                photo.Title = $"{officeForCreateDTO.City} {officeForCreateDTO.Street} {officeForCreateDTO.HouseNumber} {officeForCreateDTO.OfficeNumber}";
+                photo.OfficeId = office.Id;
+                _repositoryManager.Photo.AddPhoto(photo);
+                photoList.Add(photo);
+            }
+
+            office.Photos = photoList;
+            _repositoryManager.Office.CreateOffice(office);
+            await _repositoryManager.TransactionExecution();
+
+            return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+        }
 
         _repositoryManager.Office.CreateOffice(office);
         await _repositoryManager.SingleExecution();
@@ -68,6 +97,8 @@ public class OfficeService : IOfficeService
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
+
+        // delete all photos with this officeId
 
         _repositoryManager.Office.DeleteOfficeById(officeId);
         await _repositoryManager.SingleExecution();
@@ -101,7 +132,6 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<OfficeInfoDTO>(MessageConstants.SuccessMessage, true, officeInfoDTO);
     }
 
-    // добавить доп логику по работе с фотографиями(апдейтить фотографии через обновление коллекции монги??)
     public async Task<ResponseMessage> UpdateOfficeAsync(string officeId, OfficeForUpdateDTO officeForUpdateDTO)
     {
         var validationResult = await _officeForUpdateValidator.ValidateAsync(officeForUpdateDTO);
@@ -117,13 +147,18 @@ public class OfficeService : IOfficeService
         //    return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
         //}
 
+        // look at create!!!
+        // берем 
+
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if(office is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
+        // всунуть логику проверки старых и новых фотографий или наоборотот старые удалить новые ддобавить как в create!!!
+        var updatedOfficeDTO = OfficeMapper.OfficeForUpdateDTOToOffice(officeForUpdateDTO);
 
-        _repositoryManager.Office.UpdateOffice(office);
+        _repositoryManager.Office.UpdateOffice(updatedOfficeDTO);
         await _repositoryManager.SingleExecution();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);

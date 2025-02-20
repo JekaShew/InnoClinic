@@ -1,7 +1,7 @@
 ﻿using CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
-using OfficesAPI.Shared.DTOs;
+using OfficesAPI.Shared.DTOs.OfficeDTOs;
 
 namespace OfficesAPI.Presentation.Controllers;
 
