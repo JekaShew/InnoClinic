@@ -1,14 +1,14 @@
 ﻿using MongoDB.Driver;
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
-using System.Linq.Expressions;
+using OfficesAPI.Persistance.Data;
 
 namespace OfficesAPI.Persistance.Repositories
 {
-    public class OfficeRepository : IOffice
+    public class OfficeRepository : IOfficeRepository
     {
         private readonly IMongoCollection<Office> _officeCollection;
-        public OfficeRepository(InnoClinic.CommonLibrary.MongoDBService mongoDBService)
+        public OfficeRepository(MongoDBService mongoDBService)
         {
             _officeCollection = mongoDBService.Database?.GetCollection<Office>("office");
         }

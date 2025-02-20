@@ -9,8 +9,8 @@ namespace OfficesAPI.Services.Services
 {
     public class OfficeServices : IOfficeServices
     {
-        private readonly IOffice _officeRepository;
-        public OfficeServices(IOffice officeRepository)
+        private readonly IOfficeRepository _officeRepository;
+        public OfficeServices(IOfficeRepository officeRepository)
         {
             _officeRepository = officeRepository;
         }

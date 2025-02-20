@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace OfficesAPI.Domain.IRepositories
 {
-    public interface IPhoto
+    public interface IPhotoRepository
     {
         public Task<bool> AddPhoto(Photo photo);
         public Task<List<Photo>> TakeAllPhotos();

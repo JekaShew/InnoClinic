@@ -1,12 +1,11 @@
-﻿namespace InnoClinic.CommonLibrary.Exceptions
+﻿namespace InnoClinic.CommonLibrary.Exceptions;
+
+public class ValidationAppException : Exception
 {
-    public class ValidationAppException : Exception
+    public string[] Errors { get;}
+    public ValidationAppException(string[] errors)
+        : base("One or more validation errors occured!")
     {
-        public IReadOnlyDictionary<string, string[]> Errors { get;}
-        public ValidationAppException(IReadOnlyDictionary<string, string[]> errors)
-            : base("One or more validation errors occured!")
-        {
-            this.Errors = errors;
-        }
+        this.Errors = errors;
     }
 }

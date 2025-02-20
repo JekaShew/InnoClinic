@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace OfficesAPI.Persistance.Repositories
 {
-    public class PhotoRepository : IPhoto
+    public class PhotoRepository : IPhotoRepository
     {
         public Task<bool> AddPhoto(Photo photo)
         {

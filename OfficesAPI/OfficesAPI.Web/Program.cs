@@ -1,5 +1,5 @@
-using OfficesAPI.Services.DependencyInjection;
-using OfficesAPI.Persistance.DependencyInjection;
+using OfficesAPI.Persistance.Extensions;
+using OfficesAPI.Services.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,12 +8,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddApplicationService(builder.Configuration);
-builder.Services.AddInfrastructureService(builder.Configuration);
+builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddPersistanceServices(builder.Configuration);
 
 var app = builder.Build();
-
-app.UseInfrastructurePolicy();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 
 namespace OfficesAPI.Domain.IRepositories
 {
-    public interface IOffice
+    public interface IOfficeRepository
     {
         public Task<bool> AddOffice(Office office);
         public Task<List<Office>> TakeAllOffices();
