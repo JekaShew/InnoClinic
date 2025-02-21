@@ -1,4 +1,5 @@
 ﻿using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
 
 namespace OfficesAPI.Services.Abstractions.Interfaces
@@ -7,8 +8,8 @@ namespace OfficesAPI.Services.Abstractions.Interfaces
     {
         public Task<ResponseMessage<IEnumerable<OfficeTableInfoDTO>>> GetAllOfficesAsync();
         public Task<ResponseMessage<OfficeInfoDTO>> GetOfficeByIdAsync(string officeId);
-        public Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO);
-        public Task<ResponseMessage> UpdateOfficeAsync(string officeId, OfficeForUpdateDTO officeForUpdateDTO);
+        public Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files);
+        public Task<ResponseMessage> UpdateOfficeInfoAsync(string officeId, OfficeForUpdateDTO officeForUpdateDTO);
         public Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId);
         public Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(string officeId);
     }

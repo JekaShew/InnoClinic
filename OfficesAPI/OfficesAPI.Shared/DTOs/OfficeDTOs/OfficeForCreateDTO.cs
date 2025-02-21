@@ -1,4 +1,5 @@
-﻿using OfficesAPI.Shared.DTOs.PhotoDTOs;
+﻿using Microsoft.AspNetCore.Http;
+using OfficesAPI.Shared.DTOs.PhotoDTOs;
 
 namespace OfficesAPI.Shared.DTOs.OfficeDTOs
 {
@@ -10,6 +11,6 @@ namespace OfficesAPI.Shared.DTOs.OfficeDTOs
         public string? OfficeNumber { get; set; }
         public string? RegistryPhoneNumber { get; set; }
         public bool IsActive { get; set; }
-        public ICollection<PhotoInfoDTO>? Photos { get; set; }
+        //public ICollection<IFormFile>? Photos { get; set; }
     }
 }

@@ -8,7 +8,7 @@ namespace OfficesAPI.Persistance.Data;
 public class OfficesContext : IOfficesContext
 {
     public IClientSessionHandle session { get; set; }
-    public MongoClient MongoClient { get; set; }
+    public MongoClient mongoClient { get; set; }
     private IMongoDatabase _officesDB { get; set; }
     private readonly List<Func<Task>> _commandTasks;
     // OptionsPattern Get connection string from appsettings.json
@@ -17,8 +17,8 @@ public class OfficesContext : IOfficesContext
     public OfficesContext(IOptions<ConnectionStringsSettings> options)
     {
         var mongoUrl = MongoUrl.Create(options.Value.OfficesDB);
-        var mongoClient = new MongoClient(mongoUrl);
-        _officesDB = mongoClient.GetDatabase(mongoUrl.DatabaseName);
+        mongoClient = new MongoClient(mongoUrl);
+        _officesDB = mongoClient.GetDatabase("OfficesDB");
         _commandTasks = new List<Func<Task>>();
     }
     public void AddCommand(Func<Task> func)
@@ -41,7 +41,7 @@ public class OfficesContext : IOfficesContext
     {
         try
         {
-            using (session = await MongoClient.StartSessionAsync())
+            using (session = await mongoClient.StartSessionAsync())
             {
                 session.StartTransaction();
 
@@ -55,8 +55,12 @@ public class OfficesContext : IOfficesContext
         catch (Exception ex)
         {
             await session.AbortTransactionAsync();
-            session.Dispose();
+            session?.Dispose();
             throw new Exception(ex.Message, ex.InnerException);
+        }
+        finally
+        {
+            session?.Dispose();
         }
     }
     public void Dispose()

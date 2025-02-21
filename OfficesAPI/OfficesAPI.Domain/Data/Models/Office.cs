@@ -15,11 +15,11 @@ public class Office
     [BsonElement("house_number"), BsonRepresentation(BsonType.String)]
     public string HouseNumber { get; set; }
     [BsonElement("office_number"), BsonRepresentation(BsonType.String)]
-    public string OfficeNumber { get; set; }
+    public string? OfficeNumber { get; set; }
     [BsonElement("registry_phone_number"), BsonRepresentation(BsonType.String)]
     public string RegistryPhoneNumber { get; set; }
     [BsonElement("status"), BsonRepresentation(BsonType.Boolean)]
     public bool IsActive { get; set; }
     [BsonElement("office_photos")]
-    public List<Photo> Photos { get; set; }
+    public ICollection<Photo>? Photos { get; set; }
 }

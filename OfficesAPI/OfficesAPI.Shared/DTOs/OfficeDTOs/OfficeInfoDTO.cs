@@ -10,6 +10,6 @@ namespace OfficesAPI.Shared.DTOs.OfficeDTOs
         public string? OfficeNumber { get; set; }
         public bool IsActive { get; set; }
         public string? RegistryPhoneNumber { get; set; }
-        public ICollection<PhotoInfoDTO>? PhotoDTOs { get; set; }
+        public ICollection<PhotoInfoDTO>? Photos { get; set; }
     }
 }

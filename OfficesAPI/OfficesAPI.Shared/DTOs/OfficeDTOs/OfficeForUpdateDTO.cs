@@ -8,6 +8,6 @@ public class OfficeForUpdateDTO
     public string? OfficeNumber { get; set; }
     public string? RegistryPhoneNumber { get; set; }
     public bool IsActive { get; set; }
-    public ICollection<string>? Photos { get; set; }
+    //public ICollection<string>? Photos { get; set; }
     //public List<PhotoDTO> Photos { get; set; }
 }

@@ -25,7 +25,7 @@ public class OfficeRepository : IOfficeRepository
         _officesContext.AddCommand(() => _officeCollection.DeleteOneAsync(filter));
     }
 
-    public async Task<List<Office>> GetAllOfficesAsync()
+    public async Task<ICollection<Office>> GetAllOfficesAsync()
     {
         return await _officeCollection.Find(FilterDefinition<Office>.Empty).ToListAsync();
     }

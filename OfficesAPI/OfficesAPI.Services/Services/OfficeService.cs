@@ -3,13 +3,14 @@ using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Shared.Constnts;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using OfficesAPI.Shared.Mappers;
-using System.Net.WebSockets;
 
 namespace OfficesAPI.Services.Services;
 
@@ -32,7 +33,7 @@ public class OfficeService : IOfficeService
         _repositoryManager = repositoryManager;
     }
 
-    public async Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, IEnumerable<IFormFile> images)
+    public async Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files)
     {
         var validationResult = await _officeForCreateValidator.ValidateAsync(officeForCreateDTO);
         if (!validationResult.IsValid)
@@ -40,20 +41,20 @@ public class OfficeService : IOfficeService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
         // ask AuthorizationAPI if the current user is an admin
+        var currentUserId = _commonService.GetCurrentUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
         //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         //}
 
-        // IfromFile image from controller\
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
-        if(images.Any())
+        office.Id = ObjectId.GenerateNewId().ToString();
+        if (files is not null && files.Any())
         {
             var photoList = new List<Photo>();
-            foreach (var image in images)
+            foreach (var image in files)
             {
                 var photo = new Photo();
 
@@ -79,13 +80,13 @@ public class OfficeService : IOfficeService
         _repositoryManager.Office.CreateOffice(office);
         await _repositoryManager.SingleExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);            
+        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
     }
 
     public async Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
         // ask AuthorizationAPI if the current user is an admin
+        var currentUserId = _commonService.GetCurrentUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
@@ -93,12 +94,19 @@ public class OfficeService : IOfficeService
         //}
 
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
-        if(office is null)
+        if (office is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
 
-        // delete all photos with this officeId
+        if(office.Photos is not null && office.Photos.Any())
+        {
+            _repositoryManager.Office.DeleteOfficeById(officeId);
+            _repositoryManager.Photo.DeletePhotosOfOfficeByOfficeId(officeId);
+            await _repositoryManager.TransactionExecution();
+
+            return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+        }
 
         _repositoryManager.Office.DeleteOfficeById(officeId);
         await _repositoryManager.SingleExecution();
@@ -107,9 +115,9 @@ public class OfficeService : IOfficeService
     }
 
     public async Task<ResponseMessage<IEnumerable<OfficeTableInfoDTO>>> GetAllOfficesAsync()
-    {           
+    {
         var offices = await _repositoryManager.Office.GetAllOfficesAsync();
-        if(!offices.Any())
+        if (!offices.Any())
         {
             return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(MessageConstants.NotFoundMessage, false);
         }
@@ -132,7 +140,7 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<OfficeInfoDTO>(MessageConstants.SuccessMessage, true, officeInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateOfficeAsync(string officeId, OfficeForUpdateDTO officeForUpdateDTO)
+    public async Task<ResponseMessage> UpdateOfficeInfoAsync(string officeId,[FromBody] OfficeForUpdateDTO officeForUpdateDTO)
     {
         var validationResult = await _officeForUpdateValidator.ValidateAsync(officeForUpdateDTO);
         if (!validationResult.IsValid)
@@ -140,25 +148,23 @@ public class OfficeService : IOfficeService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
+        // ask AuthorizationAPI if the current user is an admin
         var currentUserId = _commonService.GetCurrentUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
-        //    return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         //}
 
-        // look at create!!!
-        // берем 
-
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
-        if(office is null)
+        if (office is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
-        // всунуть логику проверки старых и новых фотографий или наоборотот старые удалить новые ддобавить как в create!!!
-        var updatedOfficeDTO = OfficeMapper.OfficeForUpdateDTOToOffice(officeForUpdateDTO);
 
-        _repositoryManager.Office.UpdateOffice(updatedOfficeDTO);
+        OfficeMapper.UpdateOfficeFromOfficeForUpdateDTO(officeForUpdateDTO, office);
+
+        _repositoryManager.Office.UpdateOffice(office);
         await _repositoryManager.SingleExecution();
 
         return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
@@ -166,11 +172,12 @@ public class OfficeService : IOfficeService
 
     public async Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(string officeId)
     {
+        // ask AuthorizationAPI if the current user is an admin
         var currentUserId = _commonService.GetCurrentUserId();
         //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
         //if (!isAdmin)
         //{
-        //    return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
+        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         //}
 
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);

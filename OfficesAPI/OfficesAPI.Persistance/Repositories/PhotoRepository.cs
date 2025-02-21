@@ -25,12 +25,23 @@ public class PhotoRepository : IPhotoRepository
         _officesContext.AddCommand(() => _photoCollection.DeleteOneAsync(filter));
     }
 
-    public async Task<List<Photo>> TakeAllPhotos()
+    public void DeletePhotosOfOfficeByOfficeId(string officeId)
+    {
+        var filter = Builders<Photo>.Filter.Eq(o => o.OfficeId, officeId);
+        _officesContext.AddCommand(() => _photoCollection.DeleteManyAsync(filter));
+    }
+
+    public async Task<ICollection<Photo>> GetAllPhotos()
     {
         return await _photoCollection.Find(FilterDefinition<Photo>.Empty).ToListAsync();
     }
 
-    public async Task<Photo> TakePhotoById(string photoId)
+    public async Task<ICollection<Photo>> GetPhotoListWithFilter(FilterDefinition<Photo> filter)
+    {
+        return await _photoCollection.Find(filter).ToListAsync();
+    }
+
+    public async Task<Photo> GetPhotoById(string photoId)
     {
         var filter = Builders<Photo>.Filter.Eq(o => o.Id, photoId);
         return await _photoCollection.Find(filter).FirstOrDefaultAsync();
