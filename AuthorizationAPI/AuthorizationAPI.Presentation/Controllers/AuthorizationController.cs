@@ -1,68 +1,134 @@
-﻿using AuthorizationAPI.Application.DTOs;
-using AuthorizationAPI.Application.Interfaces;
+﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
+using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
+using AuthorizationAPI.Shared.DTOs.UserDTOs;
+using CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
-namespace AuthorizationAPI.Presentation.Controllers
+namespace AuthorizationAPI.Presentation.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class AuthorizationController : ResponseMessageHandler
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class AuthorizationController : ControllerBase
+    private readonly IAuthorizationService _authorizationService;
+    public AuthorizationController(IAuthorizationService authorizationService)
     {
-        private readonly IAuthorizationServices _authorizationService;
-        public AuthorizationController(IAuthorizationServices authorizationService)
+        _authorizationService = authorizationService;
+    }
+
+    /// <summary>
+    /// Signing In by Email and Password
+    /// </summary>
+    /// <returns>Access and Refresh Tokens</returns>
+    [HttpPost("signin")]
+    [ProducesResponseType(typeof(SuccessMessage<TokensDTO>), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    public async Task<IActionResult> SignIn([FromBody] LoginInfoDTO loginInfoDTO)
+    {
+        var result = await _authorizationService.SignIn(loginInfoDTO);
+        if (!result.Flag)
         {
-            _authorizationService = authorizationService;
+            return HandleResponseMessage(result);
         }
+            
+        return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
+    }
 
-        [HttpPost("signin")]
-        public async Task<IActionResult> SignIn([FromBody] LoginInfoDTO loginInfoDTO)
+    /// <summary>
+    /// Signing Out by Refresh Token Id
+    /// </summary>
+    /// <returns>Message</returns>
+    [HttpPost("signout")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> SignOut([FromBody] GuidValue refreshTokenId)
+    {
+        var result = await _authorizationService.SignOut(refreshTokenId.Value);
+        if (!result.Flag)
         {
-            //Rework
-            var response = await _authorizationService.SignIn(loginInfoDTO);
-            if (response.Item1.Flag == false || (response.Item2.IsNullOrEmpty() || response.Item3.IsNullOrEmpty()))
-                return BadRequest($"Tokens refresh Failed! {response.Item1.Message}");
-            return Ok(new { AccessToken = response.Item2, RefreshToken = response.Item3 });
+            return HandleResponseMessage(result);
         }
+            
+        return new SuccessMessage(result.Message.Value);
+    }
 
-        [HttpPost("signout")]
-        public async Task<IActionResult> SignOut([FromBody] Guid rTokenId)
+    /// <summary>
+    /// Signing Up with all Registration Info
+    /// </summary>
+    /// <returns>Message</returns>
+    [HttpPost("signup")]
+    [ProducesResponseType(typeof(SuccessMessage), 201)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    public async Task<IActionResult> SignUp([FromBody] RegistrationInfoDTO registrationInfoDTO)
+    {
+        var result = await _authorizationService.SignUp(registrationInfoDTO);
+        if (!result.Flag)
         {
-            var signOut = await _authorizationService.SignOut(rTokenId);
-            if (signOut.Flag == false)
-                return BadRequest(signOut.Message);
-
-            return Ok(signOut.Message);
+            return HandleResponseMessage(result);
         }
+            
+        return new SuccessMessage(result.Message.Value, 201);
+    }
 
-        [HttpPost("signup")]
-        public async Task<IActionResult> SignUp([FromBody] RegistrationInfoDTO registrationInfoDTO)
+    /// <summary>
+    /// Refreshes Access and Refresh Tokens by Refresh Token Id
+    /// </summary>
+    /// <returns>Access and Refresh Tokens</returns>
+    [HttpPost("refresh")]
+    [ProducesResponseType(typeof(SuccessMessage<TokensDTO>), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize]
+    public async Task<IActionResult> Refresh([FromBody] GuidValue refreshTokenId)
+    {
+        var result = await _authorizationService.Refresh(refreshTokenId.Value);
+        if (!result.Flag)
         {
-            var response = await _authorizationService.SignUp(registrationInfoDTO);
-            if (response.Item1.Flag == false || (response.Item2.IsNullOrEmpty() || response.Item3.IsNullOrEmpty()))
-                return BadRequest($"Tokens refresh Failed! {response.Item1.Message}");
-
-            return Ok(new { AccessToken = response.Item2, RefreshToken = response.Item3 });
+            return HandleResponseMessage(result);
         }
+            
+        return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
+    }
 
-        [HttpPost("/refresh")]
-        public async Task<IActionResult> Refresh([FromBody] Guid rTokenId)
+    /// <summary>
+    /// Resends verefication Letter to email by verifying Email and Password
+    /// </summary>
+    /// <returns>Message</returns>
+    [HttpPost("resendemailverification")]
+    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    public async Task<IActionResult> ResendEmailVerification([FromBody] LoginInfoDTO loginInfoDTO)
+    {
+        var result = await _authorizationService.ResendEmailVerification(loginInfoDTO);
+        if (!result.Flag)
         {
-            var response = await _authorizationService.Refresh(rTokenId);
-            if (response.Item1.Flag == false || (response.Item2.IsNullOrEmpty() || response.Item3.IsNullOrEmpty()))
-                return BadRequest($"Tokens refresh Failed! {response.Item1.Message}");
-
-            return Ok(new { AccessToken = response.Item2, RefreshToken = response.Item3});
+            return HandleResponseMessage(result);
         }
-
-        [HttpPatch("/revoke")]
-        public async Task<IActionResult> RevokeTokenByRTokenId([FromBody] Guid rTokenId)
-        {
-            var revoke = await _authorizationService.RevokeTokenByRTokenId(rTokenId);
-            if (revoke.Flag == false)
-                return BadRequest(revoke.Message);
-
-            return Ok(revoke.Message);
-        }
-    }   
+            
+        return new SuccessMessage(result.Message.Value);
+    }
 }

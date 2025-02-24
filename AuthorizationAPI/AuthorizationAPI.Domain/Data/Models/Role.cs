@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace AuthorizationAPI.Domain.Data.Models
+namespace AuthorizationAPI.Domain.Data.Models;
+
+public class Role
 {
-    public class Role
-    {
-        public Guid Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
+    public Guid Id { get; set; }
+    [Required]
+    [MinLength(2)]
+    public string Title { get; set; }
+    public string? Description { get; set; }
 
-        public List<User> Users { get; set; }
-
-    }
+    public ICollection<User> Users { get; set; }
 }
