@@ -32,9 +32,7 @@ services:
     ports:
     -  "5001:5001"
     # depends_on:
-    #     mssql-server:
-    #         condition: service_healthy
-    
+
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql-server

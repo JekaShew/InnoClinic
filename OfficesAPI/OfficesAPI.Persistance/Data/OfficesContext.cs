@@ -11,8 +11,6 @@ public class OfficesContext : IOfficesContext
     public MongoClient mongoClient { get; set; }
     private IMongoDatabase _officesDB { get; set; }
     private readonly List<Func<Task>> _commandTasks;
-    // OptionsPattern Get connection string from appsettings.json
-    //private readonly ConnectionStringsSettings _connectionStirngsSettings;
 
     public OfficesContext(IOptions<ConnectionStringsSettings> options)
     {
