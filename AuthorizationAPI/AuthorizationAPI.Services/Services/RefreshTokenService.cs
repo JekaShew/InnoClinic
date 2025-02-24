@@ -22,13 +22,6 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
-
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {
@@ -43,14 +36,7 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage> RevokeRefreshTokenByRefreshTokenId(Guid refreshTokenId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
-
-        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId, true);
+        var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -64,13 +50,6 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>> GetAllLoggedInUsers()
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var refreshTokenCollection = await _repositoryManager.RefreshToken
                 .GetAllRefreshTokensAsync();
         if (!refreshTokenCollection.Any())
@@ -85,13 +64,6 @@ public class RefreshTokenService : IRefreshTokenService
 
     public async Task<ResponseMessage<RefreshTokenInfoDTO>> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {

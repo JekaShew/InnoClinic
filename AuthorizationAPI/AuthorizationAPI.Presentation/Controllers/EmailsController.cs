@@ -37,7 +37,10 @@ public class EmailsController : ResponseMessageHandler
     {
         var result = await _emailService.SendUserEmail(userEmailDTOs,userId, DBConstants.DoctorRoleId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 201);
     }
 
@@ -58,7 +61,10 @@ public class EmailsController : ResponseMessageHandler
     {
         var result = await _emailService.SendUserEmail(userEmailDTOs, userId, DBConstants.AdministratorRoleId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 201);
     }
 
@@ -79,7 +85,10 @@ public class EmailsController : ResponseMessageHandler
     {
         var result = await _emailService.SendUserEmail(userEmailDTOs, userId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 201);
     }
 }

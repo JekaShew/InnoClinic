@@ -37,13 +37,6 @@ public class RoleService : IRoleService
         {
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
-        
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if(!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
 
         var role = RoleMapper.RoleForCreateDTOToRole(roleForCreateDTO);
         await _repositoryManager.Role.CreateRoleAsync(role);
@@ -54,13 +47,6 @@ public class RoleService : IRoleService
 
     public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
-
         var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
@@ -75,13 +61,6 @@ public class RoleService : IRoleService
 
     public async Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync()
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var roles = await _repositoryManager.Role.GetAllRolesAsync();
         if (!roles.Any())
         {
@@ -95,13 +74,6 @@ public class RoleService : IRoleService
 
     public async Task<ResponseMessage<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
@@ -121,14 +93,7 @@ public class RoleService : IRoleService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<RoleInfoDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
-        var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId, true);
+        var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);

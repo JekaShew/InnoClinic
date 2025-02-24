@@ -1,8 +1,10 @@
-﻿namespace CommonLibrary.CommonService
+﻿using CommonLibrary.DTOs;
+
+namespace CommonLibrary.CommonService
 {
     public interface ICommonService
     {
-        public Guid? GetCurrentUserId();
+        public CurrentUserInfoDTO? GetCurrentUserInfo();
         public Task<string> GetHashString(string stringToHash);
     }
 }

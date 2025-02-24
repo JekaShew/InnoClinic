@@ -32,7 +32,10 @@ public class AuthorizationController : ResponseMessageHandler
     {
         var result = await _authorizationService.SignIn(loginInfoDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
     }
 
@@ -52,7 +55,10 @@ public class AuthorizationController : ResponseMessageHandler
     {
         var result = await _authorizationService.SignOut(refreshTokenId.Value);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -72,7 +78,10 @@ public class AuthorizationController : ResponseMessageHandler
     {
         var result = await _authorizationService.SignUp(registrationInfoDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 201);
     }
 
@@ -93,7 +102,10 @@ public class AuthorizationController : ResponseMessageHandler
     {
         var result = await _authorizationService.Refresh(refreshTokenId.Value);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<TokensDTO>(result.Message.Value, result.Value);
     }
 
@@ -113,7 +125,10 @@ public class AuthorizationController : ResponseMessageHandler
     {
         var result = await _authorizationService.ResendEmailVerification(loginInfoDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 }

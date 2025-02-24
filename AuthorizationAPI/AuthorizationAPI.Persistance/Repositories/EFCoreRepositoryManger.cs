@@ -67,7 +67,7 @@ public class EFCoreRepositoryManger : IRepositoryManager
 
     public async Task RollbackAsync()
     {
-        if (_transaction != null)
+        if (_transaction is not null)
         {
             await _transaction.RollbackAsync();
             await _transaction.DisposeAsync();

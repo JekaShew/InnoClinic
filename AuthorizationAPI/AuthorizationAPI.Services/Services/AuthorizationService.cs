@@ -54,12 +54,6 @@ public class AuthorizationService : IAuthorizationService
         }
 
         //Check Email Registered
-        var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(loginInfoDTO.Email);
-        if (!isEmailRegistered)
-        {
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
-        }
-
         var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
         if (user is null)
         {
@@ -111,11 +105,11 @@ public class AuthorizationService : IAuthorizationService
         }
 
         // Check Email Registered
-        var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(registrationInfoDTO.Email);
-        if (isEmailRegistered)
+        var user = await _repositoryManager.User.GetUserByEmailAsync(registrationInfoDTO.Email);
+        if(user is not null)
         {
             return new ResponseMessage(MessageConstants.EmailRegisteredMessage, false);
-        }
+        }    
 
         // Create User 
         var defaultRole = await _repositoryManager.Role.GetRoleByIdAsync(DBConstants.PatientRoleId);
@@ -125,7 +119,7 @@ public class AuthorizationService : IAuthorizationService
         }
 
         var defaultUserStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(DBConstants.NonActivatedUserStatusId);
-        if (defaultUserStatus is null && defaultUserStatus.Equals(Guid.Empty))
+        if (defaultUserStatus is null || defaultUserStatus.Equals(Guid.Empty))
         {
             return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
         }
@@ -153,8 +147,7 @@ public class AuthorizationService : IAuthorizationService
         if (refreshToken is null)
         {
             return new ResponseMessage<TokensDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-           
+        }    
         //Generate A&R Tokens
         var tokens = await GenerateTokenPair(refreshToken.UserId);
 
@@ -168,13 +161,7 @@ public class AuthorizationService : IAuthorizationService
         {
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
-
-        var isEmailRegistered = await _repositoryManager.User.IsEmailRegistered(loginInfoDTO.Email);
-        if (!isEmailRegistered)
-        {
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
-        }
-
+        // Check Email Registered
         var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
         if (user is null)
         {
@@ -190,7 +177,7 @@ public class AuthorizationService : IAuthorizationService
         return await _emailService.SendVerificationLetterToEmail(loginInfoDTO.Email);
     }
 
-    private async Task<RefreshToken> IsRefreshTokeCorrect(Guid rTokenId, bool trackChanges)
+    private async Task<RefreshToken?> IsRefreshTokeCorrect(Guid rTokenId, bool trackChanges)
     {
         //Check is RefreshToken Correct
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(rTokenId);
@@ -213,7 +200,7 @@ public class AuthorizationService : IAuthorizationService
         return refreshToken;
     }
 
-    private async Task<string> GenerateJwtTokenStringByUserId(Guid userId)
+    private async Task<string?> GenerateJwtTokenStringByUserId(Guid userId)
     {
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         var role = await _repositoryManager.Role.GetRoleByIdAsync(user.RoleId);

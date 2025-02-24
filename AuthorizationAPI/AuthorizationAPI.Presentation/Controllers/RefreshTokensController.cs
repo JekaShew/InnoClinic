@@ -31,7 +31,10 @@ public class RefreshTokensController : ResponseMessageHandler
     {
         var result = await _refreshTokenService.GetRefreshTokenInfoByRefreshTokenId(refreshTokenId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<RefreshTokenInfoDTO>(result.Message.Value, result.Value);
     }
 
@@ -51,7 +54,10 @@ public class RefreshTokensController : ResponseMessageHandler
     {
         var result = await _refreshTokenService.GetAllLoggedInUsers();
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<IEnumerable<UserLoggedInInfoDTO>>(result.Message.Value, result.Value);
     }
 
@@ -71,7 +77,10 @@ public class RefreshTokensController : ResponseMessageHandler
     {
         var result = await _refreshTokenService.DeleteRefreshTokenByRTokenId(refreshTokenId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 204);
     }
 
@@ -91,7 +100,10 @@ public class RefreshTokensController : ResponseMessageHandler
     {
         var result = await _refreshTokenService.RevokeRefreshTokenByRefreshTokenId(refreshTokenId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 }

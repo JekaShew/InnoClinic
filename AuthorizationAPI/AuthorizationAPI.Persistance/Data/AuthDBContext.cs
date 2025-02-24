@@ -6,6 +6,11 @@ namespace AuthorizationAPI.Persistance.Data;
 
 public class AuthDBContext(DbContextOptions<AuthDBContext> options) : DbContext(options)
 {
+    public DbSet<User> Users { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<UserStatus> UserStatuses { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
@@ -23,11 +28,4 @@ public class AuthDBContext(DbContextOptions<AuthDBContext> options) : DbContext(
 
         base.OnModelCreating(modelBuilder);
     }
-
-    public DbSet<User> Users { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<UserStatus> UserStatuses { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
-
-    
 }

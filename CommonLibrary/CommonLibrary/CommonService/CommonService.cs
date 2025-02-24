@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using CommonLibrary.DTOs;
+using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -13,25 +14,34 @@ namespace CommonLibrary.CommonService
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Guid? GetCurrentUserId()
+        public CurrentUserInfoDTO? GetCurrentUserInfo()
         {
             if (!_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
             {
-                return Guid.Empty;
+                return null;
             }
 
-            var claim = _httpContextAccessor
+            var claimId = _httpContextAccessor
                         .HttpContext
                         .User
                         .Claims
                         .FirstOrDefault(x => x.Type == ClaimTypes.NameIdentifier);
 
-            if (claim is null)
+            var claimRole = _httpContextAccessor
+                        .HttpContext
+                        .User
+                        .Claims
+                        .FirstOrDefault(x => x.Type == ClaimTypes.Role);
+            if (claimId is null || claimRole is null)
             {
-                return Guid.Empty;
+                return null;
             }
-
-            return Guid.Parse(claim.Value);
+            var currentUserInfoDTO = new CurrentUserInfoDTO
+            {
+                Id = Guid.Parse(claimId.Value),
+                Role = claimRole.Value
+            };
+            return currentUserInfoDTO;
         }
 
         public async Task<string> GetHashString(string stringToHash)

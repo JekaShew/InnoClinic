@@ -31,7 +31,10 @@ public class RolesController : ResponseMessageHandler
     {
         var result = await _roleService.GetRoleByIdAsync(roleId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<RoleInfoDTO>(result.Message.Value, result.Value);
     }
 
@@ -51,7 +54,10 @@ public class RolesController : ResponseMessageHandler
     {
         var result = await _roleService.GetAllRolesAsync();
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<IEnumerable<RoleInfoDTO>>(result.Message.Value, result.Value);
     }
 
@@ -72,7 +78,10 @@ public class RolesController : ResponseMessageHandler
     {
         var result = await _roleService.CreateRoleAsync(roleForCreateDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+           
         return new SuccessMessage(result.Message.Value, 201);
     }
 
@@ -93,7 +102,10 @@ public class RolesController : ResponseMessageHandler
     {
         var result = await _roleService.UpdateRoleAsync(roleId, roleForUpdateDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -113,7 +125,10 @@ public class RolesController : ResponseMessageHandler
     {
         var result = await _roleService.DeleteRoleByIdAsync(roleId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 204);
     }
 }

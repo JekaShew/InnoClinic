@@ -55,7 +55,6 @@ public static class ApplicationServicesExtesionMethods
         services.AddFluentEmail(defaultFromEmail)
            .AddSmtpSender(host, port);
 
-
         return services;
     }
 
@@ -73,22 +72,22 @@ public static class ApplicationServicesExtesionMethods
         services.AddHangfire(config =>
             config.UseSimpleAssemblyNameTypeSerializer()
             .UseSimpleAssemblyNameTypeSerializer()
-            .UseSqlServerStorage(configuration.GetConnectionString("AuthDBDocker"))
+            .UseSqlServerStorage(configuration.GetConnectionString("AuthDB"))
         );
 
         services.AddHangfireServer();
 
-
         return services;
     }
-    public static IApplicationBuilder StartBackgroundTasks(this IApplicationBuilder app)
+    public static IApplicationBuilder StartBackgroundTasks(this IApplicationBuilder app, IConfiguration configuration)
     {
         // Schedule Jobs
+        var crons = configuration.GetSection("HangFire:Crons");
         IRecurringJobManager recurringJobManager = new RecurringJobManager();
         recurringJobManager.AddOrUpdate<BackgroundTasks>(
                 "CleaningExpiredRefresTokens",
                 x => x.CleanExpiredRefreshTokensAsync(),
-                "*/15 * * * *");  // Crone = Every 15 Minutes 
+                crons["Every15Minutes"]); 
 
         return app;      
     }

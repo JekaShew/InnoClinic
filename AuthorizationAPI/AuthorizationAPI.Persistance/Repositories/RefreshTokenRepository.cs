@@ -37,23 +37,14 @@ public class RefreshTokenRepository : IRefreshTokenRepository
                 .ToListAsync();
     }
 
-    public async Task<RefreshToken> GetRefreshTokenByIdAsync(Guid refreshTokenId, bool trackChanges)
+    public async Task<RefreshToken?> GetRefreshTokenByIdAsync(Guid refreshTokenId)
     {
-        return trackChanges ?
-                await _authDBContext.RefreshTokens
+        return await _authDBContext.RefreshTokens
                     .Include(u => u.User)
                         .ThenInclude(r => r.Role)
                     .Include(u => u.User)
                         .ThenInclude(us => us.UserStatus)
-                    .FirstOrDefaultAsync(rt => rt.Id.Equals(refreshTokenId))
-                 :
-                 await _authDBContext.RefreshTokens
-                    .Include(u => u.User)
-                        .ThenInclude(r => r.Role)
-                    .Include(u => u.User)
-                        .ThenInclude(us => us.UserStatus)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(rt => rt.Id.Equals(refreshTokenId));
+                    .FirstOrDefaultAsync(rt => rt.Id.Equals(refreshTokenId)); 
     }
 
     public async Task<IEnumerable<RefreshToken>> GetRefreshTokensWithExpressionAsync(Expression<Func<RefreshToken, bool>> expression)
@@ -81,7 +72,11 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task UpdateRefreshTokenAsync(RefreshToken updatedRefreshToken)
     {
         var refreshToken = await _authDBContext.RefreshTokens.FindAsync(updatedRefreshToken.Id);
-        _authDBContext.RefreshTokens.Entry(refreshToken).State = EntityState.Detached;
+        if(refreshToken is not null)
+        {
+            _authDBContext.RefreshTokens.Entry(refreshToken).State = EntityState.Detached;
+        }
+        
         _authDBContext.RefreshTokens.Update(updatedRefreshToken);
     }
 }

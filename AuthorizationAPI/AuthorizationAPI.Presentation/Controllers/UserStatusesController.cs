@@ -31,7 +31,10 @@ public class UserStatusesController : ResponseMessageHandler
     {
         var result = await _userStatusService.GetUserStatusByIdAsync(userStatusId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<UserStatusInfoDTO>(result.Message.Value, result.Value);
     }
 
@@ -51,7 +54,10 @@ public class UserStatusesController : ResponseMessageHandler
     {
         var result = await _userStatusService.GetAllUserStatusesAsync();
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<IEnumerable<UserStatusInfoDTO>>(result.Message.Value, result.Value);
     }
 
@@ -72,7 +78,10 @@ public class UserStatusesController : ResponseMessageHandler
     {
         var result = await _userStatusService.CreateUserStatusAsync(userStatusForCreateDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 201);
     }
 
@@ -93,7 +102,10 @@ public class UserStatusesController : ResponseMessageHandler
     {
         var result = await _userStatusService.UpdateUserStatusAsync(userStatusId, userStatusForUpdateDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -113,7 +125,10 @@ public class UserStatusesController : ResponseMessageHandler
     {
         var result = await _userStatusService.DeleteUserStatusByIdAsync(userStatusId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 204);
     }
 }

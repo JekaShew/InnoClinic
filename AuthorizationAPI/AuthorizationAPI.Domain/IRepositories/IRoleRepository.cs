@@ -6,9 +6,9 @@ namespace AuthorizationAPI.Domain.IRepositories;
 public interface IRoleRepository
 {
     public  Task CreateRoleAsync(Role role);
-    public Task<IEnumerable<Role>> GetAllRolesAsync(bool trackChanges = false);
-    public Task<Role> GetRoleByIdAsync(Guid roleID, bool trackChanges = false);
+    public Task<IEnumerable<Role>> GetAllRolesAsync();
+    public Task<Role?> GetRoleByIdAsync(Guid roleID);
     public Task UpdateRoleAsync(Role role);
     public void DeleteRole(Role role);
-    public Task<IEnumerable<Role>> GetRolesWithExpressionAsync(Expression<Func<Role, bool>> expression, bool trackChanges = false);
+    public Task<IEnumerable<Role>> GetRolesWithExpressionAsync(Expression<Func<Role, bool>> expression);
 }

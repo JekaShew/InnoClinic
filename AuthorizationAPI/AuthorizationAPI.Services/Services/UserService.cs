@@ -55,9 +55,14 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
-        var currentUser = await _repositoryManager.User.GetUserByIdAsync(currentUserId.Value, true);
-        currentUser.UserStatusId = deletedUserStatus.Id;
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if(currentUserInfo is null)
+        {
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }    
+
+        var currentUser = await _repositoryManager.User.GetUserByIdAsync(currentUserInfo.Id);
+        currentUser.UserStatusId = deletedUserStatus.Id;    
         await _repositoryManager.CommitAsync();
 
         return new ResponseMessage(MessageConstants.SuccessMessage, true);
@@ -65,13 +70,6 @@ public class UserService : IUserService
 
     public async Task<ResponseMessage> DeleteUserById(Guid userId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
-
         var userToDelete = await _repositoryManager.User.GetUserByIdAsync(userId);
         _repositoryManager.User.DeleteUser(userToDelete);
         await _repositoryManager.CommitAsync();
@@ -81,14 +79,7 @@ public class UserService : IUserService
 
     public async Task<ResponseMessage<IEnumerable<UserInfoDTO>>> GetAllUsersInfo()
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<IEnumerable<UserInfoDTO>>(MessageConstants.ForbiddenMessage, false);
-        }
-
-        var users = await _repositoryManager.User.GetAllUsersAsync(false);
+        var users = await _repositoryManager.User.GetAllUsersAsync();
         if (!users.Any())
         {
             return new ResponseMessage<IEnumerable<UserInfoDTO>>(MessageConstants.NotFoundMessage, false);
@@ -101,12 +92,6 @@ public class UserService : IUserService
 
     public async Task<ResponseMessage<UserInfoDTO>> GetUserInfoById(Guid userId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        if(!currentUserId.Equals(userId))
-        {
-            return new ResponseMessage<UserInfoDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
@@ -120,13 +105,6 @@ public class UserService : IUserService
 
     public async Task<ResponseMessage<UserDetailedDTO>> GetUserDetailedInfoById(Guid userId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<UserDetailedDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
@@ -146,14 +124,14 @@ public class UserService : IUserService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
-        var user = await _repositoryManager.User.GetUserByIdAsync(userId, true);
+        var currentUserId = _commonService.GetCurrentUserInfo();
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
 
-        if (!user.Id.Equals(currentUserId.Value))
+        if (!user.Id.Equals(currentUserId))
         {
             return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         }
@@ -172,14 +150,7 @@ public class UserService : IUserService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<UserDetailedDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
-        var user = await _repositoryManager.User.GetUserByIdAsync(userId, true);
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -199,8 +170,13 @@ public class UserService : IUserService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
-        var user = await _repositoryManager.User.GetUserByIdAsync(currentUserId.Value,true);
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if(currentUserInfo is null)
+        {
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }
+
+        var user = await _repositoryManager.User.GetUserByIdAsync(currentUserInfo.Id);
         var enteredPasswordHash = await _commonService.GetHashString($"{oldNewPasswordPairDTO.OldPassword}{user.SecurityStamp}");
         if (!enteredPasswordHash.Equals(user.PasswordHash))
         {
@@ -221,7 +197,7 @@ public class UserService : IUserService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var user = await _repositoryManager.User.GetUserByEmailAsync(emailSecretPhraseNewPasswordDTO.Email, true);
+        var user = await _repositoryManager.User.GetUserByEmailAsync(emailSecretPhraseNewPasswordDTO.Email);
         if (user is null)
         {
             return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
@@ -247,13 +223,6 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.FailedMessage, false);
         }
 
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
-
         Guid patchValueGuid = Guid.Empty;
         var patchValue = patchDocForUserInfoDTO.Operations.First().value.ToString();
         if (patchValue is null
@@ -269,7 +238,7 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
         }
 
-        var user = await _repositoryManager.User.GetUserByIdAsync(userId, true);
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -291,13 +260,6 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.FailedMessage, false);
         }
 
-        //var currentUserId = _commonService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
         Guid patchValueGuid = Guid.Empty;
         var patchValue = patchDocForUserInfoDTO.Operations.First().value.ToString();
         if (patchValue is null
@@ -313,7 +275,7 @@ public class UserService : IUserService
             return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
         }
 
-        var user = await _repositoryManager.User.GetUserByIdAsync(userId, true);
+        var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -335,7 +297,7 @@ public class UserService : IUserService
             return confirmEmail;
         }
 
-        var user = await _repositoryManager.User.GetUserByEmailAsync(email, true);
+        var user = await _repositoryManager.User.GetUserByEmailAsync(email);
         if(user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -349,8 +311,8 @@ public class UserService : IUserService
 
     public async Task<ResponseMessage> ChangeForgottenPasswordByEmailRequest(string email)
     {
-        var isRegistered = await _repositoryManager.User.IsEmailRegistered(email);
-        if (!isRegistered)
+        var user = await _repositoryManager.User.GetUserByEmailAsync(email);
+        if(user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
@@ -372,7 +334,7 @@ public class UserService : IUserService
             return confirmEmail;
         }
 
-        var user = await _repositoryManager.User.GetUserByEmailAsync(email,true);
+        var user = await _repositoryManager.User.GetUserByEmailAsync(email);
         if(user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -392,8 +354,13 @@ public class UserService : IUserService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var userId = _commonService.GetCurrentUserId();
-        var currentUser = await _repositoryManager.User.GetUserByIdAsync(userId.Value,true);
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null)
+        {
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+        }
+
+        var currentUser = await _repositoryManager.User.GetUserByIdAsync(currentUserInfo.Id);
         if(currentUser is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
@@ -414,8 +381,8 @@ public class UserService : IUserService
 
     private async Task<ResponseMessage> ConfirmEmail(string email, string token)
     {
-        var isRegistered = await _repositoryManager.User.IsEmailRegistered(email);
-        if (!isRegistered)
+        var user = await _repositoryManager.User.GetUserByEmailAsync(email);
+        if(user is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }

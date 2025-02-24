@@ -4,6 +4,7 @@ using AuthorizationAPI.Services.Extensions;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
 using CommonLibrary.CommonService;
+using CommonLibrary.Constants;
 using FluentEmail.Core;
 using FluentEmail.Core.Models;
 using FluentValidation;
@@ -81,15 +82,14 @@ public class FluentEmailService : IEmailService
     public async Task<ResponseMessage> SendUserEmail(IEnumerable<UserEmailDTO> userEmailDTOs,Guid userId, Guid roleId = default)
     {
         var emailMetaDatas = new List<EmailMetaData>();
-        var currentUserId = _commonService.GetCurrentUserId();
-        var currentUser = await _repositoryManager.User.GetUserByIdAsync(currentUserId.Value);
-        if (currentUser is null)
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
         }
 
-        bool isAdmin = currentUser.RoleId.Equals(DBConstants.AdministratorRoleId);
-        bool isDoctor = currentUser.RoleId.Equals(DBConstants.DoctorRoleId);
+        bool isAdmin = currentUserInfo.Role.Equals(RoleConstants.Administrator);
+        bool isDoctor = currentUserInfo.Role.Equals(RoleConstants.Doctor);
 
         foreach (var userEmailDTO in userEmailDTOs)
         {

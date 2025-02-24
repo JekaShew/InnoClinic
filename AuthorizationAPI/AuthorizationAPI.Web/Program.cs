@@ -96,16 +96,16 @@ internal class Program
         app.UseHangfireDashboard("/hangfire", new DashboardOptions
         {
             DashboardTitle = "Authorization API Jobs",
-            Authorization = new[]
-            {
-                new HangfireCustomBasicAuthenticationFilter
-                {
-                    User = "Adminiistrator",
-                    Pass = "qwedsazxc123"
-                }
-            }
+            //Authorization = new[]
+            //{
+            //    new HangfireCustomBasicAuthenticationFilter
+            //    {
+            //        User = "Administrator",
+            //        Pass = "qwedsazxc123"
+            //    }
+            //}
         });
-        app.StartBackgroundTasks();
+        app.StartBackgroundTasks(builder.Configuration);
         
         //app.UseEndpoints(endpoints =>
         //{

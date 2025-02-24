@@ -15,25 +15,19 @@ public class RoleRepository : IRoleRepository
         _authDBContext = authDBContext;
     }
 
-    public async Task<IEnumerable<Role>> GetAllRolesAsync(bool trackChanges)
+    public async Task<IEnumerable<Role>> GetAllRolesAsync()
     {
-        return trackChanges ?
-            await _authDBContext.Roles.ToListAsync() :
-            await _authDBContext.Roles.AsNoTracking().ToListAsync();
+        return await _authDBContext.Roles.AsNoTracking().ToListAsync();
     }
 
-    public async Task<Role> GetRoleByIdAsync(Guid roleId, bool trackChanges)
+    public async Task<Role?> GetRoleByIdAsync(Guid roleId)
     {
-        return trackChanges ?
-            await _authDBContext.Roles.FirstOrDefaultAsync(us => us.Id.Equals(roleId)) :
-            await _authDBContext.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Id.Equals(roleId));
+        return await _authDBContext.Roles.FirstOrDefaultAsync(us => us.Id.Equals(roleId));
     }
 
-    public async Task<IEnumerable<Role>> GetRolesWithExpressionAsync(Expression<Func<Role, bool>> expression, bool trackChanges)
+    public async Task<IEnumerable<Role>> GetRolesWithExpressionAsync(Expression<Func<Role, bool>> expression)
     {
-        return trackChanges ?
-            await _authDBContext.Roles.Where(expression).ToListAsync() :
-            await _authDBContext.Roles.AsNoTracking().Where(expression).ToListAsync();
+        return await _authDBContext.Roles.AsNoTracking().Where(expression).ToListAsync();
     }
      
     public async Task CreateRoleAsync(Role role)
@@ -49,7 +43,11 @@ public class RoleRepository : IRoleRepository
     public async Task UpdateRoleAsync(Role updatedRole)
     {
         var role = await _authDBContext.Roles.FindAsync(updatedRole.Id);
-        _authDBContext.Roles.Entry(role).State = EntityState.Detached;
+        if(role is not null)
+        {
+            _authDBContext.Roles.Entry(role).State = EntityState.Detached;
+        }
+        
         _authDBContext.Roles.Update(updatedRole);
     }
 }

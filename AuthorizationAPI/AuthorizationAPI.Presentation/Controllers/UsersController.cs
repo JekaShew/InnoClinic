@@ -33,7 +33,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.GetUserInfoById(userId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<UserInfoDTO>(result.Message.Value, result.Value);
     }
 
@@ -53,7 +56,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.GetUserDetailedInfoById(userId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<UserDetailedDTO>(result.Message.Value, result.Value);
     }
 
@@ -73,7 +79,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.GetAllUsersInfo();
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<IEnumerable<UserInfoDTO>>(result.Message.Value, result.Value);
     }
 
@@ -94,7 +103,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.UpdateUserInfo(userId, userForUpdateDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -115,7 +127,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.UpdateUserInfoByAdministrator(userId, userForUpdateByAdministratorDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -135,7 +150,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.DeleteCurrentAccount();
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -155,7 +173,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.DeleteUserById(userId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 204);
     }
 
@@ -176,7 +197,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.ChangePasswordByOldPassword(oldNewPasswordPairDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -196,7 +220,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.ChangeForgottenPasswordBySecretPhrase(emailSecretPhraseNewPasswordDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -217,7 +244,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.ChangeUserStatusOfUser(userId, patchDocForUserInfoDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -238,7 +268,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.ChangeRoleOfUser(userId, patchDocForUserInfoDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -257,7 +290,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.ActivateUser(email, token);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -278,7 +314,10 @@ public class UsersController : ResponseMessageHandler
     {
         var result = await _userService.ChangeEmailByPassword(emailPasswordPairDTO);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 
@@ -300,7 +339,10 @@ public class UsersController : ResponseMessageHandler
         // Sends message to Email with Link -> clicks the link with token and email query parameters -> return Page where you can insert new Password
         var result = await _userService.ChangeForgottenPasswordByEmailRequest(email.Value);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     } 
 
@@ -322,7 +364,10 @@ public class UsersController : ResponseMessageHandler
         // page with query Parameters and body with new Password
         var result = await _userService.ChangeForgottenPasswordByEmail(token, email, newPassword.Value);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value);
     }
 }

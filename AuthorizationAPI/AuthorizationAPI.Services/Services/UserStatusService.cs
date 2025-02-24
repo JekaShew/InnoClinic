@@ -36,13 +36,6 @@ public class UserStatusService : IUserStatusService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        //var currentUserId = _commonService.GetCurrenUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
         var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
         await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
         await _repositoryManager.CommitAsync();
@@ -52,12 +45,7 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        }
+        var currentUserId = _commonService.GetCurrentUserInfo();
 
         var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId);
         if (userStatus is null)
@@ -73,13 +61,6 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
     {
-        //var currentUserId = _commonService.GetCurrenUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(MessageConstants.ForbiddenMessage, false);
-        //}
-
         var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync();
         if (!userStatuses.Any())
         {
@@ -93,13 +74,6 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage<UserStatusInfoDTO>> GetUserStatusByIdAsync(Guid userStatusId)
     {
-        var currentUserId = _commonService.GetCurrentUserId();
-        var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        if (!isAdmin)
-        {
-            return new ResponseMessage<UserStatusInfoDTO>(MessageConstants.ForbiddenMessage, false);
-        }
-
         var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId);
         if (userStatus is null)
         {
@@ -119,14 +93,7 @@ public class UserStatusService : IUserStatusService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        //var currentUserId = _commonService.GetCurrenUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
-        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId, true);
+        var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId);
         if (userStatus is null)
         {
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);

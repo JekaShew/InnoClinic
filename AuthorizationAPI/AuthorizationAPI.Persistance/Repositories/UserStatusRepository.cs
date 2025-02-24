@@ -16,30 +16,20 @@ public class UserStatusRepository : IUserStatusRepository
         _authDBContext = authDBContext;
     }
 
-    public async Task<IEnumerable<UserStatus>> GetAllUserStatusesAsync(bool trackChanges)
+    public async Task<IEnumerable<UserStatus>> GetAllUserStatusesAsync()
     {
-        return trackChanges ? 
-            await _authDBContext.UserStatuses.ToListAsync() : 
-            await _authDBContext.UserStatuses.AsNoTracking().ToListAsync();
+        return await _authDBContext.UserStatuses.AsNoTracking().ToListAsync();
     }
 
-    public async Task<UserStatus> GetUserStatusByIdAsync(Guid userStatusId, bool trackChanges)
+    public async Task<UserStatus?> GetUserStatusByIdAsync(Guid userStatusId)
     {
-        return trackChanges ?
-            await _authDBContext.UserStatuses
-                .FirstOrDefaultAsync(us => us.Id.Equals(userStatusId)):
-            await _authDBContext.UserStatuses
-                .AsNoTracking()
+        return await _authDBContext.UserStatuses
                 .FirstOrDefaultAsync(us => us.Id.Equals(userStatusId));
     }
 
-    public async Task<IEnumerable<UserStatus>> GetUserStatusesWithExpressionAsync(Expression<Func<UserStatus, bool>> expression, bool trackChanges)
+    public async Task<IEnumerable<UserStatus>> GetUserStatusesWithExpressionAsync(Expression<Func<UserStatus, bool>> expression)
     {
-        return trackChanges ?
-            await _authDBContext.UserStatuses
-                .Where(expression)
-                .ToListAsync() :
-            await _authDBContext.UserStatuses
+        return await _authDBContext.UserStatuses
                 .AsNoTracking()
                 .Where(expression)
                 .ToListAsync();
@@ -58,7 +48,11 @@ public class UserStatusRepository : IUserStatusRepository
     public async Task UpdateUserStatusAsync(UserStatus updatedUserStatus)
     {
         var userStatus = await _authDBContext.UserStatuses.FindAsync(updatedUserStatus.Id);
-        _authDBContext.UserStatuses.Entry(userStatus).State = EntityState.Detached;
+        if(userStatus is not null)
+        {
+            _authDBContext.UserStatuses.Entry(userStatus).State = EntityState.Detached;
+        }
+
         _authDBContext.UserStatuses.Update(updatedUserStatus);
     }
 }
