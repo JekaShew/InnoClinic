@@ -24,7 +24,7 @@ public static class PersistanceExtensionMethods
         // MSSQL DB
         services.AddDbContext<AuthDBContext>(options =>
             options.UseSqlServer(
-                configuration.GetConnectionString("AuthDB"),
+                configuration.GetConnectionString("AuthDBDocker"),
                 sqlserverOption =>
                 {
                     // if Migrations in different Assembly

@@ -5,6 +5,7 @@ using AuthorizationAPI.Shared.Constants;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Transactions;
 
 namespace AuthorizationAPI.Persistance.Repositories;
 
