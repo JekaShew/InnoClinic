@@ -64,6 +64,5 @@ public class OfficesContext : IOfficesContext
     public void Dispose()
     {
         session?.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

@@ -34,7 +34,10 @@ public class PhotoController : ResponseMessageHandler
     {
         var result = await _photoServices.AddPhototoOffice(officeId, formFile);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 201);
     }
 
@@ -54,7 +57,10 @@ public class PhotoController : ResponseMessageHandler
     {
         var result = await _photoServices.DeleteOfficePhotoById(officeId, photoId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage(result.Message.Value, 204);
     }
 
@@ -74,7 +80,10 @@ public class PhotoController : ResponseMessageHandler
     {
         var result = await _photoServices.GetAllPhotos();
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<IEnumerable<PhotoInfoDTO>>(result.Message.Value, result.Value);
     }
 
@@ -93,7 +102,10 @@ public class PhotoController : ResponseMessageHandler
     {
         var result = await _photoServices.GetAllPhotosOfOfficeById(officeId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<IEnumerable<PhotoInfoDTO>>(result.Message.Value, result.Value);
     }
  
@@ -112,7 +124,10 @@ public class PhotoController : ResponseMessageHandler
     {
         var result = await _photoServices.GetPhotoById(photoId);
         if (!result.Flag)
+        {
             return HandleResponseMessage(result);
+        }
+            
         return new SuccessMessage<PhotoInfoDTO>(result.Message.Value, result.Value);
     }
 }

@@ -1,5 +1,4 @@
-﻿using CommonLibrary.CommonService;
-using FluentValidation;
+﻿using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
@@ -18,18 +17,15 @@ public class OfficeService : IOfficeService
 {
     private readonly IValidator<OfficeForCreateDTO> _officeForCreateValidator;
     private readonly IValidator<OfficeForUpdateDTO> _officeForUpdateValidator;
-    private readonly ICommonService _commonService;
     private readonly IRepositoryManager _repositoryManager;
 
     public OfficeService(
         IValidator<OfficeForCreateDTO> officeForCreateValidator,
         IValidator<OfficeForUpdateDTO> officeForUpdateValidator,
-        ICommonService commonService,
         IRepositoryManager repositoryManager)
     {
         _officeForCreateValidator = officeForCreateValidator;
         _officeForUpdateValidator = officeForUpdateValidator;
-        _commonService = commonService;
         _repositoryManager = repositoryManager;
     }
 

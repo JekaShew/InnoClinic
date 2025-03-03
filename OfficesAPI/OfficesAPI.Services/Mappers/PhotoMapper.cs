@@ -2,12 +2,10 @@
 using OfficesAPI.Shared.DTOs.PhotoDTOs;
 using Riok.Mapperly.Abstractions;
 
-namespace OfficesAPI.Shared.Mappers
+namespace OfficesAPI.Shared.Mappers;
+
+[Mapper]
+public static partial class PhotoMapper
 {
-    [Mapper]
-    public static partial class PhotoMapper
-    {
-        public static partial PhotoInfoDTO? PhotoToPhotoInfoDTO(Photo? photo);
-        //public static partial PhotoDTO? PhotoToPhotoDTO(Photo? photo);
-    }
+    public static partial PhotoInfoDTO? PhotoToPhotoInfoDTO(Photo? photo);
 }
