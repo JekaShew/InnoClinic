@@ -39,7 +39,7 @@ public class OfficeService : IOfficeService
 
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
         office.Id = ObjectId.GenerateNewId().ToString();
-        if (files is not null && files.Any())
+        if (files is not null && files.Count == 0)
         {
             var photoList = new List<Photo>();
             foreach (var image in files)
@@ -79,7 +79,7 @@ public class OfficeService : IOfficeService
             return new ResponseMessage(MessageConstants.NotFoundMessage, false);
         }
 
-        if(office.Photos is not null && office.Photos.Any())
+        if(office.Photos is not null && office.Photos.Count != 0)
         {
             _repositoryManager.Office.DeleteOfficeById(officeId);
             _repositoryManager.Photo.DeletePhotosOfOfficeByOfficeId(officeId);
@@ -97,7 +97,7 @@ public class OfficeService : IOfficeService
     public async Task<ResponseMessage<IEnumerable<OfficeTableInfoDTO>>> GetAllOfficesAsync()
     {
         var offices = await _repositoryManager.Office.GetAllOfficesAsync();
-        if (!offices.Any())
+        if (offices.Count == 0)
         {
             return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(MessageConstants.NotFoundMessage, false);
         }

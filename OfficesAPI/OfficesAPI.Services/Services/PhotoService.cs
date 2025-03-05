@@ -67,7 +67,7 @@ public class PhotoService : IPhotoService
     public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotos()
     {
         var photos = await _repositoryManager.Photo.GetAllPhotos();
-        if(!photos.Any())
+        if(photos.Count == 0)
         {
             return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(MessageConstants.NotFoundMessage, false);
         }
@@ -79,9 +79,8 @@ public class PhotoService : IPhotoService
 
     public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(string officeId)
     {
-        var filter = Builders<Photo>.Filter.Eq(o => o.OfficeId, officeId);
-        var photos = await _repositoryManager.Photo.GetPhotoListWithFilter(filter);
-        if(!photos.Any())
+        var photos = await _repositoryManager.Photo.GetPhotoListByFilter(x => x.OfficeId.Equals(officeId));
+        if(photos.Count == 0)
         {
             return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(MessageConstants.NotFoundMessage, false);
         }
