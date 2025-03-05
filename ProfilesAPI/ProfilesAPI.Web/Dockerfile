@@ -1,28 +1,31 @@
 # See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-# This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
+EXPOSE 5002
 
-
-# This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-ARG BUILD_CONFIGURATION=Release
+ARG BUILD_CONFIGURATION=Development
 WORKDIR /src
-COPY ["ProfilesAPI.Web/ProfilesAPI.Web.csproj", "ProfilesAPI.Web/"]
-RUN dotnet restore "./ProfilesAPI.Web/ProfilesAPI.Web.csproj"
+COPY ["CommonLibrary/CommonLibrary/CommonLibrary.csproj", "CommonLibrary/CommonLibrary/"]
+COPY ["ProfilesAPI/ProfilesAPI.Domain/ProfilesAPI.Domain.csproj", "ProfilesAPI/ProfilesAPI.Domain/"]
+COPY ["ProfilesAPI/ProfilesAPI.Shared/ProfilesAPI.Shared.csproj", "ProfilesAPI/ProfilesAPI.Shared/"]
+COPY ["ProfilesAPI/ProfilesAPI.Persistance/ProfilesAPI.Persistance.csproj", "ProfilesAPI/ProfilesAPI.Persistance/"]
+COPY ["ProfilesAPI/ProfilesAPI.Presentation/ProfilesAPI.Presentation.csproj", "ProfilesAPI/ProfilesAPI.Presentation/"]
+COPY ["ProfilesAPI/ProfilesAPI.Services/ProfilesAPI.Services.csproj", "ProfilesAPI/ProfilesAPI.Services/"]
+COPY ["ProfilesAPI/ProfilesAPI.Services.Abstractions/ProfilesAPI.Services.Abstractions.csproj", "ProfilesAPI/ProfilesAPI.Services.Abstractions/"]
+COPY ["ProfilesAPI/ProfilesAPI.Web/ProfilesAPI.Web.csproj", "ProfilesAPI/ProfilesAPI.Web/"]
+RUN dotnet restore "./ProfilesAPI/ProfilesAPI.Web/ProfilesAPI.Web.csproj"
+
 COPY . .
-WORKDIR "/src/ProfilesAPI.Web"
+
+WORKDIR "/src/ProfilesAPI/ProfilesAPI.Web"
 RUN dotnet build "./ProfilesAPI.Web.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
-# This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
+ARG BUILD_CONFIGURATION=Development
 RUN dotnet publish "./ProfilesAPI.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-# This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .

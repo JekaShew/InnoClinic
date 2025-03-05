@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProfilesAPI.Persistance.Repositories
+namespace ProfilesAPI.Services.Validators.ReceptionistValidators
 {
-    internal class RepositoryManager
+    internal class ReceptionistForUpdateDTOValidator
     {
     }
 }

@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\CommonLibrary\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Shared\ProfilesAPI.Shared.csproj" />
+  </ItemGroup>
+
 </Project>

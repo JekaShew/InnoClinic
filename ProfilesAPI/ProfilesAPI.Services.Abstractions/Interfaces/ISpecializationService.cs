@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ProfilesAPI.Shared.DTOs.SpecializationDTOs;
 
-namespace ProfilesAPI.Services.Abstractions.Interfaces
+namespace ProfilesAPI.Services.Abstractions.Interfaces;
+
+public interface ISpecializationService
 {
-    internal interface ISpecializationService
-    {
-    }
+    public Task AddSpecializationAsync(SpecializationForCreateDTO specialization);
+    public Task UpdateSpecializationAsync(Guid specializationId, SpecializationForUpdateDTO updatedSpecialization);
+    public Task DeleteSpecializationByIdAsync(Guid specializationId);
+    public Task<SpecializationInfoDTO> GetSpecializationByIdAsync(Guid specializationId);
+    public Task<ICollection<SpecializationTableInfoDTO>> GetAllSpecializationsAsync();
 }

@@ -1,12 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
+using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
-namespace ProfilesAPI.Services.Abstractions.Interfaces
+namespace ProfilesAPI.Services.Abstractions.Interfaces;
+
+public interface IAdministratorService
 {
-    internal interface IAdministratorService
-    {
-    }
+    public Task AddAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO);
+    public Task UpdateAdministratorAsync(Guid administratorId, AdministratorForUpdateDTO administratorForUpdateDTO);
+    public Task DeleteAdministratorByIdAsync(Guid administratorId);
+    public Task<AdministratorInfoDTO> GetAdministratorByIdAsync(Guid administratorId);
+    public Task<ICollection<AdministratorTableInfoDTO>> GetAllAdministratorsAsync();
 }

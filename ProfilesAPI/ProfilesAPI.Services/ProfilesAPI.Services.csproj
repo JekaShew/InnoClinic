@@ -6,4 +6,24 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Mappers\DoctorMappers\" />
+    <Folder Include="Mappers\AdministratorMappers\" />
+    <Folder Include="Mappers\ReceptionistMapper\" />
+    <Folder Include="Mappers\PatientMappers\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.2" />
+    <PackageReference Include="Riok.Mapperly" Version="4.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProfilesAPI.Domain\ProfilesAPI.Domain.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Services.Abstractions\ProfilesAPI.Services.Abstractions.csproj" />
+  </ItemGroup>
+
 </Project>
