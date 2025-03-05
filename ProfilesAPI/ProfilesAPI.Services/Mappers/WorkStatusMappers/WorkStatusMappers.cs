@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
-namespace ProfilesAPI.Services.Mappers.WorkStatusMappers
+namespace ProfilesAPI.Services.Mappers.WorkStatusMappers;
+
+public class WorkStatusMappers : Profile
 {
-    internal class WorkStatusMappers
+    public WorkStatusMappers()
     {
+        CreateMap<WorkStatus, WorkStatusInfoDTO>();
+        CreateMap<WorkStatus, WorkStatusTableInfoDTO>();
+        CreateMap<WorkStatusForCreateDTO, WorkStatus>();
+        CreateMap<WorkStatusForUpdateDTO, WorkStatus>();
     }
 }

@@ -2,6 +2,7 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using ProfilesAPI.Persistance.Extensions;
 using InnoClinic.CommonLibrary.Exceptions;
+using ProfilesAPI.Services.Extensions;
 
 internal class Program
 {
@@ -58,7 +59,7 @@ internal class Program
         builder.Services.AddCommonServices(builder.Configuration, builder.Configuration["ProfilesSerilog:FileName"]);
 
         builder.Services.AddPersistanceServices(builder.Configuration);
-        //builder.Services.AddApplicationServices(builder.Configuration);
+        builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddCors(options =>

@@ -20,6 +20,7 @@ namespace ProfilesAPI.Services.Extensions
             services.AddScoped<IWorkStatusService, WorkStatusService>();
 
             services.AddFluentValidationMethod();
+            services.AddAutoMapperMethod();
 
             return services;
         }
@@ -31,4 +32,13 @@ namespace ProfilesAPI.Services.Extensions
 
             return services;
         }
+
+        private static IServiceCollection AddAutoMapperMethod(this IServiceCollection services)
+        {
+            // FluentValidation
+            services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+            return services;
+        }
     }
+}

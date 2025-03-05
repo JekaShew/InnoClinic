@@ -1,4 +1,9 @@
-﻿using ProfilesAPI.Domain.IRepositories;
+﻿using AutoMapper;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
+using InnoClinic.CommonLibrary.Response;
+using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.SpecializationDTOs;
 
@@ -7,34 +12,86 @@ namespace ProfilesAPI.Services.Services;
 public class SpecializationService : ISpecializationService
 {
     private readonly IRepositoryManager _repositoryManager;
+    private readonly IMapper _mapper;
+    private readonly IValidator<SpecializationForCreateDTO> _specializationForCreateValidator;
+    private readonly IValidator<SpecializationForUpdateDTO> _specializationForUpdateValidator;
 
-    public SpecializationService(IRepositoryManager repositoryManager)
+    public SpecializationService(
+            IRepositoryManager repositoryManager, 
+            IMapper mapper,
+            IValidator<SpecializationForCreateDTO> specializationForCreateValidator, 
+            IValidator<SpecializationForUpdateDTO> specializationForUpdateValidator)
     {
         _repositoryManager = repositoryManager;
+        _mapper = mapper;
+        _specializationForCreateValidator = specializationForCreateValidator;
+        _specializationForUpdateValidator = specializationForUpdateValidator;
     }
 
-    public Task AddSpecializationAsync(SpecializationForCreateDTO specialization)
+    public async Task<ResponseMessage> AddSpecializationAsync(SpecializationForCreateDTO specializationForCreateDTO)
     {
-        throw new NotImplementedException();
+        var validationResult = await _specializationForCreateValidator.ValidateAsync(specializationForCreateDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        var specialization = _mapper.Map<Specialization>(specializationForCreateDTO);
+        await _repositoryManager.Specialization.AddSpecializationAsync(specialization);
+
+        return new ResponseMessage();
     }
 
-    public Task DeleteSpecializationByIdAsync(Guid specializationId)
+    public async Task<ResponseMessage> DeleteSpecializationByIdAsync(Guid specializationId)
     {
-        throw new NotImplementedException();
+        await _repositoryManager.Specialization.DeleteSpecializationByIdAsync(specializationId);
+
+        return new ResponseMessage();
     }
 
-    public Task<ICollection<SpecializationTableInfoDTO>> GetAllSpecializationsAsync()
+    public async Task<ResponseMessage<ICollection<SpecializationTableInfoDTO>>> GetAllSpecializationsAsync()
     {
-        throw new NotImplementedException();
+        var specializations = await _repositoryManager.Specialization.GetAllSpecializationsAsync();
+        if (specializations.Count == 0)
+        {
+            return new ResponseMessage<ICollection<SpecializationTableInfoDTO>>("No Specializations Found in Database!", 404);
+        }
+
+        var specializationTableInfoDTOs = _mapper.Map<ICollection<SpecializationTableInfoDTO>>(specializations);
+
+        return new ResponseMessage<ICollection<SpecializationTableInfoDTO>>(specializationTableInfoDTOs);
     }
 
-    public Task<SpecializationInfoDTO> GetSpecializationByIdAsync(Guid specializationId)
+    public async Task<ResponseMessage<SpecializationInfoDTO>> GetSpecializationByIdAsync(Guid specializationId)
     {
-        throw new NotImplementedException();
+        var specialization = await _repositoryManager.Specialization.GetSpecializationByIdAsync(specializationId);
+        if (specialization is null)
+        {
+            return new ResponseMessage<SpecializationInfoDTO>("Specialization Not Found!", 404);
+        }
+
+        var specializationInfoDTO = _mapper.Map<SpecializationInfoDTO>(specialization);
+
+        return new ResponseMessage<SpecializationInfoDTO>(specializationInfoDTO);
     }
 
-    public Task UpdateSpecializationAsync(Guid specializationId, SpecializationForUpdateDTO updatedSpecialization)
+    public async Task<ResponseMessage> UpdateSpecializationAsync(Guid specializationId, SpecializationForUpdateDTO specializationForUpdateDTO)
     {
-        throw new NotImplementedException();
+        var validationResult = await _specializationForUpdateValidator.ValidateAsync(specializationForUpdateDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        var specialization = await _repositoryManager.Specialization.GetSpecializationByIdAsync(specializationId);
+        if (specialization is null)
+        {
+            return new ResponseMessage("Specialization Not Found!", 404);
+        }
+
+        specialization = _mapper.Map(specializationForUpdateDTO, specialization);
+        await _repositoryManager.Specialization.UpdateSpecializationAsync(specialization);
+
+        return new ResponseMessage();
     }
 }

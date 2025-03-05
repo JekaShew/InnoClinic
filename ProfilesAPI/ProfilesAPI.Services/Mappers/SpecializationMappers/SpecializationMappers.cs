@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Shared.DTOs.SpecializationDTOs;
 
-namespace ProfilesAPI.Services.Mappers.SpecializationMappers
+namespace ProfilesAPI.Services.Mappers.SpecializationMappers;
+
+public class SpecializationMappers : Profile
 {
-    internal class SpecializationMappers
+    public SpecializationMappers() 
     {
+        CreateMap<Specialization, SpecializationInfoDTO>();
+        CreateMap<Specialization, SpecializationTableInfoDTO>();
+        CreateMap<SpecializationForCreateDTO, Specialization>();
+        CreateMap<SpecializationForUpdateDTO, Specialization>();
     }
 }
