@@ -11,12 +11,14 @@ namespace ProfilesAPI.Persistance.Data
 
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
+        private readonly string _masterConnectionString;
         private IDbConnection _dbConnection;
         private IDbTransaction _dbTransaction;
         public ProfilesDBContext(IConfiguration configuration)
         {
             _configuration = configuration;
             _connectionString = _configuration.GetConnectionString("ProfilesDB");
+            _masterConnectionString = _configuration.GetConnectionString("MasterDB");
         }
 
         public IDbConnection? Connection
@@ -26,6 +28,18 @@ namespace ProfilesAPI.Persistance.Data
                 if(_dbConnection is null || !_dbConnection.State.Equals(ConnectionState.Open) )
                 {
                     _dbConnection = new SqlConnection(_connectionString);
+                }
+                return _dbConnection;
+            }
+        }
+
+        public IDbConnection? MasterConnection
+        {
+            get
+            {
+                if (_dbConnection is null || !_dbConnection.State.Equals(ConnectionState.Open))
+                {
+                    _dbConnection = new SqlConnection(_masterConnectionString);
                 }
                 return _dbConnection;
             }

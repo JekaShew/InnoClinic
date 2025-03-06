@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 
-namespace ProfilesAPI.Services.Validators.DoctorValidators
+namespace ProfilesAPI.Services.Validators.DoctorValidators;
+
+public class DoctorForCreateDTOValidator : AbstractValidator<DoctorForCreateDTO>
 {
-    internal class DoctorForCreateDTOValidator
+    public DoctorForCreateDTOValidator()
     {
+        
     }
 }

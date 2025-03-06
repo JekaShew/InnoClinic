@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
+using ProfilesAPI.Shared.DTOs.ReceptionistDTOs;
 
-namespace ProfilesAPI.Services.Validators.ReceptionistValidators
+namespace ProfilesAPI.Services.Validators.ReceptionistValidators;
+
+public class ReceptionistForCreateDTOValidator : AbstractValidator<ReceptionistForCreateDTO>
 {
-    internal class ReceptionistForCreateDTOValidator
+    public ReceptionistForCreateDTOValidator()
     {
+        
     }
 }

@@ -57,7 +57,7 @@ internal class Program
         });
 
         builder.Services.AddCommonServices(builder.Configuration, builder.Configuration["ProfilesSerilog:FileName"]);
-
+        
         builder.Services.AddPersistanceServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
 
@@ -73,7 +73,7 @@ internal class Program
         var app = builder.Build();
 
         app.UseCommonPolicies();
-
+        
         app.UseStaticFiles();
         app.UseCors("CorsPolicy");
         app.UseSwagger();
@@ -87,6 +87,8 @@ internal class Program
         app.UseRouting();
 
         app.UseAuthorization();
+
+        app.ApplyFluentMigrationsMethodAsync();    
 
         app.MapControllers();
         app.Run();

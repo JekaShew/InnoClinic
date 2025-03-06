@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FluentValidation;
+using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
 
-namespace ProfilesAPI.Services.Validators.AdministratorValidators
+namespace ProfilesAPI.Services.Validators.AdministratorValidators;
+
+public class AdministratorForUpdateDTOValidator : AbstractValidator<AdministratorForUpdateDTO>
 {
-    internal class AdministratorForUpdateDTOValidator
+    public AdministratorForUpdateDTOValidator()
     {
+        
     }
 }

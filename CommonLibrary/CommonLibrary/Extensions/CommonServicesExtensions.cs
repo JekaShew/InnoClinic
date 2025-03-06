@@ -43,6 +43,7 @@ public static class CommonServicesExtensions
     public static IApplicationBuilder UseCommonPolicies(this IApplicationBuilder app)
     {
         app.UseExceptionHandler(opt => { });
+        app.UseSerilogRequestLogging();
 
         return app;
     }
