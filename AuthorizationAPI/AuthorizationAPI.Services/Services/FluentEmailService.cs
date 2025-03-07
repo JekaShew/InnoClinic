@@ -73,10 +73,10 @@ public class FluentEmailService : IEmailService
         var sendEmail = await SendSingleMail(verificationEmailMetadata);
         if (!sendEmail)
         {
-            return new ResponseMessage(MessageConstants.FailEmailVerificationMessage, false);
+            return new ResponseMessage("An Error Occured while sending Verification mail!", 500);
         }
 
-        return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> SendUserEmail(IEnumerable<UserEmailDTO> userEmailDTOs,Guid userId, Guid roleId = default)
@@ -85,7 +85,7 @@ public class FluentEmailService : IEmailService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null)
         {
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+            return new ResponseMessage("Forbidden Action! You have no Rights!", 403);
         }
 
         bool isAdmin = currentUserInfo.Role.Equals(RoleConstants.Administrator);
@@ -134,7 +134,7 @@ public class FluentEmailService : IEmailService
                 continue;
             }
 
-            return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
+            return new ResponseMessage("Forbidden Action! You Have no Rights!", 403);
         }
 
         bool response = 
@@ -143,10 +143,10 @@ public class FluentEmailService : IEmailService
                     response = await SendMultipleConsumersMail(emailMetaDatas);
         if(!response)
         {
-            return new ResponseMessage(MessageConstants.FailSendEmailMessage500, false);
+            return new ResponseMessage("An Error Occred while sending Mail!", 500);
         }
 
-        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<bool> SendMultipleConsumersMail(IEnumerable<EmailMetaData> emailMetadataList)

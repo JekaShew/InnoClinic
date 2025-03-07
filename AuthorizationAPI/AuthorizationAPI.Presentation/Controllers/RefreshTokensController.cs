@@ -7,7 +7,7 @@ namespace AuthorizationAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class RefreshTokensController : ResponseMessageHandler
+public class RefreshTokensController : ControllerBase
 {
     private readonly IRefreshTokenService _refreshTokenService;
     public RefreshTokensController(IRefreshTokenService refreshTokenService)
@@ -19,8 +19,8 @@ public class RefreshTokensController : ResponseMessageHandler
     /// Gets selected Refresh Token
     /// </summary>
     /// <returns>Single Refresh Token</returns>
-    [HttpGet("{refreshTokenId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage<RefreshTokenInfoDTO>), 200)]
+    [HttpGet("{refreshTokenId}")]
+    [ProducesResponseType(typeof(RefreshTokenInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -30,12 +30,12 @@ public class RefreshTokensController : ResponseMessageHandler
     public async Task<IActionResult> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
     {
         var result = await _refreshTokenService.GetRefreshTokenInfoByRefreshTokenId(refreshTokenId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<RefreshTokenInfoDTO>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class RefreshTokensController : ResponseMessageHandler
     /// </summary>
     /// <returns>The Logged In Users list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(SuccessMessage<IEnumerable<UserLoggedInInfoDTO>>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<UserLoggedInInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -53,20 +53,20 @@ public class RefreshTokensController : ResponseMessageHandler
     public async Task<IActionResult> GetAllLoggedInUsers()
     {
         var result = await _refreshTokenService.GetAllLoggedInUsers();
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<IEnumerable<UserLoggedInInfoDTO>>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
     /// Deletes Refresh Token By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{refreshTokenId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage), 204)]
+    [HttpDelete("{refreshTokenId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -76,20 +76,20 @@ public class RefreshTokensController : ResponseMessageHandler
     public async Task<IActionResult> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
     {
         var result = await _refreshTokenService.DeleteRefreshTokenByRTokenId(refreshTokenId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 204);
+        return NoContent();
     }
 
     /// <summary>
     /// Switches Revoke status of Refresh Token by Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{refreshTokenId:guid}/revoke")]
-    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [HttpPut("{refreshTokenId}/revoke")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -99,11 +99,11 @@ public class RefreshTokensController : ResponseMessageHandler
     public async Task<IActionResult> RevokeRefreshTokenByRefreshTokenId(Guid refreshTokenId)
     {
         var result = await _refreshTokenService.RevokeRefreshTokenByRefreshTokenId(refreshTokenId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value);
+        return Ok();
     }
 }

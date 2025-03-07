@@ -10,6 +10,7 @@ using CommonLibrary.CommonService;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -57,29 +58,29 @@ public class AuthorizationService : IAuthorizationService
         var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
         if (user is null)
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+            return new ResponseMessage<TokensDTO>("Access Denied! Check Email, you have entered!", 400);
         }
 
         if(!user.UserStatusId.Equals(DBConstants.ActivatedUserStatusId))
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.ForbiddenMessage, false);
+            return new ResponseMessage<TokensDTO>("Forbidden Action! Your user status is incorrect!", 403);
         }
 
         //Check Email Password pair
         var enteredPasswordHash = await _commonService.GetHashString($"{loginInfoDTO.Password}{user.SecurityStamp}");
         if (!enteredPasswordHash.Equals(user.PasswordHash))
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+            return new ResponseMessage<TokensDTO>("Access Denied! Check Credentials, you have entered!", 400);
         }  
 
         //Generate A&R Tokens
         var tokens = await GenerateTokenPair(user.Id);
         if(tokens.AccessToken.IsNullOrEmpty() || tokens.RefreshToken.IsNullOrEmpty())
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.FailedMessage, false);
+            return new ResponseMessage<TokensDTO>("Server's Error Occured!", 500);
         }
 
-        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
+        return new ResponseMessage<TokensDTO>(tokens);
     }
 
     public async Task<ResponseMessage> SignOut(Guid refreshTokenId)
@@ -87,13 +88,13 @@ public class AuthorizationService : IAuthorizationService
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Refrest Token Found!", 404);
         } 
 
         _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
         await _repositoryManager.CommitAsync();
 
-        return new ResponseMessage(MessageConstants.SuccessMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> SignUp(RegistrationInfoDTO registrationInfoDTO)
@@ -108,20 +109,20 @@ public class AuthorizationService : IAuthorizationService
         var user = await _repositoryManager.User.GetUserByEmailAsync(registrationInfoDTO.Email);
         if(user is not null)
         {
-            return new ResponseMessage(MessageConstants.EmailRegisteredMessage, false);
+            return new ResponseMessage("Server's Error Occured!", 500);
         }    
 
         // Create User 
         var defaultRole = await _repositoryManager.Role.GetRoleByIdAsync(DBConstants.PatientRoleId);
         if (defaultRole is null || defaultRole.Id.Equals(Guid.Empty))
         {
-            return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
+            return new ResponseMessage("Server's Error Occured! Check Initial Database Data!", 500);
         }
 
         var defaultUserStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(DBConstants.NonActivatedUserStatusId);
         if (defaultUserStatus is null || defaultUserStatus.Equals(Guid.Empty))
         {
-            return new ResponseMessage(MessageConstants.CheckDBDataMessage, false);
+            return new ResponseMessage("Server's Error Occured! Check Initial Database Data!", 500);
         }
 
         var securityStamp = await _commonService.GetHashString(registrationInfoDTO.SecretPhrase);
@@ -146,12 +147,12 @@ public class AuthorizationService : IAuthorizationService
         var refreshToken = await IsRefreshTokeCorrect(rTokenId, false);
         if (refreshToken is null)
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.ForbiddenMessage, false);
+            return new ResponseMessage<TokensDTO>("Access Denied! Your Session is inValid", 403);
         }    
         //Generate A&R Tokens
         var tokens = await GenerateTokenPair(refreshToken.UserId);
 
-        return new ResponseMessage<TokensDTO>(MessageConstants.SuccessMessage, true, tokens);
+        return new ResponseMessage<TokensDTO>(tokens);
     }
 
     public async Task<ResponseMessage> ResendEmailVerification(LoginInfoDTO loginInfoDTO)
@@ -165,13 +166,13 @@ public class AuthorizationService : IAuthorizationService
         var user = await _repositoryManager.User.GetUserByEmailAsync(loginInfoDTO.Email);
         if (user is null)
         {
-            return new ResponseMessage<TokensDTO>(MessageConstants.CheckCredsMessage, false);
+            return new ResponseMessage<TokensDTO>("Access Denied! Check Email, you have entered!", 400);
         }
 
         var enteredPasswordhash = await _commonService.GetHashString($"{loginInfoDTO.Password}{user.SecurityStamp}");
         if (!enteredPasswordhash.Equals(user.PasswordHash))
         {
-            return new ResponseMessage(MessageConstants.CheckCredsMessage, false);
+            return new ResponseMessage("Access Denied! Check Credentials, you have entered!", 400);
         }
 
         return await _emailService.SendVerificationLetterToEmail(loginInfoDTO.Email);
