@@ -1,10 +1,8 @@
 ﻿using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
-using MongoDB.Driver;
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Services.Abstractions.Interfaces;
-using OfficesAPI.Shared.Constnts;
 using OfficesAPI.Shared.DTOs.PhotoDTOs;
 using OfficesAPI.Shared.Mappers;
 
@@ -23,7 +21,7 @@ public class PhotoService : IPhotoService
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if(office is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Office found!", 404);
         }
         var photo = new Photo();
 
@@ -40,20 +38,20 @@ public class PhotoService : IPhotoService
 
         await _repositoryManager.TransactionExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+        return new ResponseMessage();
     }
     public async Task<ResponseMessage> DeleteOfficePhotoById(string officeId,string photoId)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Office Found!", 404);
         }
 
         var photo = await _repositoryManager.Photo.GetPhotoById(photoId);
         if (photo is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Photo Found!", 404);
         }
 
         _repositoryManager.Photo.DeletePhotoById(photoId);
@@ -61,7 +59,7 @@ public class PhotoService : IPhotoService
         _repositoryManager.Office.UpdateOffice(office);
         await _repositoryManager.TransactionExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotos()
@@ -69,12 +67,12 @@ public class PhotoService : IPhotoService
         var photos = await _repositoryManager.Photo.GetAllPhotos();
         if(photos.Count == 0)
         {
-            return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<IEnumerable<PhotoInfoDTO>>("No Photos Found in Database!", 404);
         }
 
         var photoDTOs = photos.Select(p => PhotoMapper.PhotoToPhotoInfoDTO(p));
 
-        return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(MessageConstants.SuccessMessage, true, photoDTOs);
+        return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(photoDTOs);
     }
 
     public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(string officeId)
@@ -82,12 +80,12 @@ public class PhotoService : IPhotoService
         var photos = await _repositoryManager.Photo.GetPhotoListByFilter(x => x.OfficeId.Equals(officeId));
         if(photos.Count == 0)
         {
-            return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<IEnumerable<PhotoInfoDTO>>("No Photos found!", 404);
         }
 
         var photoDTOs = photos.Select(p => PhotoMapper.PhotoToPhotoInfoDTO(p));
 
-        return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(MessageConstants.SuccessMessage, true, photoDTOs);
+        return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(photoDTOs);
     }
 
     public async Task<ResponseMessage<PhotoInfoDTO>> GetPhotoById(string photoId)
@@ -95,11 +93,11 @@ public class PhotoService : IPhotoService
         var photo = await _repositoryManager.Photo.GetPhotoById(photoId);
         if(photo is null)
         {
-            return new ResponseMessage<PhotoInfoDTO>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<PhotoInfoDTO>("No Photo Found!", 404);
         }
 
         var photoDTO = PhotoMapper.PhotoToPhotoInfoDTO(photo);
 
-        return new ResponseMessage<PhotoInfoDTO>(MessageConstants.SuccessMessage, true, photoDTO);
+        return new ResponseMessage<PhotoInfoDTO>(photoDTO);
     }
 }
