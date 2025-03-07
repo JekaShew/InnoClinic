@@ -33,6 +33,21 @@ services:
     -  "5001:5001"
     # depends_on:
 
+  profiles.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5001
+    image: profilesapi
+    container_name: ProfilesAPI
+    build:
+      context: .
+      args:
+      - BUILD_CONFIGURATION=Development
+      dockerfile: ProfilesAPI/ProfilesAPI.Web/Dockerfile
+    ports:
+    -  "5002:5002"
+    # depends_on:
+    
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql-server
@@ -50,3 +65,12 @@ services:
     #     timeout: 3s
     #     retries: 10
     #     start_period: 10s
+
+    profiles-azure-blob-storage:
+      image: mcr.miccrosoft.com/azure-storage/azurite:latest
+      container_name: profilesapi.azure-blob-storage
+      volumes:
+        - ./.containers/azure-blob-storage:/data
+      ports:
+        - "10000:10000"
+      command: "azurite-blob --blobHost 0.0.0.0 -l /data"

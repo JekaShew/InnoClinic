@@ -21,6 +21,7 @@ public class PatientController : ControllerBase
     /// </summary>
     /// <returns>Single Patient's Profile</returns>
     [HttpGet("{patientId}")]
+    [ProducesResponseType(typeof(PatientInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -43,6 +44,7 @@ public class PatientController : ControllerBase
     /// </summary>
     /// <returns>The Patient's Profiles list</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(ICollection<PatientTableInfoDTO>),200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -65,6 +67,7 @@ public class PatientController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -88,6 +91,7 @@ public class PatientController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{patientId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -111,6 +115,7 @@ public class PatientController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{patientId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]

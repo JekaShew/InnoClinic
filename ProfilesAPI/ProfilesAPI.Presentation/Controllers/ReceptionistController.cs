@@ -20,6 +20,7 @@ public class ReceptionistController : ControllerBase
     /// </summary>
     /// <returns>Single Receptionist's Profile</returns>
     [HttpGet("{receptionistId}")]
+    [ProducesResponseType(typeof(ReceptionistInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -42,6 +43,7 @@ public class ReceptionistController : ControllerBase
     /// </summary>
     /// <returns>The Receptionist's Profiles list</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(ICollection<ReceptionistTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -64,6 +66,7 @@ public class ReceptionistController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -87,6 +90,7 @@ public class ReceptionistController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{receptionistId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -110,6 +114,7 @@ public class ReceptionistController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{receptionistId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]

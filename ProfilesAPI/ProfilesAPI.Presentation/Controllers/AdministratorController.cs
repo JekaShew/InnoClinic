@@ -20,6 +20,7 @@ public class AdministratorController : ControllerBase
     /// </summary>
     /// <returns>Single Administrator's Profile</returns>
     [HttpGet("{administratorId}")]
+    [ProducesResponseType(typeof(AdministratorInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -42,6 +43,7 @@ public class AdministratorController : ControllerBase
     /// </summary>
     /// <returns>The Administrator's Profiles list</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(ICollection<AdministratorTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -64,6 +66,7 @@ public class AdministratorController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -87,6 +90,7 @@ public class AdministratorController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{administratorId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -110,6 +114,7 @@ public class AdministratorController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{administratorId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]

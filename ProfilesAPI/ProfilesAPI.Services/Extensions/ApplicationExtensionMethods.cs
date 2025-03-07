@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using Azure.Storage.Blobs;
+using FluentValidation;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProfilesAPI.Services.Abstractions.Interfaces;
@@ -18,6 +19,9 @@ namespace ProfilesAPI.Services.Extensions
             services.AddScoped<IReceptionistService, ReceptionistService>();
             services.AddScoped<ISpecializationService, SpecializationService>();
             services.AddScoped<IWorkStatusService, WorkStatusService>();
+
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
+            services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("AzureBlobStorage")));
 
             services.AddFluentValidationMethod();
             services.AddAutoMapperMethod();

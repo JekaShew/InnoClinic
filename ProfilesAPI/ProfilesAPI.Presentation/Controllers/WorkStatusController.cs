@@ -1,6 +1,7 @@
 ﻿using CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
@@ -20,6 +21,7 @@ public class WorkStatusController : ControllerBase
     /// </summary>
     /// <returns>Single Work Status</returns>
     [HttpGet("{workStatusId}")]
+    [ProducesResponseType(typeof(WorkStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -42,6 +44,7 @@ public class WorkStatusController : ControllerBase
     /// </summary>
     /// <returns>The Work Statuses list</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(ICollection<WorkStatusTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -64,6 +67,7 @@ public class WorkStatusController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -87,6 +91,7 @@ public class WorkStatusController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{workStatusId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -110,6 +115,7 @@ public class WorkStatusController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{workStatusId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]

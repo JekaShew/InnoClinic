@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.DoctorDTOs;
-using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
@@ -21,6 +20,7 @@ public class DoctorController : ControllerBase
     /// </summary>
     /// <returns>Single Doctor's Profile</returns>
     [HttpGet("{doctorId}")]
+    [ProducesResponseType(typeof(DoctorInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -43,6 +43,7 @@ public class DoctorController : ControllerBase
     /// </summary>
     /// <returns>The Doctor's Profiles list</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(ICollection<DoctorTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -65,6 +66,7 @@ public class DoctorController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -88,6 +90,7 @@ public class DoctorController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{doctorId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -111,6 +114,7 @@ public class DoctorController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{doctorId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
