@@ -17,6 +17,21 @@ services:
     # depends_on:
     #     mssql-server:
     #         condition: service_healthy
+  
+  offices.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5001
+    image: officesapi
+    container_name: OfficesAPI
+    build:
+      context: .
+      args:
+      - BUILD_CONFIGURATION=Development
+      dockerfile: OfficesAPI/OfficesAPI.Web/Dockerfile
+    ports:
+    -  "5001:5001"
+    # depends_on:
 
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -34,4 +49,4 @@ services:
     #     interval: 10s
     #     timeout: 3s
     #     retries: 10
-
+    #     start_period: 10s

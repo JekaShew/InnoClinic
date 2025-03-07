@@ -14,11 +14,7 @@ public static class CommonServicesExtensions
         this IServiceCollection services,
         IConfiguration configuration,
         string serilogFile)
-    {
-        // DB MongoDB
-        //if (dbConnectionStringKey.Key.Equals("MongoDB"))
-        //    services.AddSingleton(new MongoDBService(dbConnectionStringKey.Value));
-        //services.AddSingleton<MongoDBService>(dbConnectionStringKey.Value).BuildServiceProvider(); 
+    {       
         // CommonService
         services.AddScoped<ICommonService, CommonService>();
         //Serilog
@@ -32,7 +28,7 @@ public static class CommonServicesExtensions
             .ReadFrom.Configuration(configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
-            .WriteTo.Console(Serilog.Events.LogEventLevel.Error)
+            .WriteTo.Console(LogEventLevel.Error)
             .WriteTo.File($"{serilogFile}.log"));
 
         // Global Exception Handler

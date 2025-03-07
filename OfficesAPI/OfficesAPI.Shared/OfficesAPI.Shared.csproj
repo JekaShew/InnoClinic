@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Constnts\**" />
+    <EmbeddedResource Remove="Constnts\**" />
+    <None Remove="Constnts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\CommonLibrary\CommonLibrary\CommonLibrary.csproj" />
   </ItemGroup>
 

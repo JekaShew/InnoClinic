@@ -72,7 +72,7 @@ public static class ApplicationServicesExtesionMethods
         services.AddHangfire(config =>
             config.UseSimpleAssemblyNameTypeSerializer()
             .UseSimpleAssemblyNameTypeSerializer()
-            .UseSqlServerStorage(configuration.GetConnectionString("AuthDB"))
+            .UseSqlServerStorage(configuration.GetConnectionString("AuthDBDocker"))
         );
 
         services.AddHangfireServer();

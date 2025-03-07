@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using OfficesAPI.Persistance.Extensions;
+using System.Collections.Concurrent;
 using System.Data;
 
 namespace OfficesAPI.Persistance.Data;
@@ -9,19 +10,19 @@ public class OfficesContext : IOfficesContext
 {
     public IClientSessionHandle session { get; set; }
     public MongoClient mongoClient { get; set; }
-    private IMongoDatabase _officesDB { get; set; }
-    private readonly List<Func<Task>> _commandTasks;
+    private readonly IMongoDatabase _officesDB;
+    private readonly  ConcurrentQueue<Func<Task>> _commandTasks;
 
     public OfficesContext(IOptions<ConnectionStringsSettings> options)
     {
         var mongoUrl = MongoUrl.Create(options.Value.OfficesDB);
         mongoClient = new MongoClient(mongoUrl);
         _officesDB = mongoClient.GetDatabase("OfficesDB");
-        _commandTasks = new List<Func<Task>>();
+        _commandTasks = new ConcurrentQueue<Func<Task>>();
     }
     public void AddCommand(Func<Task> func)
     {
-        _commandTasks.Add(func);
+        _commandTasks.Enqueue(func);
     }
 
     public IMongoCollection<T> GetMongoCollection<T>(string name)
@@ -31,7 +32,11 @@ public class OfficesContext : IOfficesContext
 
     public async Task SingleExecution()
     {
-        var commandTask = _commandTasks.FirstOrDefault();
+        if(!_commandTasks.TryDequeue(out Func<Task>? commandTask))
+        {
+            throw new Exception("No commands to execute");
+        }
+
         await commandTask.Invoke();
     }
 
@@ -42,10 +47,11 @@ public class OfficesContext : IOfficesContext
             using (session = await mongoClient.StartSessionAsync())
             {
                 session.StartTransaction();
-
-                var commandTasks = _commandTasks.Select(async c => await c.Invoke());
-
-                await Task.WhenAll(commandTasks);
+                foreach (var command in _commandTasks)
+                {
+                    _commandTasks.TryDequeue(out Func<Task>? commandTask);
+                    await command.Invoke();
+                }
 
                 await session.CommitTransactionAsync();
             }
@@ -64,6 +70,5 @@ public class OfficesContext : IOfficesContext
     public void Dispose()
     {
         session?.Dispose();
-        GC.SuppressFinalize(this);
     }
 }

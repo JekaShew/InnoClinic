@@ -1,5 +1,4 @@
-﻿using CommonLibrary.CommonService;
-using FluentValidation;
+﻿using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +7,6 @@ using MongoDB.Bson;
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Services.Abstractions.Interfaces;
-using OfficesAPI.Shared.Constnts;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using OfficesAPI.Shared.Mappers;
 
@@ -18,18 +16,15 @@ public class OfficeService : IOfficeService
 {
     private readonly IValidator<OfficeForCreateDTO> _officeForCreateValidator;
     private readonly IValidator<OfficeForUpdateDTO> _officeForUpdateValidator;
-    private readonly ICommonService _commonService;
     private readonly IRepositoryManager _repositoryManager;
 
     public OfficeService(
         IValidator<OfficeForCreateDTO> officeForCreateValidator,
         IValidator<OfficeForUpdateDTO> officeForUpdateValidator,
-        ICommonService commonService,
         IRepositoryManager repositoryManager)
     {
         _officeForCreateValidator = officeForCreateValidator;
         _officeForUpdateValidator = officeForUpdateValidator;
-        _commonService = commonService;
         _repositoryManager = repositoryManager;
     }
 
@@ -41,17 +36,9 @@ public class OfficeService : IOfficeService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        // ask AuthorizationAPI if the current user is an admin
-        var currentUserId = _commonService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
         office.Id = ObjectId.GenerateNewId().ToString();
-        if (files is not null && files.Any())
+        if (files is not null && files.Count == 0)
         {
             var photoList = new List<Photo>();
             foreach (var image in files)
@@ -74,57 +61,47 @@ public class OfficeService : IOfficeService
             _repositoryManager.Office.CreateOffice(office);
             await _repositoryManager.TransactionExecution();
 
-            return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+            return new ResponseMessage();
         }
 
         _repositoryManager.Office.CreateOffice(office);
         await _repositoryManager.SingleExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId)
     {
-        // ask AuthorizationAPI if the current user is an admin
-        var currentUserId = _commonService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No office found!", 404);
         }
 
-        if(office.Photos is not null && office.Photos.Any())
+        if(office.Photos is not null && office.Photos.Count != 0)
         {
             _repositoryManager.Office.DeleteOfficeById(officeId);
             _repositoryManager.Photo.DeletePhotosOfOfficeByOfficeId(officeId);
             await _repositoryManager.TransactionExecution();
-
-            return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
         }
 
         _repositoryManager.Office.DeleteOfficeById(officeId);
         await _repositoryManager.SingleExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<IEnumerable<OfficeTableInfoDTO>>> GetAllOfficesAsync()
     {
         var offices = await _repositoryManager.Office.GetAllOfficesAsync();
-        if (!offices.Any())
+        if (offices.Count == 0)
         {
-            return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>("No Offices found!", 404);
         }
 
         var officeTableInfoDTOs = offices.Select(o => OfficeMapper.OfficeToOfficeTableInfoDTO(o));
 
-        return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(MessageConstants.SuccessMessage, true, officeTableInfoDTOs);
+        return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(officeTableInfoDTOs);
     }
 
     public async Task<ResponseMessage<OfficeInfoDTO>> GetOfficeByIdAsync(string officeId)
@@ -132,12 +109,12 @@ public class OfficeService : IOfficeService
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
         {
-            return new ResponseMessage<OfficeInfoDTO>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<OfficeInfoDTO>("No Office found!", 404);
         }
 
         var officeInfoDTO = OfficeMapper.OfficeToOfficeInfoDTO(office);
 
-        return new ResponseMessage<OfficeInfoDTO>(MessageConstants.SuccessMessage, true, officeInfoDTO);
+        return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
     public async Task<ResponseMessage> UpdateOfficeInfoAsync(string officeId,[FromBody] OfficeForUpdateDTO officeForUpdateDTO)
@@ -148,18 +125,10 @@ public class OfficeService : IOfficeService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        // ask AuthorizationAPI if the current user is an admin
-        var currentUserId = _commonService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Office found!", 404);
         }
 
         OfficeMapper.UpdateOfficeFromOfficeForUpdateDTO(officeForUpdateDTO, office);
@@ -167,23 +136,15 @@ public class OfficeService : IOfficeService
         _repositoryManager.Office.UpdateOffice(office);
         await _repositoryManager.SingleExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(string officeId)
     {
-        // ask AuthorizationAPI if the current user is an admin
-        var currentUserId = _commonService.GetCurrentUserId();
-        //var isAdmin = await _repositoryManager.User.IsCurrentUserAdministrator(currentUserId.Value);
-        //if (!isAdmin)
-        //{
-        //    return new ResponseMessage(MessageConstants.ForbiddenMessage, false);
-        //}
-
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Office Found!", 404);
         }
 
         office.IsActive = !office.IsActive;
@@ -191,6 +152,6 @@ public class OfficeService : IOfficeService
         _repositoryManager.Office.UpdateOffice(office);
         await _repositoryManager.SingleExecution();
 
-        return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
+        return new ResponseMessage();
     }
 }

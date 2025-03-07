@@ -6,7 +6,7 @@ namespace OfficesAPI.Domain.Data.Models;
 [Serializable, BsonIgnoreExtraElements]
 public class Office
 {
-    [BsonId, BsonElement("_id"), BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+    [BsonId, BsonElement("_id"), BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; }
     [BsonElement("city"), BsonRepresentation(BsonType.String)]
     public string City { get; set; }
