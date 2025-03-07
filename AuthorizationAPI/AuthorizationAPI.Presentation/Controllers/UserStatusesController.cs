@@ -7,7 +7,7 @@ namespace AuthorizationAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class UserStatusesController : ResponseMessageHandler
+public class UserStatusesController : ControllerBase
 {
     private readonly IUserStatusService _userStatusService;
     public UserStatusesController(IUserStatusService userStatusService)
@@ -20,7 +20,7 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Single User Status</returns>
     [HttpGet("{userStatusId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage<UserStatusInfoDTO>), 200)]
+    [ProducesResponseType(typeof(UserStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -30,12 +30,12 @@ public class UserStatusesController : ResponseMessageHandler
     public async Task<IActionResult> GetUserStatusById(Guid userStatusId)
     {
         var result = await _userStatusService.GetUserStatusByIdAsync(userStatusId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<UserStatusInfoDTO>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>The User Statuses list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(SuccessMessage<IEnumerable<UserStatusInfoDTO>>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<UserStatusInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -53,12 +53,12 @@ public class UserStatusesController : ResponseMessageHandler
     public async Task<IActionResult> GetAllUserStatuses()
     {
         var result = await _userStatusService.GetAllUserStatusesAsync();
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<IEnumerable<UserStatusInfoDTO>>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(SuccessMessage), 201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -77,12 +77,12 @@ public class UserStatusesController : ResponseMessageHandler
     public async Task<IActionResult> AddUserStatus([FromBody] UserStatusForCreateDTO userStatusForCreateDTO)
     {
         var result = await _userStatusService.CreateUserStatusAsync(userStatusForCreateDTO);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 201);
+        return Created();
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("/{userStatusId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -101,12 +101,12 @@ public class UserStatusesController : ResponseMessageHandler
     public async Task<IActionResult> UpdateUserStatus(Guid userStatusId, [FromBody] UserStatusForUpdateDTO userStatusForUpdateDTO)
     {
         var result = await _userStatusService.UpdateUserStatusAsync(userStatusId, userStatusForUpdateDTO);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value);
+        return Ok();
     }
 
     /// <summary>
@@ -114,7 +114,7 @@ public class UserStatusesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{userStatusId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage), 204)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -124,11 +124,11 @@ public class UserStatusesController : ResponseMessageHandler
     public async Task<IActionResult> DeleteUserStatusById(Guid userStatusId)
     {
         var result = await _userStatusService.DeleteUserStatusByIdAsync(userStatusId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 204);
+        return NoContent();
     }
 }

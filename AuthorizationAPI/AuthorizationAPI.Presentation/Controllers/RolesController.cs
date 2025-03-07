@@ -7,7 +7,7 @@ namespace AuthorizationAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class RolesController : ResponseMessageHandler
+public class RolesController : ControllerBase
 {
     private readonly IRoleService _roleService;
     public RolesController(IRoleService roleService)
@@ -19,8 +19,8 @@ public class RolesController : ResponseMessageHandler
     /// Gets selected Role
     /// </summary>
     /// <returns>Single Role</returns>
-    [HttpGet("{roleId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage<RoleInfoDTO>),200)]
+    [HttpGet("{roleId}")]
+    [ProducesResponseType(typeof(RoleInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage),404)]
@@ -30,12 +30,12 @@ public class RolesController : ResponseMessageHandler
     public async Task<IActionResult> GetRoleById(Guid roleId)
     {
         var result = await _roleService.GetRoleByIdAsync(roleId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<RoleInfoDTO>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ public class RolesController : ResponseMessageHandler
     /// </summary>
     /// <returns>The Roles list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(SuccessMessage<IEnumerable<RoleInfoDTO>>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<RoleInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage),400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -53,12 +53,12 @@ public class RolesController : ResponseMessageHandler
     public async Task<IActionResult> GetAllRoles()
     {
         var result = await _roleService.GetAllRolesAsync();
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<IEnumerable<RoleInfoDTO>>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class RolesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(SuccessMessage),201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -77,20 +77,20 @@ public class RolesController : ResponseMessageHandler
     public async Task<IActionResult> AddRole([FromBody] RoleForCreateDTO roleForCreateDTO)
     {
         var result = await _roleService.CreateRoleAsync(roleForCreateDTO);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
            
-        return new SuccessMessage(result.Message.Value, 201);
+        return Created();
     }
 
     /// <summary>
     /// Updates selected Role 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{roleId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [HttpPut("{roleId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -101,20 +101,20 @@ public class RolesController : ResponseMessageHandler
     public async Task<IActionResult> UpdateRole(Guid roleId, [FromBody] RoleForUpdateDTO roleForUpdateDTO)
     {
         var result = await _roleService.UpdateRoleAsync(roleId, roleForUpdateDTO);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value);
+        return Ok();
     }
 
     /// <summary>
     /// Deletes Role By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{roleId:guid}")]
-    [ProducesResponseType(typeof(SuccessMessage), 204)]
+    [HttpDelete("{roleId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -124,11 +124,11 @@ public class RolesController : ResponseMessageHandler
     public async Task<IActionResult> DeleteRoleById(Guid roleId)
     {
         var result = await _roleService.DeleteRoleByIdAsync(roleId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 204);
+        return NoContent();
     }
 }

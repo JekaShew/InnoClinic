@@ -42,7 +42,7 @@ public class RoleService : IRoleService
         await _repositoryManager.Role.CreateRoleAsync(role);
         await _repositoryManager.CommitAsync();
 
-        return new ResponseMessage(MessageConstants.SuccessCreateMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)
@@ -50,13 +50,13 @@ public class RoleService : IRoleService
         var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Role Found!", 404);
         }
            
         _repositoryManager.Role.DeleteRole(role);
         await _repositoryManager.CommitAsync();
 
-        return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync()
@@ -64,12 +64,12 @@ public class RoleService : IRoleService
         var roles = await _repositoryManager.Role.GetAllRolesAsync();
         if (!roles.Any())
         {
-            return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<IEnumerable<RoleInfoDTO>>("No Role Found in Database!", 404);
         }
 
         var roleInfoDTOs = roles.Select(r => RoleMapper.RoleToRoleInfoDTO(r));
 
-        return new ResponseMessage<IEnumerable<RoleInfoDTO>>(MessageConstants.SuccessMessage, true, roleInfoDTOs);
+        return new ResponseMessage<IEnumerable<RoleInfoDTO>>(roleInfoDTOs);
     }
 
     public async Task<ResponseMessage<RoleInfoDTO>> GetRoleByIdAsync(Guid roleId)
@@ -77,12 +77,12 @@ public class RoleService : IRoleService
         var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
-            return new ResponseMessage<RoleInfoDTO>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<RoleInfoDTO>("No Role Found!", 404);
         }
             
         var roleInfoDTO = RoleMapper.RoleToRoleInfoDTO(role);
 
-        return new ResponseMessage<RoleInfoDTO>(MessageConstants.SuccessMessage, true, roleInfoDTO);
+        return new ResponseMessage<RoleInfoDTO>(roleInfoDTO);
     }
 
     public async Task<ResponseMessage> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO)
@@ -96,12 +96,12 @@ public class RoleService : IRoleService
         var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("No Role Found!", 404);
         }
   
         RoleMapper.UpdateRoleFromRoleForUpdateDTO(roleForUpdateDTO, role);
         await _repositoryManager.CommitAsync();
 
-        return new ResponseMessage(MessageConstants.SuccessUpdateMessage, true);
+        return new ResponseMessage();
     }
 }

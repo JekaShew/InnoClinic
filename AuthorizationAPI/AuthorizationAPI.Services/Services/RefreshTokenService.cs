@@ -1,7 +1,6 @@
 ﻿using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
-using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.RefreshTokenDTOs;
 using CommonLibrary.CommonService;
 using InnoClinic.CommonLibrary.Response;
@@ -25,13 +24,13 @@ public class RefreshTokenService : IRefreshTokenService
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("Refresh Token not Found!", 404);
         }
 
         _repositoryManager.RefreshToken.DeleteRefreshToken(refreshToken);
         await _repositoryManager.CommitAsync();
 
-        return new ResponseMessage(MessageConstants.SuccessDeleteMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> RevokeRefreshTokenByRefreshTokenId(Guid refreshTokenId)
@@ -39,13 +38,13 @@ public class RefreshTokenService : IRefreshTokenService
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {
-            return new ResponseMessage(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage("Refresh Token not Found!", 404);
         }
 
         refreshToken.IsRevoked = !refreshToken.IsRevoked;
         await _repositoryManager.CommitAsync();
 
-        return new ResponseMessage(MessageConstants.SuccessMessage, true);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>> GetAllLoggedInUsers()
@@ -54,12 +53,12 @@ public class RefreshTokenService : IRefreshTokenService
                 .GetAllRefreshTokensAsync();
         if (!refreshTokenCollection.Any())
         {
-            return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>("No Logged in Users Found!", 404);
         }         
 
         var userLoggedInInfoDTOs = refreshTokenCollection.Select(rt => RefreshTokenMapper.RefreshTokenToUserLoggedInInfoDTO(rt));
 
-        return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(MessageConstants.SuccessMessage, true, userLoggedInInfoDTOs);
+        return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(userLoggedInInfoDTOs);
     }
 
     public async Task<ResponseMessage<RefreshTokenInfoDTO>> GetRefreshTokenInfoByRefreshTokenId(Guid refreshTokenId)
@@ -67,11 +66,11 @@ public class RefreshTokenService : IRefreshTokenService
         var refreshToken = await _repositoryManager.RefreshToken.GetRefreshTokenByIdAsync(refreshTokenId);
         if (refreshToken is null)
         {
-            return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.NotFoundMessage, false);
+            return new ResponseMessage<RefreshTokenInfoDTO>("Refresh Token not Found!", 404);
         }
 
         var refreshTokenInfoDTO = RefreshTokenMapper.RefreshTokenToRefreshTokenInfoDTO(refreshToken);
 
-        return new ResponseMessage<RefreshTokenInfoDTO>(MessageConstants.SuccessMessage, true, refreshTokenInfoDTO);
+        return new ResponseMessage<RefreshTokenInfoDTO>(refreshTokenInfoDTO);
     }
 }

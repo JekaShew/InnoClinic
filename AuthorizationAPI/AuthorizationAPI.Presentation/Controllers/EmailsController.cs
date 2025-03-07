@@ -1,19 +1,15 @@
 ﻿using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.AdditionalDTOs;
-using AuthorizationAPI.Shared.DTOs.UserDTOs;
 using CommonLibrary.Response;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AuthorizationAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class EmailsController : ResponseMessageHandler
+public class EmailsController : ControllerBase
 {    
-    // responses?
-
     private readonly IEmailService _emailService;
     public EmailsController(IEmailService emailService)
     {
@@ -24,8 +20,8 @@ public class EmailsController : ResponseMessageHandler
     /// Creates and sends Doctor's Email to single or multy consumers 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPost("{userId:guid}/sendfromdoctoremail")]
-    [ProducesResponseType(typeof(SuccessMessage<UserDetailedDTO>), 201)]
+    [HttpPost("{userId}/sendfromdoctoremail")]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -36,20 +32,20 @@ public class EmailsController : ResponseMessageHandler
     public async Task<IActionResult> SendFromDoctorEmail(Guid userId,[FromBody] IEnumerable<UserEmailDTO> userEmailDTOs)
     {
         var result = await _emailService.SendUserEmail(userEmailDTOs,userId, DBConstants.DoctorRoleId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 201);
+        return Created();
     }
 
     /// <summary>
     /// Creates and sends Administrator's Email to single or multy consumers 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPost("{userId:guid}/sendfromadministratoremail")]
-    [ProducesResponseType(typeof(SuccessMessage), 201)]
+    [HttpPost("{userId}/sendfromadministratoremail")]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -60,12 +56,12 @@ public class EmailsController : ResponseMessageHandler
     public async Task<IActionResult> SendFromAdministratorEmail(Guid userId, [FromBody] IEnumerable<UserEmailDTO> userEmailDTOs)
     {
         var result = await _emailService.SendUserEmail(userEmailDTOs, userId, DBConstants.AdministratorRoleId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 201);
+        return Created();
     }
 
     /// <summary>
@@ -73,7 +69,7 @@ public class EmailsController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost("{userId:guid}/sendfromnoreplyemail")]
-    [ProducesResponseType(typeof(SuccessMessage), 201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -84,11 +80,11 @@ public class EmailsController : ResponseMessageHandler
     public async Task<IActionResult> SendFromNoReplyEmail(Guid userId, [FromBody] IEnumerable<UserEmailDTO> userEmailDTOs)
     {
         var result = await _emailService.SendUserEmail(userEmailDTOs, userId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 201);
+        return Created();
     }
 }

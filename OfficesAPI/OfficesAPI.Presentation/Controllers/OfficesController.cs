@@ -8,7 +8,7 @@ namespace OfficesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class OfficesController : ResponseMessageHandler
+public class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
 
@@ -22,7 +22,7 @@ public class OfficesController : ResponseMessageHandler
     /// </summary>
     /// <returns>The Offices list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(SuccessMessage<IEnumerable<OfficeTableInfoDTO>>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<OfficeTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -31,12 +31,12 @@ public class OfficesController : ResponseMessageHandler
     public async Task<IActionResult> GetAllOffices()
     {
         var result = await _officeService.GetAllOfficesAsync();
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<IEnumerable<OfficeTableInfoDTO>>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -44,7 +44,7 @@ public class OfficesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Single Office</returns>
     [HttpGet("{officeId}")]
-    [ProducesResponseType(typeof(SuccessMessage<OfficeInfoDTO>), 200)]
+    [ProducesResponseType(typeof(OfficeInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -53,12 +53,12 @@ public class OfficesController : ResponseMessageHandler
     public async Task<IActionResult> GetOfficeByid(string officeId)
     {
         var result = await _officeService.GetOfficeByIdAsync(officeId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage<OfficeInfoDTO>(result.Message.Value, result.Value);
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class OfficesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(SuccessMessage), 201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -79,9 +79,12 @@ public class OfficesController : ResponseMessageHandler
             [FromForm] ICollection<IFormFile> files)
     {
         var result = await _officeService.CreateOfficeAsync(officeForCreateDTO, files);
-        if (!result.Flag)
-            return HandleResponseMessage(result);
-        return new SuccessMessage(result.Message.Value, 201);
+        if (!result.IsComplited)
+        {
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
+        }
+            
+        return Created();
     }
 
     /// <summary>
@@ -89,7 +92,7 @@ public class OfficesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{officeId}")]
-    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -100,12 +103,12 @@ public class OfficesController : ResponseMessageHandler
     public async Task<IActionResult> UpdateOffice(string officeId, [FromBody] OfficeForUpdateDTO officeForUpdateDTO)
     {
         var result = await _officeService.UpdateOfficeInfoAsync(officeId, officeForUpdateDTO);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value);
+        return Ok();
     }
 
     /// <summary>
@@ -113,7 +116,7 @@ public class OfficesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpDelete("{officeId}")]
-    [ProducesResponseType(typeof(SuccessMessage), 204)]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -123,12 +126,12 @@ public class OfficesController : ResponseMessageHandler
     public async Task<IActionResult> DeleteOfficeById(string officeId)
     {
         var result = await _officeService.DeleteOfficeByIdAsync(officeId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 204);
+        return NoContent();
     }
 
     /// <summary>
@@ -136,7 +139,7 @@ public class OfficesController : ResponseMessageHandler
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{officeId}/changestatusofofficebyid")]
-    [ProducesResponseType(typeof(SuccessMessage), 200)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -146,11 +149,11 @@ public class OfficesController : ResponseMessageHandler
     public async Task<IActionResult> ChangeStatusOfOfficeByIdAsync(string officeId)
     {
         var result = await _officeService.ChangeStatusOfOfficeByIdAsync(officeId);
-        if (!result.Flag)
+        if (!result.IsComplited)
         {
-            return HandleResponseMessage(result);
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return new SuccessMessage(result.Message.Value, 200);
+        return Ok();
     }
 }

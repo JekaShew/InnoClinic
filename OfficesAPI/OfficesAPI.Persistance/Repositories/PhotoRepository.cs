@@ -2,6 +2,7 @@
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Persistance.Data;
+using System.Linq.Expressions;
 
 namespace OfficesAPI.Persistance.Repositories;
 
@@ -27,7 +28,7 @@ public class PhotoRepository : IPhotoRepository
 
     public void DeletePhotosOfOfficeByOfficeId(string officeId)
     {
-        var filter = Builders<Photo>.Filter.Eq(o => o.OfficeId, officeId);
+        var filter = Builders<Photo>.Filter.Where(o => o.OfficeId.Equals(officeId));
         _officesContext.AddCommand(() => _photoCollection.DeleteManyAsync(filter));
     }
 
@@ -36,8 +37,10 @@ public class PhotoRepository : IPhotoRepository
         return await _photoCollection.Find(FilterDefinition<Photo>.Empty).ToListAsync();
     }
 
-    public async Task<ICollection<Photo>> GetPhotoListWithFilter(FilterDefinition<Photo> filter)
+    public async Task<ICollection<Photo>> GetPhotoListByFilter(Expression<Func<Photo, bool>> expression)
     {
+        var filter = Builders<Photo>.Filter.Where(expression);
+
         return await _photoCollection.Find(filter).ToListAsync();
     }
 
