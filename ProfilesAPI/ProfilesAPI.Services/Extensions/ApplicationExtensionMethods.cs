@@ -12,6 +12,11 @@ namespace ProfilesAPI.Services.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {
+            services.AddOptions<BlobContainerTitles>()
+            .Bind(configuration.GetSection(BlobContainerTitles.ConfigurationSection))
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
+
             // Registration of Services
             services.AddScoped<IAdministratorService, AdministratorService>();
             services.AddScoped<IPatientService, PatientService>();
@@ -39,7 +44,7 @@ namespace ProfilesAPI.Services.Extensions
 
         private static IServiceCollection AddAutoMapperMethod(this IServiceCollection services)
         {
-            // FluentValidation
+            // AutoMapper
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
             return services;

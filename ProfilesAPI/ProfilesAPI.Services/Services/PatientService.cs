@@ -1,7 +1,10 @@
 ﻿using AutoMapper;
+using CommonLibrary.CommonService;
+using CommonLibrary.Constants;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
@@ -12,23 +15,30 @@ namespace ProfilesAPI.Services.Services;
 public class PatientService : IPatientService
 {
     private readonly IRepositoryManager _repositoryManager;
+    private readonly IBlobStorageService _blobService;
+    private readonly ICommonService _commonService;
     private readonly IMapper _mapper;
     private readonly IValidator<PatientForCreateDTO> _patientForCreateValidator;
     private readonly IValidator<PatientForUpdateDTO> _patientForUpdateValidator;
 
     public PatientService(
             IRepositoryManager repositoryManager,
-            IMapper mapper, 
-            IValidator<PatientForCreateDTO> patientForCreateValidator, 
+            IBlobStorageService blobService,
+            ICommonService commonService,
+            IMapper mapper,
+            IValidator<PatientForCreateDTO> patientForCreateValidator,
             IValidator<PatientForUpdateDTO> patientForUpdateValidator)
     {
         _repositoryManager = repositoryManager;
+        _commonService = commonService;
+        _blobService = blobService;
         _mapper = mapper;
         _patientForCreateValidator = patientForCreateValidator;
         _patientForUpdateValidator = patientForUpdateValidator;
+        
     }
 
-    public async Task<ResponseMessage> AddPatientAsync(PatientForCreateDTO patientForCreateDTO)
+    public async Task<ResponseMessage> AddPatientAsync(PatientForCreateDTO patientForCreateDTO, IFormFile file)
     {
         var validationResult = await _patientForCreateValidator.ValidateAsync(patientForCreateDTO);
         if (!validationResult.IsValid)
@@ -36,7 +46,17 @@ public class PatientService : IPatientService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if(currentUserInfo is null)
+        {
+            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+        }
+
         var patient = _mapper.Map<Patient>(patientForCreateDTO);
+        using Stream stream = file.OpenReadStream();
+        var fileId = await _blobService.UploadAsync(stream, file.ContentType);
+        patient.UserId = currentUserInfo.Id;
+        patient.Photo = fileId;
         await _repositoryManager.Patient.AddPatientAsync(patient);
 
         return new ResponseMessage();
@@ -44,6 +64,19 @@ public class PatientService : IPatientService
 
     public async Task<ResponseMessage> DeletePatientByIdAsync(Guid patientId)
     {
+        var patient = await _repositoryManager.Patient.GetPatientByIdAsync(patientId);
+        if(patient is null)
+        {
+            return new ResponseMessage("Patient's Profile Not Found!", 404);
+        }
+
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator)
+        {
+            return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
+        }
+
+        await _blobService.DeleteAsync(patient.Photo);
         await _repositoryManager.Patient.DeletePatientByIdAsync(patientId);
 
         return new ResponseMessage();
@@ -72,10 +105,14 @@ public class PatientService : IPatientService
 
         var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
 
+        var patientPhoto = await _blobService.DownloadAsync(patient.Photo);
+        
+        patientInfoDTO.Photo = await _blobService.DownloadAsync(patient.Photo);
+        
         return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO)
+    public async Task<ResponseMessage> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO, IFormFile? file)
     {
         var validationResult = await _patientForUpdateValidator.ValidateAsync(patientForUpdateDTO);
         if (!validationResult.IsValid)
@@ -89,7 +126,21 @@ public class PatientService : IPatientService
             return new ResponseMessage("Patient's Profile Not Found!", 404);
         }
 
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id))
+        {
+            return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
+        }
+
         patient = _mapper.Map(patientForUpdateDTO, patient);
+        if(file is not null)
+        {
+            using Stream stream = file.OpenReadStream();
+            await _blobService.DeleteAsync(patient.Photo);
+            var fileId = await _blobService.UploadAsync(stream, file.ContentType);
+            patient.Photo = fileId;
+        }
+        
         await _repositoryManager.Patient.UpdatePatientAsync(patient);
 
         return new ResponseMessage();

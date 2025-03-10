@@ -31,7 +31,7 @@ public static class PersistanceExtensionMethods
         services.AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddSqlServer()
-                .WithGlobalConnectionString(configuration.GetConnectionString("ProfilesDB"))
+                .WithGlobalConnectionString(configuration.GetConnectionString("ProfilesDBDocker"))
                 .ScanIn(Assembly.GetExecutingAssembly()).For.Migrations()
             );
 
@@ -49,7 +49,6 @@ public static class PersistanceExtensionMethods
         if(context is null)
         {
             database.CreateDatabase("ProfilesDB");
-            //migrator.MigrateUp();
         }
 
         if (migrator.HasMigrationsToApplyUp())
@@ -59,6 +58,4 @@ public static class PersistanceExtensionMethods
 
         return app;
     }
-
-
 }

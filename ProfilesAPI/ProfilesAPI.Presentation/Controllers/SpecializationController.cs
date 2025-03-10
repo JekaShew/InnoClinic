@@ -25,7 +25,7 @@ public class SpecializationController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
     public async Task<IActionResult> GetSpecializationById(Guid specializationId)
     {
         var result = await _specializationService.GetSpecializationByIdAsync(specializationId);
@@ -47,7 +47,7 @@ public class SpecializationController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
     public async Task<IActionResult> GetAllSpecializations()
     {
         var result = await _specializationService.GetAllSpecializationsAsync();

@@ -1,7 +1,6 @@
 ﻿using CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
@@ -27,7 +26,7 @@ public class WorkStatusController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
     public async Task<IActionResult> GetWorkStatusById(Guid workStatusId)
     {
         var result = await _workStatusService.GetWorkStatusByIdAsync(workStatusId);
@@ -50,7 +49,7 @@ public class WorkStatusController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
+    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
     public async Task<IActionResult> GetAllWorkStatuses()
     {
         var result = await _workStatusService.GetAllWorkStatusesAsync();

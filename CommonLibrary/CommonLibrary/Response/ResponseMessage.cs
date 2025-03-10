@@ -2,7 +2,7 @@
 
 public class ResponseMessage
 {
-    public bool IsComplited => !string.IsNullOrWhiteSpace(ErrorMessage);
+    public bool IsComplited => string.IsNullOrWhiteSpace(ErrorMessage);
     public string ErrorMessage { get; }
     public int StatusCode { get; }
 

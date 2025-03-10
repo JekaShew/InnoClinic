@@ -9,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers(config =>
     {
         config.RespectBrowserAcceptHeader = true;
-        config.ReturnHttpNotAcceptable = true;
     })
     .AddApplicationPart(typeof(OfficesAPI.Presentation.Controllers.OfficesController).Assembly);
 

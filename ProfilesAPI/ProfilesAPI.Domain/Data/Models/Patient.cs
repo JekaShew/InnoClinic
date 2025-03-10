@@ -2,5 +2,4 @@
 
 public class Patient : BaseProfileInformation
 {
-    public Guid UserId { get; set; }
 }

@@ -8,5 +8,5 @@ public class PatientInfoDTO
     public string? Address { get; set; }
     public string Phone { get; set; }
     public DateTime BirthDate { get; set; }
-    public string Photo { get; set; }
+    public FileResponse? Photo { get; set; }
 }

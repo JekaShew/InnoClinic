@@ -1,8 +1,8 @@
 ﻿using CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.PatientDTOs;
-using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
@@ -44,7 +44,7 @@ public class PatientController : ControllerBase
     /// </summary>
     /// <returns>The Patient's Profiles list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ICollection<PatientTableInfoDTO>),200)]
+    [ProducesResponseType(typeof(IEnumerable<PatientTableInfoDTO>),200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -62,6 +62,33 @@ public class PatientController : ControllerBase
         return Ok(result.Value);
     }
 
+    ///// <summary>
+    ///// Creates new Office
+    ///// </summary>
+    ///// <returns>Message</returns>
+    //[HttpPost]
+    //[ProducesResponseType(201)]
+    //[ProducesResponseType(typeof(FailMessage), 400)]
+    //[ProducesResponseType(typeof(FailMessage), 403)]
+    //[ProducesResponseType(typeof(FailMessage), 404)]
+    //[ProducesResponseType(typeof(FailMessage), 408)]
+    //[ProducesResponseType(typeof(FailMessage), 422)]
+    //[ProducesResponseType(typeof(FailMessage), 500)]
+    ////[Authorize(Roles = "Administrator")]
+    //public async Task<IActionResult> AddPatient(
+    //        [FromForm] PatientForCreateDTO patientForCreateDTO,
+    //        [FromForm] IFormFile file)
+    //{
+    //    var result = await _patientService.AddPatientAsync(patientForCreateDTO, file);
+    //    if (!result.IsComplited)
+    //    {
+    //        return new FailMessage(result.ErrorMessage, result.StatusCode);
+    //    }
+
+    //    return Created();
+    //}
+
+
     /// <summary>
     /// Creates new Patient's Profile
     /// </summary>
@@ -75,9 +102,11 @@ public class PatientController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddPatient([FromBody] PatientForCreateDTO patientForCreateDTO)
+    public async Task<IActionResult> AddPatient(
+            [FromForm]PatientForCreateDTO patientForCreateDTO,
+            IFormFile file)
     {
-        var result = await _patientService.AddPatientAsync(patientForCreateDTO);
+        var result = await _patientService.AddPatientAsync(patientForCreateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

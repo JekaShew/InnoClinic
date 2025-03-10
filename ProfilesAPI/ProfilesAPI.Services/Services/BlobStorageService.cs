@@ -1,29 +1,46 @@
 ﻿using Azure;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Extensions;
 using ProfilesAPI.Shared.DTOs;
 
 namespace ProfilesAPI.Services.Services;
 
-public class BlobStorageService(BlobServiceClient blobServiceClient) : IBlobStorageService
+public class BlobStorageService() : IBlobStorageService
 {
-    private readonly string _containerTitle;
-    public BlobStorageService()
+    private readonly BlobContainerTitles _blobContainerTitles;
+    private readonly BlobServiceClient _blobServiceClient;
+
+    public BlobStorageService(
+            BlobServiceClient blobServiceClient, 
+            IOptions<BlobContainerTitles> options)
+       : this(options)
     {
-        _containerTitle = IConfiguration.GetSection("BlobStorage:ContainerTitle").Value;    
+        _blobServiceClient = blobServiceClient;
     }
+
+    public BlobStorageService(IOptions<BlobContainerTitles> options)
+        :this()
+    {
+        _blobContainerTitles = options.Value;
+    }
+
+    //public BlobStorageService(IOptions<BlobContainerTitles> options)
+    //{
+    //    _blobContainerTitles = options.Value;    
+    //}
     public async Task DeleteAsync(Guid fileId)
     {
-        BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(_containerTitle);
+        BlobContainerClient blobContainerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
         BlobClient blobClient = blobContainerClient.GetBlobClient(fileId.ToString());
         await blobClient.DeleteIfExistsAsync();         
     }
 
     public async Task<FileResponse> DownloadAsync(Guid fileId)
     {
-        BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(_containerTitle);
+        BlobContainerClient blobContainerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
         BlobClient blobClient = blobContainerClient.GetBlobClient(fileId.ToString());
         Response<BlobDownloadResult> response = await blobClient.DownloadContentAsync();
 
@@ -32,7 +49,7 @@ public class BlobStorageService(BlobServiceClient blobServiceClient) : IBlobStor
 
     public async Task<Guid> UploadAsync(Stream stream, string contentType)
     {
-        BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(_containerTitle);
+        BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
         var fileId = Guid.NewGuid();
         BlobClient blobClient = containerClient.GetBlobClient(fileId.ToString());
         await blobClient.UploadAsync(

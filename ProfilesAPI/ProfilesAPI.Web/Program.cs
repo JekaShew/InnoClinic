@@ -12,7 +12,6 @@ internal class Program
         builder.Services.AddControllers(config =>
         {
             config.RespectBrowserAcceptHeader = true;
-            config.ReturnHttpNotAcceptable = true;
         })
             .AddApplicationPart(typeof(ProfilesAPI.Presentation.Controllers.SpecializationController).Assembly);
 

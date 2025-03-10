@@ -1,6 +1,5 @@
 ﻿using Dapper;
 using ProfilesAPI.Persistance.Data;
-using System.Xml.Linq;
 
 namespace ProfilesAPI.Persistance.Migrations;
 

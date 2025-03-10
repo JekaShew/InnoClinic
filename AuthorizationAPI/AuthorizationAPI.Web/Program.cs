@@ -14,7 +14,6 @@ internal class Program
         builder.Services.AddControllers(config =>
             {
                 config.RespectBrowserAcceptHeader = true;
-                config.ReturnHttpNotAcceptable = true;
             })
             .AddNewtonsoftJson()
             .AddApplicationPart(typeof(AuthorizationAPI.Presentation.Controllers.UsersController).Assembly);

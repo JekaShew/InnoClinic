@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 
@@ -7,8 +6,6 @@ namespace ProfilesAPI.Persistance.Data
 {
     public class ProfilesDBContext
     {
-        // Options Pattern For ConnectionString
-
         private readonly IConfiguration _configuration;
         private readonly string _connectionString;
         private readonly string _masterConnectionString;
@@ -17,8 +14,8 @@ namespace ProfilesAPI.Persistance.Data
         public ProfilesDBContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("ProfilesDB");
-            _masterConnectionString = _configuration.GetConnectionString("MasterDB");
+            _connectionString = _configuration.GetConnectionString("ProfilesDBDocker");
+            _masterConnectionString = _configuration.GetConnectionString("MasterDBDocker");
         }
 
         public IDbConnection? Connection

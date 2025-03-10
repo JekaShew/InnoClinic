@@ -33,7 +33,8 @@ public class InitialMigration : Migration
             .WithColumn("Description").AsString().Nullable();
 
         Create.Table("Patients")
-            .WithColumn("UserId").AsGuid().PrimaryKey()
+            .WithColumn("Id").AsGuid().PrimaryKey()
+            .WithColumn("UserId").AsGuid().NotNullable()
             .WithColumn("FirstName").AsString().NotNullable()
             .WithColumn("LastName").AsString().NotNullable()
             .WithColumn("SecondName").AsString().Nullable()
@@ -43,7 +44,8 @@ public class InitialMigration : Migration
             .WithColumn("Photo").AsString().NotNullable();
 
         Create.Table("Receptionists")
-            .WithColumn("UserId").AsGuid().PrimaryKey()
+            .WithColumn("Id").AsGuid().PrimaryKey()
+            .WithColumn("UserId").AsGuid().NotNullable()
             .WithColumn("FirstName").AsString().NotNullable()
             .WithColumn("LastName").AsString().NotNullable()
             .WithColumn("SecondName").AsString().Nullable()
@@ -57,7 +59,8 @@ public class InitialMigration : Migration
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
         Create.Table("Doctors")
-            .WithColumn("UserId").AsGuid().PrimaryKey()
+            .WithColumn("Id").AsGuid().PrimaryKey()
+            .WithColumn("UserId").AsGuid().NotNullable()
             .WithColumn("FirstName").AsString().NotNullable()
             .WithColumn("LastName").AsString().NotNullable()
             .WithColumn("SecondName").AsString().Nullable()
@@ -71,7 +74,8 @@ public class InitialMigration : Migration
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
         Create.Table("Administrators")
-            .WithColumn("UserId").AsGuid().PrimaryKey()
+            .WithColumn("Id").AsGuid().PrimaryKey()
+            .WithColumn("UserId").AsGuid().NotNullable()
             .WithColumn("FirstName").AsString().NotNullable()
             .WithColumn("LastName").AsString().NotNullable()
             .WithColumn("SecondName").AsString().Nullable()
@@ -86,7 +90,7 @@ public class InitialMigration : Migration
 
         Create.Table("DoctorSpecializations")
            .WithColumn("Id").AsGuid().PrimaryKey()
-           .WithColumn("DoctorId").AsGuid().NotNullable().ForeignKey("Doctors", "UserId")
+           .WithColumn("DoctorId").AsGuid().NotNullable().ForeignKey("Doctors", "Id")
            .WithColumn("SpecializationId").AsGuid().NotNullable().ForeignKey("Specializations", "Id")
            .WithColumn("SpecialzationAchievementDate").AsDateTime().NotNullable()
            .WithColumn("WorkExperience").AsString().Nullable()
