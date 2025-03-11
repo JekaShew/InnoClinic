@@ -62,33 +62,6 @@ public class PatientController : ControllerBase
         return Ok(result.Value);
     }
 
-    ///// <summary>
-    ///// Creates new Office
-    ///// </summary>
-    ///// <returns>Message</returns>
-    //[HttpPost]
-    //[ProducesResponseType(201)]
-    //[ProducesResponseType(typeof(FailMessage), 400)]
-    //[ProducesResponseType(typeof(FailMessage), 403)]
-    //[ProducesResponseType(typeof(FailMessage), 404)]
-    //[ProducesResponseType(typeof(FailMessage), 408)]
-    //[ProducesResponseType(typeof(FailMessage), 422)]
-    //[ProducesResponseType(typeof(FailMessage), 500)]
-    ////[Authorize(Roles = "Administrator")]
-    //public async Task<IActionResult> AddPatient(
-    //        [FromForm] PatientForCreateDTO patientForCreateDTO,
-    //        [FromForm] IFormFile file)
-    //{
-    //    var result = await _patientService.AddPatientAsync(patientForCreateDTO, file);
-    //    if (!result.IsComplited)
-    //    {
-    //        return new FailMessage(result.ErrorMessage, result.StatusCode);
-    //    }
-
-    //    return Created();
-    //}
-
-
     /// <summary>
     /// Creates new Patient's Profile
     /// </summary>
@@ -128,9 +101,9 @@ public class PatientController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdatePatient(Guid patientId, [FromBody] PatientForUpdateDTO patientForUpdateDTO)
+    public async Task<IActionResult> UpdatePatient(Guid patientId, [FromForm] PatientForUpdateDTO patientForUpdateDTO, IFormFile? file)
     {
-        var result = await _patientService.UpdatePatientAsync(patientId, patientForUpdateDTO);
+        var result = await _patientService.UpdatePatientAsync(patientId, patientForUpdateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

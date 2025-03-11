@@ -1,4 +1,5 @@
 ﻿using CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
@@ -74,9 +75,9 @@ public class AdministratorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddAdminitrator([FromBody] AdministratorForCreateDTO administratorForCreateDTO)
+    public async Task<IActionResult> AddAdminitrator([FromForm] AdministratorForCreateDTO administratorForCreateDTO, IFormFile file)
     {
-        var result = await _administratorService.AddAdministratorAsync(administratorForCreateDTO);
+        var result = await _administratorService.AddAdministratorAsync(administratorForCreateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -98,9 +99,9 @@ public class AdministratorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateAdminitrator(Guid administratorId, [FromBody] AdministratorForUpdateDTO administratorForUpdateDTO)
+    public async Task<IActionResult> UpdateAdminitrator(Guid administratorId, [FromForm] AdministratorForUpdateDTO administratorForUpdateDTO, IFormFile? file)
     {
-        var result = await _administratorService.UpdateAdministratorAsync(administratorId, administratorForUpdateDTO);
+        var result = await _administratorService.UpdateAdministratorAsync(administratorId, administratorForUpdateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

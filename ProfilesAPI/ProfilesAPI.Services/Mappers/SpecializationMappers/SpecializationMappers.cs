@@ -10,7 +10,9 @@ public class SpecializationMappers : Profile
     {
         CreateMap<Specialization, SpecializationInfoDTO>();
         CreateMap<Specialization, SpecializationTableInfoDTO>();
-        CreateMap<SpecializationForCreateDTO, Specialization>();
+        CreateMap<SpecializationForCreateDTO, Specialization>()
+            .ForMember(s => s.Id, opt => opt.Ignore())
+            .ForMember(s => s.DoctorSpecializations, opt => opt.Ignore());
         CreateMap<SpecializationForUpdateDTO, Specialization>();
     }
 }

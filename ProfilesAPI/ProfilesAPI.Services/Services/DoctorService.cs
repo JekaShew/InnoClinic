@@ -76,13 +76,20 @@ public class DoctorService : IDoctorService
         return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync()
+    public async Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync(/*DoctorFilterDTO doctorFilterDTO*/)
     {
+        //if(doctorFilterDTO is not null)
+        //{
+
+        //    //var filteredDoctors = await _repositoryManager.Doctor.GetDoctorsByExpression()
+        //}
+        
         var doctors = await _repositoryManager.Doctor.GetAllDoctorsAsync();
         if (doctors.Count == 0)
         {
             return new ResponseMessage<ICollection<DoctorTableInfoDTO>>("No Doctor's Profiles Found in Database!", 404);
         }
+
 
         var doctorTableInfoDTOs = _mapper.Map<ICollection<DoctorTableInfoDTO>>(doctors);
 

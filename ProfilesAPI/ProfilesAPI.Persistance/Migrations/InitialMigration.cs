@@ -93,18 +93,17 @@ public class InitialMigration : Migration
            .WithColumn("DoctorId").AsGuid().NotNullable().ForeignKey("Doctors", "Id")
            .WithColumn("SpecializationId").AsGuid().NotNullable().ForeignKey("Specializations", "Id")
            .WithColumn("SpecialzationAchievementDate").AsDateTime().NotNullable()
-           .WithColumn("WorkExperience").AsString().Nullable()
            .WithColumn("Description").AsString().Nullable();
 
         Create.Index("IX_Specialization_Title")
             .OnTable("Specializations")
             .OnColumn("Title")
-            .Ascending();
+            .Unique();
 
         Create.Index("IX_WorkStatus_Title")
             .OnTable("WorkStatuses")
             .OnColumn("Title")
-            .Ascending();
+            .Unique();
 
         Create.Index("IX_DoctorSpecializations_DoctorId")
             .OnTable("DoctorSpecializations")

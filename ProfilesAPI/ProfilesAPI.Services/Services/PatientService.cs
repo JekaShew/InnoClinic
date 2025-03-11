@@ -71,7 +71,7 @@ public class PatientService : IPatientService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator)
+        if (currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
         }

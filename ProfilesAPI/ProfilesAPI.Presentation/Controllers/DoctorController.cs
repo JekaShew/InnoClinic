@@ -1,4 +1,5 @@
 ﻿using CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.DoctorDTOs;
@@ -74,9 +75,9 @@ public class DoctorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddDoctor([FromBody] DoctorForCreateDTO doctorForCreateDTO)
+    public async Task<IActionResult> AddDoctor([FromForm] DoctorForCreateDTO doctorForCreateDTO, IFormFile file)
     {
-        var result = await _doctorService.AddDoctorAsync(doctorForCreateDTO);
+        var result = await _doctorService.AddDoctorAsync(doctorForCreateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -98,9 +99,9 @@ public class DoctorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateDoctor(Guid doctorId, [FromBody] DoctorForUpdateDTO doctorForUpdateDTO)
+    public async Task<IActionResult> UpdateDoctor(Guid doctorId, [FromForm] DoctorForUpdateDTO doctorForUpdateDTO, IFormFile? file)
     {
-        var result = await _doctorService.UpdateDoctorAsync(doctorId, doctorForUpdateDTO);
+        var result = await _doctorService.UpdateDoctorAsync(doctorId, doctorForUpdateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -132,3 +133,4 @@ public class DoctorController : ControllerBase
         return NoContent();
     }
 }
+// for each workers profile change workStatus 

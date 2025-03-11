@@ -1,4 +1,5 @@
 ﻿using CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.ReceptionistDTOs;
@@ -74,9 +75,9 @@ public class ReceptionistController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddReceptionist([FromBody] ReceptionistForCreateDTO receptionistForCreateDTO)
+    public async Task<IActionResult> AddReceptionist([FromForm] ReceptionistForCreateDTO receptionistForCreateDTO, IFormFile file)
     {
-        var result = await _receptionistService.AddReceptionistAsync(receptionistForCreateDTO);
+        var result = await _receptionistService.AddReceptionistAsync(receptionistForCreateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -98,9 +99,9 @@ public class ReceptionistController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateReceptionist(Guid receptionistId, [FromBody] ReceptionistForUpdateDTO receptionistForUpdateDTO)
+    public async Task<IActionResult> UpdateReceptionist(Guid receptionistId, [FromBody] ReceptionistForUpdateDTO receptionistForUpdateDTO, IFormFile? file)
     {
-        var result = await _receptionistService.UpdateReceptionistAsync(receptionistId, receptionistForUpdateDTO);
+        var result = await _receptionistService.UpdateReceptionistAsync(receptionistId, receptionistForUpdateDTO, file);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

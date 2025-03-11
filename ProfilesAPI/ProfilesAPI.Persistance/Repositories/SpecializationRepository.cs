@@ -1,4 +1,5 @@
-﻿using Dapper.Contrib.Extensions;
+﻿using Dapper;
+using Dapper.Contrib.Extensions;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Persistance.Data;
@@ -16,7 +17,19 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task AddSpecializationAsync(Specialization specialization)
     {
-        await _profilesDBContext.Connection.InsertAsync<Specialization>(specialization);
+        //await _profilesDBContext.Connection.InsertAsync<Specialization>(specialization);
+        var query = "Insert into Specializations (Id, Title, Description) " +
+            "Values (@Id, @Title, @Description)";
+
+        var parameters = new DynamicParameters();
+        parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
+        parameters.Add("Title", specialization.Title, System.Data.DbType.String);
+        parameters.Add("Description", specialization.Description, System.Data.DbType.String);
+
+        using (var connection = _profilesDBContext.Connection)
+        {
+            await connection.ExecuteAsync(query, parameters);
+        }
     }
 
     public async Task DeleteSpecializationByIdAsync(Guid specializationId)

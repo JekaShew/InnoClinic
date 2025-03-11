@@ -64,6 +64,7 @@ public class SpecializationController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
