@@ -49,7 +49,7 @@ public static class ApplicationServicesExtesionMethods
         // FluentEmail
         var emailSettings = configuration.GetSection("EmailSettings");
         var defaultFromEmail = emailSettings["FromEmails:Default"];
-        var host = emailSettings["SMTPSettings:Host"];
+        var host = emailSettings["SMTPSettings:HostDocker"];
         var port = emailSettings.GetValue<int>("SMTPSettings:Port");
 
         services.AddFluentEmail(defaultFromEmail)

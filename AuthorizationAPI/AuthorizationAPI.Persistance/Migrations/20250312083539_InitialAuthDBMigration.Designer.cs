@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AuthorizationAPI.Persistance.Migrations
 {
     [DbContext(typeof(AuthDBContext))]
-    [Migration("20250219100007_InitializeAuthDB")]
-    partial class InitializeAuthDB
+    [Migration("20250312083539_InitialAuthDBMigration")]
+    partial class InitialAuthDBMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -74,6 +74,12 @@ namespace AuthorizationAPI.Persistance.Migrations
                             Id = new Guid("73b795d3-4917-4219-a1a0-044fcc6606ea"),
                             Description = "The role Administrator gives full admin rights.",
                             Title = "Administrator"
+                        },
+                        new
+                        {
+                            Id = new Guid("cefa7c0e-23ef-4c48-8696-b894be96bc68"),
+                            Description = "The role Receptionist gives semi full admin rights to manage Clinic's Registry.",
+                            Title = "Receptionist"
                         },
                         new
                         {

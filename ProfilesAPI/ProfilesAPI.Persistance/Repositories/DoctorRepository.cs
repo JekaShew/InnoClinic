@@ -22,7 +22,7 @@ public class DoctorRepository : IDoctorRepository
         var queryDoctor =
                     "Insert into Doctors " +
                         "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
-                        " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo" +
+                        " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo)" +
                     "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                         "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo)";
 

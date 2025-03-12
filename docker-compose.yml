@@ -13,10 +13,12 @@ services:
       dockerfile: AuthorizationAPI/AuthorizationAPI.Web/Dockerfile
     ports:
     - "5000:5000"
+    restart: on-failure
     depends_on:
-    - mssql-server
       # mssql-server:
-      #   condition: service_healthy
+      #   condition: service_completed_successfully
+      mssql-server:
+        condition: service_healthy
 
   offices.web:
     environment:
@@ -47,30 +49,38 @@ services:
       dockerfile: ProfilesAPI/ProfilesAPI.Web/Dockerfile
     ports:
     - "5002:5002"
+    restart: on-failure
     depends_on:
-    - authorization.web
-    - mssql-server
-    - profiles-azure-blob-storage
-
+      authorization.web:
+        condition: service_started
+      profiles-azure-blob-storage:
+        condition: service_started
 
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql-server
     environment:
-      ACCEPT_EULA: Y
-      SA_PASSWORD: SecretPassword123
+      - ACCEPT_EULA=Y
+      - SA_USERNAME=sa
+      - SA_PASSWORD=SecretPassword123
+    # environment:
+    #   - ACCEPT_EULA: Y
+    #   - SA_USERNAME=sa
+    #   - SA_PASSWORD=SecretPassword123
     volumes:
     - ./sqlserver/data:/var/opt/mssql/data
     - ./sqlserver/log:/var/opt/mssql/log
     ports: 
     - "1433:1433"
-    # healthcheck:
-    #   test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "http://localhost:1433", "-U", "sa", "-P", "SecretPassword123", "-Q", "SELECT 1", "||", "exit 1"]
-    #   interval: 10s
-    #   timeout: 5s
-    #   retries: 4
-    #   start_period: 15s
-
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "sqlcmd -S 127.0.0.1 -U sa -P SecretPassword123 -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # start_period: 15s
+      
+      # test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "http://localhost:1433", "-U", "sa", "-P", "SecretPassword123", "-Q", "SELECT 1", "||", "exit 1"]
       # test: /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "SecretPassword123" -Q "SELECT 1" -b -o /dev/null
       # test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P SecretPassword123 -Q "SELECT 1" || exit 1
       # test: /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "SecretPassword123" -Q "Select 1" -b -o /dev/null
@@ -84,3 +94,26 @@ services:
     ports:
     - "10000:10000"
     command: "azurite-blob --blobHost 0.0.0.0 -l /data"
+  
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    restart: always
+    ports:
+      # Change the number before : to the port the web interface should be accessible on
+      - '8000:80'
+      # Change the number before : to the port the SMTP server should be accessible on
+      - '25:25'
+      # Change the number before : to the port the IMAP server should be accessible on
+      - '143:143'
+    volumes:
+      # This is where smtp4dev stores the database..
+        - ./smtp4dev-data:/smtp4dev
+    environment:
+      #Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. "/" or "/smtp4dev"
+      # - ServerOptions__BasePath=/smtp4dev
+      # - ServerOptions__Database=database.db
+      #Specifies the URLs the web UI will use inside the container.
+      - ServerOptions__Urls=http://*:80
+
+      #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
+      - ServerOptions__HostName=smtp4dev

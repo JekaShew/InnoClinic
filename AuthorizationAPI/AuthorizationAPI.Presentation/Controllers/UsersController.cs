@@ -123,7 +123,7 @@ public class UsersController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize]
+    //[Authorize(Roles ="Administrator")]
     public async Task<IActionResult> UpdateUserInfoByAdministrator(Guid userId, [FromBody] UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO)
     {
         var result = await _userService.UpdateUserInfoByAdministrator(userId, userForUpdateByAdministratorDTO);

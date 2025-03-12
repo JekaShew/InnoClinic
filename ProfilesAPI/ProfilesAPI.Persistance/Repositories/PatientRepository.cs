@@ -21,7 +21,7 @@ public class PatientRepository : IPatientRepository
         var query = 
             "Insert into Patients " +
                 "(Id, UserId, FirstName, LastName," +
-                " SecondName, Address, Phone, BirthDate, Photo" +
+                " SecondName, Address, Phone, BirthDate, Photo)" +
             "Values (@Id, @UserId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @Phone, @BirthDate, @Photo)";
 

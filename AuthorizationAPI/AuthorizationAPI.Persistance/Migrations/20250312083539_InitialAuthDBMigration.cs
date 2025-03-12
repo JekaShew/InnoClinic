@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AuthorizationAPI.Persistance.Migrations
 {
     /// <inheritdoc />
-    public partial class InitializeAuthDB : Migration
+    public partial class InitialAuthDBMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -100,7 +100,8 @@ namespace AuthorizationAPI.Persistance.Migrations
                 {
                     { new Guid("0eec148a-43d6-4b32-afb6-1ecf3341be6d"), "The role Doctor gives some administrative rights.", "Doctor" },
                     { new Guid("73b795d3-4917-4219-a1a0-044fcc6606ea"), "The role Administrator gives full admin rights.", "Administrator" },
-                    { new Guid("78b25fdf-7199-4066-b677-5bc465bc3d1a"), "The role Patient gives small client rigts.", "Patient" }
+                    { new Guid("78b25fdf-7199-4066-b677-5bc465bc3d1a"), "The role Patient gives small client rigts.", "Patient" },
+                    { new Guid("cefa7c0e-23ef-4c48-8696-b894be96bc68"), "The role Receptionist gives semi full admin rights to manage Clinic's Registry.", "Receptionist" }
                 });
 
             migrationBuilder.InsertData(
