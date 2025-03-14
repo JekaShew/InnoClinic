@@ -1,4 +1,6 @@
-﻿namespace ProfilesAPI.Shared.DTOs.PatientDTOs;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace ProfilesAPI.Shared.DTOs.PatientDTOs;
 
 public class PatientForCreateDTO
 {
@@ -8,5 +10,5 @@ public class PatientForCreateDTO
     public string? Address { get; set; }
     public string Phone { get; set; }
     public DateTime BirthDate { get; set; }
-    public Guid? Photo { get; set; }
+    public IFormFile? Photo { get; set; }
 }

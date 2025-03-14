@@ -2,35 +2,35 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using ProfilesAPI.Shared.DTOs.ReceptionistDTOs;
+using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ReceptionistController : ControllerBase
+public class AdministratorsController : ControllerBase
 {
-    private readonly IReceptionistService _receptionistService;
-    public ReceptionistController(IReceptionistService receptionistService)
+    private readonly IAdministratorService _administratorService;
+    public AdministratorsController(IAdministratorService administratorService)
     {
-        _receptionistService = receptionistService;
+        _administratorService = administratorService;
     }
 
     /// <summary>
-    /// Gets selected Receptionist's Profile
+    /// Gets selected Adminitrator's Profile
     /// </summary>
-    /// <returns>Single Receptionist's Profile</returns>
-    [HttpGet("{receptionistId}")]
-    [ProducesResponseType(typeof(ReceptionistInfoDTO), 200)]
+    /// <returns>Single Administrator's Profile</returns>
+    [HttpGet("{administratorId}")]
+    [ProducesResponseType(typeof(AdministratorInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetReceptionistById(Guid receptionistId)
+    public async Task<IActionResult> GetAdminitratorById(Guid administratorId)
     {
-        var result = await _receptionistService.GetReceptionistByIdAsync(receptionistId);
+        var result = await _administratorService.GetAdministratorByIdAsync(administratorId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -40,20 +40,20 @@ public class ReceptionistController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of all Receptionist's Profiles
+    /// Gets the list of all Administrator's Profiles
     /// </summary>
-    /// <returns>The Receptionist's Profiles list</returns>
+    /// <returns>The Administrator's Profiles list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ICollection<ReceptionistTableInfoDTO>), 200)]
+    [ProducesResponseType(typeof(ICollection<AdministratorTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllReceptionists()
+    public async Task<IActionResult> GetAllAdminitrators()
     {
-        var result = await _receptionistService.GetAllReceptionistsAsync();
+        var result = await _administratorService.GetAllAdministratorsAsync();
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -63,7 +63,7 @@ public class ReceptionistController : ControllerBase
     }
 
     /// <summary>
-    /// Creates new Receptionist's Profile
+    /// Creates new Administrator's Profile
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
@@ -75,9 +75,9 @@ public class ReceptionistController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddReceptionist([FromForm] ReceptionistForCreateDTO receptionistForCreateDTO, IFormFile file)
+    public async Task<IActionResult> AddAdminitrator([FromForm] AdministratorForCreateDTO administratorForCreateDTO)
     {
-        var result = await _receptionistService.AddReceptionistAsync(receptionistForCreateDTO, file);
+        var result = await _administratorService.AddAdministratorAsync(administratorForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -87,10 +87,10 @@ public class ReceptionistController : ControllerBase
     }
 
     /// <summary>
-    /// Updates selected Receptionist's Profile
+    /// Updates selected Administrator's Profile 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{receptionistId}")]
+    [HttpPut("{administratorId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -99,9 +99,9 @@ public class ReceptionistController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateReceptionist(Guid receptionistId, [FromBody] ReceptionistForUpdateDTO receptionistForUpdateDTO, IFormFile? file)
+    public async Task<IActionResult> UpdateAdminitrator(Guid administratorId, [FromForm] AdministratorForUpdateDTO administratorForUpdateDTO)
     {
-        var result = await _receptionistService.UpdateReceptionistAsync(receptionistId, receptionistForUpdateDTO, file);
+        var result = await _administratorService.UpdateAdministratorAsync(administratorId, administratorForUpdateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -111,10 +111,10 @@ public class ReceptionistController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes Receptionist's Profile By Id
+    /// Deletes Administrator's Profile By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{receptionistId}")]
+    [HttpDelete("{administratorId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -122,9 +122,9 @@ public class ReceptionistController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteReceptionistById(Guid receptionistId)
+    public async Task<IActionResult> DeleteAdminitratorById(Guid administratorId)
     {
-        var result = await _receptionistService.DeleteReceptionistByIdAsync(receptionistId);
+        var result = await _administratorService.DeleteAdministratorByIdAsync(administratorId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

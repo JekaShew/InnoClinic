@@ -4,13 +4,10 @@ using CommonLibrary.Constants;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Http;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
-using ProfilesAPI.Shared.DTOs.DoctorDTOs;
-using System.Numerics;
 
 namespace ProfilesAPI.Services.Services;
 
@@ -38,7 +35,7 @@ public class AdministratorService : IAdministratorService
         _blobService = blobService;
     }
 
-    public async Task<ResponseMessage> AddAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO, IFormFile file)
+    public async Task<ResponseMessage> AddAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO)
     {
         var validationResult = await _administratorForCreateValidator.ValidateAsync(administratorForCreateDTO);
         if (!validationResult.IsValid)
@@ -47,11 +44,21 @@ public class AdministratorService : IAdministratorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null)
+        {
+            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+        }
+
         var administrator = _mapper.Map<Administrator>(administratorForCreateDTO);
-        using Stream stream = file.OpenReadStream();
-        var fileId = await _blobService.UploadAsync(stream, file.ContentType);
+        if (administratorForCreateDTO.Photo is not null)
+        {
+            using Stream stream = administratorForCreateDTO.Photo.OpenReadStream();
+            var blobFileInfo = await _blobService.UploadAsync(stream, administratorForCreateDTO.Photo.ContentType);
+            administrator.Photo = blobFileInfo.Uri;
+            administrator.PhotoId = blobFileInfo.FileId;
+        }
+        
         administrator.UserId = currentUserInfo.Id;
-        administrator.Photo = fileId;
         await _repositoryManager.Administrator.AddAdministratorAsync(administrator);
 
         return new ResponseMessage();
@@ -66,9 +73,16 @@ public class AdministratorService : IAdministratorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !administrator.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        if ((currentUserInfo is null
+            || !administrator.UserId.Equals(currentUserInfo.Id))
+            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
+        }
+        
+        if (administrator.Photo is not null)
+        {
+            await _blobService.DeleteAsync(administrator.PhotoId);
         }
 
         await _repositoryManager.Administrator.DeleteAdministratorByIdAsync(administratorId);
@@ -91,6 +105,10 @@ public class AdministratorService : IAdministratorService
 
     public async Task<ResponseMessage<ICollection<AdministratorTableInfoDTO>>> GetAllAdministratorsAsync()
     {
+        // Pagination
+        // Filtration
+        // Search
+
         var administrators = await _repositoryManager.Administrator.GetAllAdministratorsAsync();
         if (administrators.Count == 0)
         {
@@ -102,7 +120,7 @@ public class AdministratorService : IAdministratorService
         return new ResponseMessage<ICollection<AdministratorTableInfoDTO>>(administratorTableInfoDTOs);
     }
 
-    public async Task<ResponseMessage> UpdateAdministratorAsync(Guid administratorId, AdministratorForUpdateDTO administratorForUpdateDTO, IFormFile? file)
+    public async Task<ResponseMessage> UpdateAdministratorAsync(Guid administratorId, AdministratorForUpdateDTO administratorForUpdateDTO)
     {
         var validationResult = await _administratorForUpdateValidator.ValidateAsync(administratorForUpdateDTO);
         if (!validationResult.IsValid)
@@ -124,12 +142,13 @@ public class AdministratorService : IAdministratorService
         }
 
         administrator = _mapper.Map(administratorForUpdateDTO, administrator);
-        if (file is not null)
+        if (administratorForUpdateDTO.Photo is not null)
         {
-            using Stream stream = file.OpenReadStream();
-            await _blobService.DeleteAsync(administrator.Photo);
-            var fileId = await _blobService.UploadAsync(stream, file.ContentType);
-            administrator.Photo = fileId;
+            using Stream stream = administratorForUpdateDTO.Photo.OpenReadStream();
+            await _blobService.DeleteAsync(administrator.PhotoId);
+            var blobFileInfo = await _blobService.UploadAsync(stream, administratorForUpdateDTO.Photo.ContentType);
+            administrator.Photo = blobFileInfo.Uri;
+            administrator.PhotoId = blobFileInfo.FileId;
         }
 
         await _repositoryManager.Administrator.UpdateAdministratorAsync(administrator);

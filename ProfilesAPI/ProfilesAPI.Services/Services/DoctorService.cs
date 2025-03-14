@@ -4,14 +4,13 @@ using CommonLibrary.Constants;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Http;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 
 namespace ProfilesAPI.Services.Services;
-// think about specializations!!!!!
+
 public class DoctorService : IDoctorService
 {
     private readonly IRepositoryManager _repositoryManager;
@@ -37,7 +36,7 @@ public class DoctorService : IDoctorService
         _blobService = blobService;
     }
 
-    public async Task<ResponseMessage> AddDoctorAsync(DoctorForCreateDTO doctorForCreateDTO, IFormFile file)
+    public async Task<ResponseMessage> AddDoctorAsync(DoctorForCreateDTO doctorForCreateDTO)
     {
         var validationResult = await _doctorForCreateValidator.ValidateAsync(doctorForCreateDTO);
         if (!validationResult.IsValid)
@@ -46,12 +45,21 @@ public class DoctorService : IDoctorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        var doctor = _mapper.Map<Doctor>(doctorForCreateDTO);
-        using Stream stream = file.OpenReadStream();
-        var fileId = await _blobService.UploadAsync(stream, file.ContentType);
-        doctor.UserId = currentUserInfo.Id;
-        doctor.Photo = fileId;
+        if (currentUserInfo is null)
+        {
+            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+        }
 
+        var doctor = _mapper.Map<Doctor>(doctorForCreateDTO);
+        if(doctorForCreateDTO.Photo is not null)
+        {
+            using Stream stream = doctorForCreateDTO.Photo.OpenReadStream();
+            var blobFileInfo = await _blobService.UploadAsync(stream, doctorForCreateDTO.Photo.ContentType);
+            doctor.Photo = blobFileInfo.Uri;
+            doctor.PhotoId = blobFileInfo.FileId;
+        }
+
+        doctor.UserId = currentUserInfo.Id;
         await _repositoryManager.Doctor.AddDoctorAsync(doctor);
 
         return new ResponseMessage();
@@ -66,11 +74,18 @@ public class DoctorService : IDoctorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !doctor.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        if ((currentUserInfo is null 
+            || !doctor.UserId.Equals(currentUserInfo.Id)) 
+            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Doctor's Profile!", 403);
         }
 
+        if(doctor.Photo is not null)
+        {
+            await _blobService.DeleteAsync(doctor.PhotoId);
+        }
+        
         await _repositoryManager.Doctor.DeleteDoctorByIdAsync(doctorId);
 
         return new ResponseMessage();
@@ -78,6 +93,10 @@ public class DoctorService : IDoctorService
 
     public async Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync(/*DoctorFilterDTO doctorFilterDTO*/)
     {
+        // Pagination
+        // Filtration
+        // Search
+
         //if(doctorFilterDTO is not null)
         //{
 
@@ -90,12 +109,11 @@ public class DoctorService : IDoctorService
             return new ResponseMessage<ICollection<DoctorTableInfoDTO>>("No Doctor's Profiles Found in Database!", 404);
         }
 
-
         var doctorTableInfoDTOs = _mapper.Map<ICollection<DoctorTableInfoDTO>>(doctors);
 
         return new ResponseMessage<ICollection<DoctorTableInfoDTO>>(doctorTableInfoDTOs);
     }
-
+    // no mapping DoctorSpecializations! need to update in DoctorRepository!
     public async Task<ResponseMessage<DoctorInfoDTO>> GetDoctorByIdAsync(Guid doctorId) 
     {
         var doctor = await _repositoryManager.Doctor.GetDoctorByIdAsync(doctorId);
@@ -105,11 +123,11 @@ public class DoctorService : IDoctorService
         }
 
         var doctorInfoDTO = _mapper.Map<DoctorInfoDTO>(doctor);
-
+        
         return new ResponseMessage<DoctorInfoDTO>(doctorInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateDoctorAsync(Guid doctorId, DoctorForUpdateDTO doctorForUpdateDTO, IFormFile? file)
+    public async Task<ResponseMessage> UpdateDoctorAsync(Guid doctorId, DoctorForUpdateDTO doctorForUpdateDTO)
     {
         var validationResult = await _doctorForUpdateValidator.ValidateAsync(doctorForUpdateDTO);
         if (!validationResult.IsValid)
@@ -123,7 +141,6 @@ public class DoctorService : IDoctorService
             return new ResponseMessage("Doctor's Profile Not Found!", 404);
         }
 
-
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null || !doctor.UserId.Equals(currentUserInfo.Id))
         {
@@ -131,12 +148,13 @@ public class DoctorService : IDoctorService
         }
         
         doctor = _mapper.Map(doctorForUpdateDTO, doctor);
-        if (file is not null)
+        if (doctorForUpdateDTO.Photo is not null)
         {
-            using Stream stream = file.OpenReadStream();
-            await _blobService.DeleteAsync(doctor.Photo);
-            var fileId = await _blobService.UploadAsync(stream, file.ContentType);
-            doctor.Photo = fileId;
+            using Stream stream = doctorForUpdateDTO.Photo.OpenReadStream();
+            await _blobService.DeleteAsync(doctor.PhotoId);
+            var blobFileInfo = await _blobService.UploadAsync(stream, doctorForUpdateDTO.Photo.ContentType);
+            doctor.Photo = blobFileInfo.Uri;
+            doctor.PhotoId = blobFileInfo.FileId;
         }
 
         await _repositoryManager.Doctor.UpdateDoctorAsync(doctor);

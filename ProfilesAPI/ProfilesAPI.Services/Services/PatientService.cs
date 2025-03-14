@@ -4,7 +4,6 @@ using CommonLibrary.Constants;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Http;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
@@ -38,7 +37,7 @@ public class PatientService : IPatientService
         
     }
 
-    public async Task<ResponseMessage> AddPatientAsync(PatientForCreateDTO patientForCreateDTO, IFormFile file)
+    public async Task<ResponseMessage> AddPatientAsync(PatientForCreateDTO patientForCreateDTO)
     {
         var validationResult = await _patientForCreateValidator.ValidateAsync(patientForCreateDTO);
         if (!validationResult.IsValid)
@@ -53,10 +52,15 @@ public class PatientService : IPatientService
         }
 
         var patient = _mapper.Map<Patient>(patientForCreateDTO);
-        using Stream stream = file.OpenReadStream();
-        var fileId = await _blobService.UploadAsync(stream, file.ContentType);
+        if (patientForCreateDTO.Photo is not null)
+        {
+            using Stream stream = patientForCreateDTO.Photo.OpenReadStream();
+            var blobFileInfo = await _blobService.UploadAsync(stream, patientForCreateDTO.Photo.ContentType);
+            patient.Photo = blobFileInfo.Uri;
+            patient.PhotoId = blobFileInfo.FileId;
+        }
+       
         patient.UserId = currentUserInfo.Id;
-        patient.Photo = fileId;
         await _repositoryManager.Patient.AddPatientAsync(patient);
 
         return new ResponseMessage();
@@ -71,12 +75,18 @@ public class PatientService : IPatientService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        if ((currentUserInfo is null
+            || !patient.UserId.Equals(currentUserInfo.Id))
+            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
         }
 
-        await _blobService.DeleteAsync(patient.Photo);
+        if(patient.Photo is not null)
+        {
+            await _blobService.DeleteAsync(patient.PhotoId);
+        }
+        
         await _repositoryManager.Patient.DeletePatientByIdAsync(patientId);
 
         return new ResponseMessage();
@@ -84,6 +94,10 @@ public class PatientService : IPatientService
 
     public async Task<ResponseMessage<ICollection<PatientTableInfoDTO>>> GetAllPatientsAsync()
     {
+        // Pagination
+        // Filtration
+        // Search
+
         var patients = await _repositoryManager.Patient.GetAllPatientsAsync();
         if (patients.Count == 0)
         {
@@ -104,15 +118,11 @@ public class PatientService : IPatientService
         }
 
         var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
-
-        var patientPhoto = await _blobService.DownloadAsync(patient.Photo);
-        
-        patientInfoDTO.Photo = await _blobService.DownloadAsync(patient.Photo);
-        
+      
         return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO, IFormFile? file)
+    public async Task<ResponseMessage> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO)
     {
         var validationResult = await _patientForUpdateValidator.ValidateAsync(patientForUpdateDTO);
         if (!validationResult.IsValid)
@@ -133,12 +143,13 @@ public class PatientService : IPatientService
         }
 
         patient = _mapper.Map(patientForUpdateDTO, patient);
-        if(file is not null)
+        if(patientForUpdateDTO.Photo is not null)
         {
-            using Stream stream = file.OpenReadStream();
-            await _blobService.DeleteAsync(patient.Photo);
-            var fileId = await _blobService.UploadAsync(stream, file.ContentType);
-            patient.Photo = fileId;
+            using Stream stream = patientForUpdateDTO.Photo.OpenReadStream();
+            await _blobService.DeleteAsync(patient.PhotoId);
+            var blobFileInfo = await _blobService.UploadAsync(stream, patientForUpdateDTO.Photo.ContentType);
+            patient.Photo = blobFileInfo.Uri;
+            patient.PhotoId = blobFileInfo.FileId;
         }
         
         await _repositoryManager.Patient.UpdatePatientAsync(patient);

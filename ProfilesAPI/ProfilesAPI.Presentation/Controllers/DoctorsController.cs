@@ -1,34 +1,36 @@
 ﻿using CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using ProfilesAPI.Shared.DTOs.SpecializationDTOs;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class SpecializationController : ControllerBase
+public class DoctorsController : ControllerBase
 {
-    private readonly ISpecializationService _specializationService;
-    public SpecializationController(ISpecializationService specializationService)
+    private readonly IDoctorService _doctorService;
+    public DoctorsController(IDoctorService doctorService)
     {
-        _specializationService = specializationService;
+        _doctorService = doctorService;
     }
 
     /// <summary>
-    /// Gets selected Specialization
+    /// Gets selected Doctor's Profile
     /// </summary>
-    /// <returns>Single Specialization</returns>
-    [HttpGet("{specializationId}")]
+    /// <returns>Single Doctor's Profile</returns>
+    [HttpGet("{doctorId}")]
+    [ProducesResponseType(typeof(DoctorInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
-    public async Task<IActionResult> GetSpecializationById(Guid specializationId)
+    //[Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetDoctorById(Guid doctorId)
     {
-        var result = await _specializationService.GetSpecializationByIdAsync(specializationId);
+        var result = await _doctorService.GetDoctorByIdAsync(doctorId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -38,19 +40,20 @@ public class SpecializationController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of all Specializations
+    /// Gets the list of all Doctor's Profiles
     /// </summary>
-    /// <returns>The Specializations list</returns>
+    /// <returns>The Doctor's Profiles list</returns>
     [HttpGet]
+    [ProducesResponseType(typeof(ICollection<DoctorTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
-    public async Task<IActionResult> GetAllSpecializations()
+    //[Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetAllDoctors()
     {
-        var result = await _specializationService.GetAllSpecializationsAsync();
+        var result = await _doctorService.GetAllDoctorsAsync();
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -60,7 +63,7 @@ public class SpecializationController : ControllerBase
     }
 
     /// <summary>
-    /// Creates new Specialization
+    /// Creates new Doctor's Profile
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
@@ -72,9 +75,9 @@ public class SpecializationController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddSpecialization([FromBody] SpecializationForCreateDTO specializationForCreateDTO)
+    public async Task<IActionResult> AddDoctor([FromForm] DoctorForCreateDTO doctorForCreateDTO)
     {
-        var result = await _specializationService.AddSpecializationAsync(specializationForCreateDTO);
+        var result = await _doctorService.AddDoctorAsync(doctorForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -84,10 +87,11 @@ public class SpecializationController : ControllerBase
     }
 
     /// <summary>
-    /// Updates selected Specialization 
+    /// Updates selected Doctor's Profile 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{specializationId}")]
+    [HttpPut("{doctorId}")]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -95,9 +99,9 @@ public class SpecializationController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateSpecialization(Guid specializationId, [FromBody] SpecializationForUpdateDTO specializationForUpdateDTO)
+    public async Task<IActionResult> UpdateDoctor(Guid doctorId, [FromForm] DoctorForUpdateDTO doctorForUpdateDTO)
     {
-        var result = await _specializationService.UpdateSpecializationAsync(specializationId, specializationForUpdateDTO);
+        var result = await _doctorService.UpdateDoctorAsync(doctorId, doctorForUpdateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -107,19 +111,20 @@ public class SpecializationController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes Specialization By Id
+    /// Deletes Doctor's Profile By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{specializationId}")]
+    [HttpDelete("{doctorId}")]
+    [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteSpecializationById(Guid specializationId)
+    public async Task<IActionResult> DeleteDoctorById(Guid doctorId)
     {
-        var result = await _specializationService.DeleteSpecializationByIdAsync(specializationId);
+        var result = await _doctorService.DeleteDoctorByIdAsync(doctorId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -128,3 +133,4 @@ public class SpecializationController : ControllerBase
         return NoContent();
     }
 }
+// for each workers profile change workStatus 

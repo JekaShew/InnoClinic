@@ -13,7 +13,7 @@ internal class Program
         {
             config.RespectBrowserAcceptHeader = true;
         })
-            .AddApplicationPart(typeof(ProfilesAPI.Presentation.Controllers.SpecializationController).Assembly);
+            .AddApplicationPart(typeof(ProfilesAPI.Presentation.Controllers.SpecializationsController).Assembly);
 
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
@@ -48,7 +48,7 @@ internal class Program
             });
 
             var swaggerAssambly = Assembly
-                .GetAssembly(typeof(ProfilesAPI.Presentation.Controllers.SpecializationController));
+                .GetAssembly(typeof(ProfilesAPI.Presentation.Controllers.SpecializationsController));
             var swaggerPath = Path.GetDirectoryName(swaggerAssambly.Location);
             var xmlFile = $"{swaggerAssambly.GetName().Name}.xml";
             var xmlPath = Path.Combine(swaggerPath, xmlFile);

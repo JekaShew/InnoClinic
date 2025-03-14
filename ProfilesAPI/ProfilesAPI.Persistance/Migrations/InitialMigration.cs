@@ -41,7 +41,9 @@ public class InitialMigration : Migration
             .WithColumn("Address").AsString().Nullable()
             .WithColumn("Phone").AsString().NotNullable()
             .WithColumn("BirthDate").AsDateTime().NotNullable()
-            .WithColumn("Photo").AsString().NotNullable();
+            .WithColumn("Photo").AsString().NotNullable()
+            .WithColumn("PhotoId").AsGuid().NotNullable();
+
 
         Create.Table("Receptionists")
             .WithColumn("Id").AsGuid().PrimaryKey()
@@ -55,6 +57,7 @@ public class InitialMigration : Migration
             .WithColumn("BirthDate").AsDateTime().NotNullable()
             .WithColumn("CareerStartDate").AsDateTime().NotNullable()
             .WithColumn("Photo").AsString().NotNullable()
+            .WithColumn("PhotoId").AsGuid().NotNullable()
             .WithColumn("OfficeId").AsGuid().NotNullable()
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
@@ -70,6 +73,7 @@ public class InitialMigration : Migration
             .WithColumn("BirthDate").AsDateTime().NotNullable()
             .WithColumn("CareerStartDate").AsDateTime().NotNullable()
             .WithColumn("Photo").AsString().NotNullable()
+            .WithColumn("PhotoId").AsGuid().NotNullable()
             .WithColumn("OfficeId").AsGuid().NotNullable()
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
@@ -85,6 +89,7 @@ public class InitialMigration : Migration
             .WithColumn("BirthDate").AsDateTime().NotNullable()
             .WithColumn("CareerStartDate").AsDateTime().NotNullable()
             .WithColumn("Photo").AsString().NotNullable()
+            .WithColumn("PhotoId").AsGuid().NotNullable()
             .WithColumn("OfficeId").AsGuid().NotNullable()
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 

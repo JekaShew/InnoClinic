@@ -6,4 +6,6 @@ public class PatientTableInfoDTO
     public string LastName { get; set; }
     public string? Address { get; set; }
     public string Phone { get; set; }
+    public Guid? PhotoId { get; set; }
+    public FileResponse? Photo { get; set; }
 }

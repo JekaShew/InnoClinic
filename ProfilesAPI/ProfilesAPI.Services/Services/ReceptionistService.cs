@@ -4,7 +4,6 @@ using CommonLibrary.Constants;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Http;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
@@ -37,7 +36,7 @@ public class ReceptionistService : IReceptionistService
         _blobService = blobService;
     }
 
-    public async Task<ResponseMessage> AddReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO, IFormFile file)
+    public async Task<ResponseMessage> AddReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO)
     {
         var validationResult = await _receptionistForCreateValidator.ValidateAsync(receptionistForCreateDTO);
         if (!validationResult.IsValid)
@@ -46,11 +45,21 @@ public class ReceptionistService : IReceptionistService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null)
+        {
+            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+        }
+
         var receptionist = _mapper.Map<Receptionist>(receptionistForCreateDTO);
-        using Stream stream = file.OpenReadStream();
-        var fileId = await _blobService.UploadAsync(stream, file.ContentType);
+        if (receptionistForCreateDTO.Photo is not null)
+        {
+            using Stream stream = receptionistForCreateDTO.Photo.OpenReadStream();
+            var blobFileInfo = await _blobService.UploadAsync(stream, receptionistForCreateDTO.Photo.ContentType);
+            receptionist.Photo = blobFileInfo.Uri;
+            receptionist.PhotoId = blobFileInfo.FileId;
+        }
+       
         receptionist.UserId = currentUserInfo.Id;
-        receptionist.Photo = fileId;
         await _repositoryManager.Receptionist.AddReceptionistAsync(receptionist);
 
         return new ResponseMessage();
@@ -65,10 +74,18 @@ public class ReceptionistService : IReceptionistService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !receptionist.UserId.Equals(currentUserInfo.Id) || !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        if ((currentUserInfo is null
+            || !receptionist.UserId.Equals(currentUserInfo.Id))
+            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Receptionist's Profile!", 403);
         }
+
+        if (receptionist.Photo is not null)
+        {
+            await _blobService.DeleteAsync(receptionist.PhotoId);
+        }
+        
         await _repositoryManager.Receptionist.DeleteReceptionistByIdAsync(receptionistId);
 
         return new ResponseMessage();
@@ -76,6 +93,10 @@ public class ReceptionistService : IReceptionistService
 
     public async Task<ResponseMessage<ICollection<ReceptionistTableInfoDTO>>> GetAllReceptionistsAsync()
     {
+        // Pagination
+        // Filtration
+        // Search
+
         var receptionists = await _repositoryManager.Receptionist.GetAllReceptionistsAsync();
         if (receptionists.Count == 0)
         {
@@ -83,7 +104,7 @@ public class ReceptionistService : IReceptionistService
         }
 
         var receptionistTableInfoDTOs = _mapper.Map<ICollection<ReceptionistTableInfoDTO>>(receptionists);
-
+        
         return new ResponseMessage<ICollection<ReceptionistTableInfoDTO>>(receptionistTableInfoDTOs);
     }
 
@@ -96,11 +117,11 @@ public class ReceptionistService : IReceptionistService
         }
 
         var receptionistDTO = _mapper.Map<ReceptionistInfoDTO>(receptionist);
-
+        
         return new ResponseMessage<ReceptionistInfoDTO>(receptionistDTO);
     }
 
-    public async Task<ResponseMessage> UpdateReceptionistAsync(Guid receptionistId, ReceptionistForUpdateDTO receptionistForUpdateDTO, IFormFile? file )
+    public async Task<ResponseMessage> UpdateReceptionistAsync(Guid receptionistId, ReceptionistForUpdateDTO receptionistForUpdateDTO)
     {
         var validationResult = await _receptionistForUpdateValidator.ValidateAsync(receptionistForUpdateDTO);
         if (!validationResult.IsValid)
@@ -121,12 +142,13 @@ public class ReceptionistService : IReceptionistService
         }
 
         receptionist = _mapper.Map(receptionistForUpdateDTO, receptionist);
-        if (file is not null)
+        if (receptionistForUpdateDTO.Photo is not null)
         {
-            using Stream stream = file.OpenReadStream();
-            await _blobService.DeleteAsync(receptionist.Photo);
-            var fileId = await _blobService.UploadAsync(stream, file.ContentType);
-            receptionist.Photo = fileId;
+            using Stream stream = receptionistForUpdateDTO.Photo.OpenReadStream();
+            await _blobService.DeleteAsync(receptionist.PhotoId);
+            var blobFileInfo = await _blobService.UploadAsync(stream, receptionistForUpdateDTO.Photo.ContentType);
+            receptionist.Photo = blobFileInfo.Uri;
+            receptionist.PhotoId = blobFileInfo.FileId;
         }
 
         await _repositoryManager.Receptionist.UpdateReceptionistAsync(receptionist);

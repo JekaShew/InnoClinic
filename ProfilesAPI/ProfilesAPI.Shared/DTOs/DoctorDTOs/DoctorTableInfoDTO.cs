@@ -2,7 +2,6 @@
 
 public class DoctorTableInfoDTO
 {
-    // Update necessary data
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string? SecondName { get; set; }
@@ -11,8 +10,8 @@ public class DoctorTableInfoDTO
     public string Phone { get; set; }
     public DateTime BirthDate { get; set; }
     public DateTime CareerStartDate { get; set; }
-    public string Photo { get; set; }
+    public Guid PhotoId { get; set; }
+    public string? Photo { get; set; }
     public Guid OfficeId { get; set; }
-
     public Guid? WorkStatusId { get; set; }
 }

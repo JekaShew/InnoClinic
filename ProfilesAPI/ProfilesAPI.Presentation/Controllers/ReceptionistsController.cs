@@ -1,35 +1,36 @@
 ﻿using CommonLibrary.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
+using ProfilesAPI.Shared.DTOs.ReceptionistDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class WorkStatusController : ControllerBase
+public class ReceptionistsController : ControllerBase
 {
-    private readonly IWorkStatusService _workStatusService;
-    public WorkStatusController(IWorkStatusService workStatusService)
+    private readonly IReceptionistService _receptionistService;
+    public ReceptionistsController(IReceptionistService receptionistService)
     {
-        _workStatusService = workStatusService;
+        _receptionistService = receptionistService;
     }
 
     /// <summary>
-    /// Gets selected Work Status
+    /// Gets selected Receptionist's Profile
     /// </summary>
-    /// <returns>Single Work Status</returns>
-    [HttpGet("{workStatusId}")]
-    [ProducesResponseType(typeof(WorkStatusInfoDTO), 200)]
+    /// <returns>Single Receptionist's Profile</returns>
+    [HttpGet("{receptionistId}")]
+    [ProducesResponseType(typeof(ReceptionistInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
-    public async Task<IActionResult> GetWorkStatusById(Guid workStatusId)
+    //[Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetReceptionistById(Guid receptionistId)
     {
-        var result = await _workStatusService.GetWorkStatusByIdAsync(workStatusId);
+        var result = await _receptionistService.GetReceptionistByIdAsync(receptionistId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -39,20 +40,20 @@ public class WorkStatusController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of all Work Statuses
+    /// Gets the list of all Receptionist's Profiles
     /// </summary>
-    /// <returns>The Work Statuses list</returns>
+    /// <returns>The Receptionist's Profiles list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ICollection<WorkStatusTableInfoDTO>), 200)]
+    [ProducesResponseType(typeof(ICollection<ReceptionistTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
-    public async Task<IActionResult> GetAllWorkStatuses()
+    //[Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> GetAllReceptionists()
     {
-        var result = await _workStatusService.GetAllWorkStatusesAsync();
+        var result = await _receptionistService.GetAllReceptionistsAsync();
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -62,7 +63,7 @@ public class WorkStatusController : ControllerBase
     }
 
     /// <summary>
-    /// Creates new Work Status
+    /// Creates new Receptionist's Profile
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
@@ -74,9 +75,9 @@ public class WorkStatusController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddWorkStatus([FromBody] WorkStatusForCreateDTO workStatusForCreateDTO)
+    public async Task<IActionResult> AddReceptionist([FromForm] ReceptionistForCreateDTO receptionistForCreateDTO)
     {
-        var result = await _workStatusService.AddWorkStatusAsync(workStatusForCreateDTO);
+        var result = await _receptionistService.AddReceptionistAsync(receptionistForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -86,10 +87,10 @@ public class WorkStatusController : ControllerBase
     }
 
     /// <summary>
-    /// Updates selected Work Status 
+    /// Updates selected Receptionist's Profile
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{workStatusId}")]
+    [HttpPut("{receptionistId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -98,9 +99,9 @@ public class WorkStatusController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateWorkStatus(Guid workStatusId, [FromBody] WorkStatusForUpdateDTO workStatusForUpdateDTO)
+    public async Task<IActionResult> UpdateReceptionist(Guid receptionistId, [FromBody] ReceptionistForUpdateDTO receptionistForUpdateDTO)
     {
-        var result = await _workStatusService.UpdateWorkStatusAsync(workStatusId, workStatusForUpdateDTO);
+        var result = await _receptionistService.UpdateReceptionistAsync(receptionistId, receptionistForUpdateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -110,10 +111,10 @@ public class WorkStatusController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes Work Status By Id
+    /// Deletes Receptionist's Profile By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{workStatusId}")]
+    [HttpDelete("{receptionistId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -121,9 +122,9 @@ public class WorkStatusController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteWorkStatusById(Guid workStatusId)
+    public async Task<IActionResult> DeleteReceptionistById(Guid receptionistId)
     {
-        var result = await _workStatusService.DeleteWorkStatusByIdAsync(workStatusId);
+        var result = await _receptionistService.DeleteReceptionistByIdAsync(receptionistId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

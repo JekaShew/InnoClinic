@@ -2,35 +2,35 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
+using ProfilesAPI.Shared.DTOs.PatientDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AdministratorController : ControllerBase
+public class PatientsController : ControllerBase
 {
-    private readonly IAdministratorService _administratorService;
-    public AdministratorController(IAdministratorService administratorService)
+    private readonly IPatientService _patientService;
+    public PatientsController(IPatientService patientService)
     {
-        _administratorService = administratorService;
+        _patientService = patientService;
     }
 
     /// <summary>
-    /// Gets selected Adminitrator's Profile
+    /// Gets selected Patient's Profile
     /// </summary>
-    /// <returns>Single Administrator's Profile</returns>
-    [HttpGet("{administratorId}")]
-    [ProducesResponseType(typeof(AdministratorInfoDTO), 200)]
+    /// <returns>Single Patient's Profile</returns>
+    [HttpGet("{patientId}")]
+    [ProducesResponseType(typeof(PatientInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAdminitratorById(Guid administratorId)
+    public async Task<IActionResult> GetPatientById(Guid patientId)
     {
-        var result = await _administratorService.GetAdministratorByIdAsync(administratorId);
+        var result = await _patientService.GetPatientByIdAsync(patientId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -40,20 +40,20 @@ public class AdministratorController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of all Administrator's Profiles
+    /// Gets the list of all Patient's Profiles
     /// </summary>
-    /// <returns>The Administrator's Profiles list</returns>
+    /// <returns>The Patient's Profiles list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ICollection<AdministratorTableInfoDTO>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<PatientTableInfoDTO>),200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllAdminitrators()
+    public async Task<IActionResult> GetAllPatients()
     {
-        var result = await _administratorService.GetAllAdministratorsAsync();
+        var result = await _patientService.GetAllPatientsAsync();
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -63,7 +63,7 @@ public class AdministratorController : ControllerBase
     }
 
     /// <summary>
-    /// Creates new Administrator's Profile
+    /// Creates new Patient's Profile
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
@@ -75,9 +75,9 @@ public class AdministratorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddAdminitrator([FromForm] AdministratorForCreateDTO administratorForCreateDTO, IFormFile file)
+    public async Task<IActionResult> AddPatient([FromForm]PatientForCreateDTO patientForCreateDTO)
     {
-        var result = await _administratorService.AddAdministratorAsync(administratorForCreateDTO, file);
+        var result = await _patientService.AddPatientAsync(patientForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -87,10 +87,10 @@ public class AdministratorController : ControllerBase
     }
 
     /// <summary>
-    /// Updates selected Administrator's Profile 
+    /// Updates selected Patient's Profile
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{administratorId}")]
+    [HttpPut("{patientId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -99,9 +99,9 @@ public class AdministratorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateAdminitrator(Guid administratorId, [FromForm] AdministratorForUpdateDTO administratorForUpdateDTO, IFormFile? file)
+    public async Task<IActionResult> UpdatePatient(Guid patientId, [FromForm] PatientForUpdateDTO patientForUpdateDTO)
     {
-        var result = await _administratorService.UpdateAdministratorAsync(administratorId, administratorForUpdateDTO, file);
+        var result = await _patientService.UpdatePatientAsync(patientId, patientForUpdateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -111,10 +111,10 @@ public class AdministratorController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes Administrator's Profile By Id
+    /// Deletes Patient's Profile By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{administratorId}")]
+    [HttpDelete("{patientId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -122,9 +122,9 @@ public class AdministratorController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteAdminitratorById(Guid administratorId)
+    public async Task<IActionResult> DeletePatientById(Guid patientId)
     {
-        var result = await _administratorService.DeleteAdministratorByIdAsync(administratorId);
+        var result = await _patientService.DeletePatientByIdAsync(patientId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

@@ -10,5 +10,6 @@ public class BaseProfileInformation
     public string? Address { get; set; }
     public string Phone { get; set; }
     public DateTime BirthDate { get; set; }
-    public Guid Photo { get; set; }
+    public string? Photo { get; set; }
+    public Guid PhotoId { get; set; }
 }

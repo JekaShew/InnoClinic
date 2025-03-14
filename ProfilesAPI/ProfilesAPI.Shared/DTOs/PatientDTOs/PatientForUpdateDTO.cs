@@ -1,4 +1,6 @@
-﻿namespace ProfilesAPI.Shared.DTOs.PatientDTOs;
+﻿using Microsoft.AspNetCore.Http;
+
+namespace ProfilesAPI.Shared.DTOs.PatientDTOs;
 
 public class PatientForUpdateDTO
 {
@@ -8,5 +10,5 @@ public class PatientForUpdateDTO
     public string? Address { get; set; }
     public string Phone { get; set; }
     public DateTime BirthDate { get; set; }
-    public string Photo { get; set; }
+    public IFormFile? Photo { get; set; }
 }

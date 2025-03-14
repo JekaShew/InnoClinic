@@ -1,36 +1,35 @@
 ﻿using CommonLibrary.Response;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using ProfilesAPI.Shared.DTOs.PatientDTOs;
+using ProfilesAPI.Shared.DTOs.WorkStatusDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class PatientController : ControllerBase
+public class WorkStatusesController : ControllerBase
 {
-    private readonly IPatientService _patientService;
-    public PatientController(IPatientService patientService)
+    private readonly IWorkStatusService _workStatusService;
+    public WorkStatusesController(IWorkStatusService workStatusService)
     {
-        _patientService = patientService;
+        _workStatusService = workStatusService;
     }
 
     /// <summary>
-    /// Gets selected Patient's Profile
+    /// Gets selected Work Status
     /// </summary>
-    /// <returns>Single Patient's Profile</returns>
-    [HttpGet("{patientId}")]
-    [ProducesResponseType(typeof(PatientInfoDTO), 200)]
+    /// <returns>Single Work Status</returns>
+    [HttpGet("{workStatusId}")]
+    [ProducesResponseType(typeof(WorkStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetPatientById(Guid patientId)
+    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
+    public async Task<IActionResult> GetWorkStatusById(Guid workStatusId)
     {
-        var result = await _patientService.GetPatientByIdAsync(patientId);
+        var result = await _workStatusService.GetWorkStatusByIdAsync(workStatusId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -40,20 +39,20 @@ public class PatientController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of all Patient's Profiles
+    /// Gets the list of all Work Statuses
     /// </summary>
-    /// <returns>The Patient's Profiles list</returns>
+    /// <returns>The Work Statuses list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(IEnumerable<PatientTableInfoDTO>),200)]
+    [ProducesResponseType(typeof(ICollection<WorkStatusTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllPatients()
+    //[Authorize(Roles = "Administrator, Doctor, Receptionist")]
+    public async Task<IActionResult> GetAllWorkStatuses()
     {
-        var result = await _patientService.GetAllPatientsAsync();
+        var result = await _workStatusService.GetAllWorkStatusesAsync();
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -63,7 +62,7 @@ public class PatientController : ControllerBase
     }
 
     /// <summary>
-    /// Creates new Patient's Profile
+    /// Creates new Work Status
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
@@ -75,11 +74,9 @@ public class PatientController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddPatient(
-            [FromForm]PatientForCreateDTO patientForCreateDTO,
-            IFormFile file)
+    public async Task<IActionResult> AddWorkStatus([FromBody] WorkStatusForCreateDTO workStatusForCreateDTO)
     {
-        var result = await _patientService.AddPatientAsync(patientForCreateDTO, file);
+        var result = await _workStatusService.AddWorkStatusAsync(workStatusForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -89,10 +86,10 @@ public class PatientController : ControllerBase
     }
 
     /// <summary>
-    /// Updates selected Patient's Profile
+    /// Updates selected Work Status 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{patientId}")]
+    [HttpPut("{workStatusId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -101,9 +98,9 @@ public class PatientController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdatePatient(Guid patientId, [FromForm] PatientForUpdateDTO patientForUpdateDTO, IFormFile? file)
+    public async Task<IActionResult> UpdateWorkStatus(Guid workStatusId, [FromBody] WorkStatusForUpdateDTO workStatusForUpdateDTO)
     {
-        var result = await _patientService.UpdatePatientAsync(patientId, patientForUpdateDTO, file);
+        var result = await _workStatusService.UpdateWorkStatusAsync(workStatusId, workStatusForUpdateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -113,10 +110,10 @@ public class PatientController : ControllerBase
     }
 
     /// <summary>
-    /// Deletes Patient's Profile By Id
+    /// Deletes Work Status By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{patientId}")]
+    [HttpDelete("{workStatusId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -124,9 +121,9 @@ public class PatientController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeletePatientById(Guid patientId)
+    public async Task<IActionResult> DeleteWorkStatusById(Guid workStatusId)
     {
-        var result = await _patientService.DeletePatientByIdAsync(patientId);
+        var result = await _workStatusService.DeleteWorkStatusByIdAsync(workStatusId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

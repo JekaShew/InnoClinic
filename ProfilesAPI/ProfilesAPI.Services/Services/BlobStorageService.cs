@@ -27,10 +27,6 @@ public class BlobStorageService() : IBlobStorageService
         _blobContainerTitles = options.Value;
     }
 
-    //public BlobStorageService(IOptions<BlobContainerTitles> options)
-    //{
-    //    _blobContainerTitles = options.Value;    
-    //}
     public async Task DeleteAsync(Guid fileId)
     {
         BlobContainerClient blobContainerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
@@ -47,7 +43,7 @@ public class BlobStorageService() : IBlobStorageService
         return new FileResponse(response.Value.Content.ToStream(), response.Value.Details.ContentType);
     }
 
-    public async Task<Guid> UploadAsync(Stream stream, string contentType)
+    public async Task<BlobFileInfo> UploadAsync(Stream stream, string contentType)
     {
         BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
         var fileId = Guid.NewGuid();
@@ -56,6 +52,8 @@ public class BlobStorageService() : IBlobStorageService
                 stream,
                 new BlobHttpHeaders { ContentType = contentType });
         
-        return fileId;
+        //var qw = blobClient.Uri;
+        // link to image to entity
+        return new BlobFileInfo() {FileId = fileId, Uri = blobClient.Uri.ToString() };
     }
 }

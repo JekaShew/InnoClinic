@@ -22,9 +22,9 @@ public class DoctorRepository : IDoctorRepository
         var queryDoctor =
                     "Insert into Doctors " +
                         "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
-                        " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo)" +
+                        " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId)" +
                     "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
-                        "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo)";
+                        "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId)";
 
         var queryDoctorSpecializations =
                     "Insert into DoctorSpecializations " +
@@ -44,7 +44,8 @@ public class DoctorRepository : IDoctorRepository
         doctorParameters.Add("Phone", doctor.Phone, System.Data.DbType.String);
         doctorParameters.Add("BirthDate", doctor.BirthDate, System.Data.DbType.DateTime);
         doctorParameters.Add("CareerStartDate", doctor.CareerStartDate, System.Data.DbType.DateTime);
-        doctorParameters.Add("Photo", doctor.Photo, System.Data.DbType.Guid);
+        doctorParameters.Add("Photo", doctor.Photo, System.Data.DbType.String);
+        doctorParameters.Add("PhotoId", doctor.PhotoId, System.Data.DbType.Guid);
 
         var doctorSpecializationsParametersList = new List<DynamicParameters>();
         foreach(var doctorSpecialization in doctor.DoctorSpecializations)
@@ -68,7 +69,6 @@ public class DoctorRepository : IDoctorRepository
                 await connection.ExecuteAsync(queryDoctorSpecializations, doctorSpecializationsParameters);
             }
         }
-
     }
 
     public async Task DeleteDoctorByIdAsync(Guid doctorId)
