@@ -90,7 +90,7 @@ public class SpecializationService : ISpecializationService
         }
 
         specialization = _mapper.Map(specializationForUpdateDTO, specialization);
-        await _repositoryManager.Specialization.UpdateSpecializationAsync(specialization);
+        await _repositoryManager.Specialization.UpdateSpecializationAsync(specializationId, specialization);
 
         return new ResponseMessage();
     }

@@ -24,10 +24,11 @@ public class DoctorMappers : Profile
         CreateMap<DoctorForUpdateDTO, Doctor>()
             .ForMember(dest => dest.Photo, opt => opt.Ignore());
 
-        CreateMap<SpecializationsOfDoctorInfoDTO, DoctorSpecialization>();
+        CreateMap<SpecializationsOfDoctorInfoDTO, DoctorSpecialization>().ReverseMap();
         //CreateMap<List<SpecializationsOfDoctorInfoDTO>, List<DoctorSpecialization>>();
 
         CreateMap<DoctorSpecializationForCreateDTO, DoctorSpecialization>();
+        CreateMap<DoctorSpecializationForUpdateDTO, DoctorSpecialization>();
         //CreateMap<List<DoctorSpecializationForCreateDTO>, List<DoctorSpecialization>>();
     }
 }

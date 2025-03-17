@@ -89,7 +89,7 @@ public class WorkStatusService : IWorkStatusService
         }
 
         workStatus = _mapper.Map(workStatusForUpdateDTO, workStatus);
-        await _repositoryManager.WorkStatus.UpdateWorkStatusAsync(workStatus);
+        await _repositoryManager.WorkStatus.UpdateWorkStatusAsync(workStatusId, workStatus);
 
         return new ResponseMessage();
     }

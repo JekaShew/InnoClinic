@@ -111,6 +111,30 @@ public class DoctorsController : ControllerBase
     }
 
     /// <summary>
+    /// Updates selected Doctor's Specializations 
+    /// </summary>
+    /// <returns>Message</returns>
+    [HttpPut("{doctorId}/updatedoctorspecializations")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(FailMessage), 400)]
+    [ProducesResponseType(typeof(FailMessage), 403)]
+    [ProducesResponseType(typeof(FailMessage), 404)]
+    [ProducesResponseType(typeof(FailMessage), 408)]
+    [ProducesResponseType(typeof(FailMessage), 422)]
+    [ProducesResponseType(typeof(FailMessage), 500)]
+    //[Authorize(Roles = "Administrator")]
+    public async Task<IActionResult> UpdateDoctorSpecializations(Guid doctorId, [FromBody]IEnumerable<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateDTOs)
+    {
+        var result = await _doctorService.UpdateDoctorSpecializationsAsync(doctorId, doctorSpecializationForUpdateDTOs);
+        if (!result.IsComplited)
+        {
+            return new FailMessage(result.ErrorMessage, result.StatusCode);
+        }
+
+        return Ok();
+    }
+
+    /// <summary>
     /// Deletes Doctor's Profile By Id
     /// </summary>
     /// <returns>Message</returns>

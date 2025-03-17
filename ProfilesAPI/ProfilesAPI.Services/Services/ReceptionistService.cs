@@ -151,7 +151,7 @@ public class ReceptionistService : IReceptionistService
             receptionist.PhotoId = blobFileInfo.FileId;
         }
 
-        await _repositoryManager.Receptionist.UpdateReceptionistAsync(receptionist);
+        await _repositoryManager.Receptionist.UpdateReceptionistAsync(receptionistId, receptionist);
 
         return new ResponseMessage();
     }

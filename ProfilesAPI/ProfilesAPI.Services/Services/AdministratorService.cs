@@ -151,7 +151,7 @@ public class AdministratorService : IAdministratorService
             administrator.PhotoId = blobFileInfo.FileId;
         }
 
-        await _repositoryManager.Administrator.UpdateAdministratorAsync(administrator);
+        await _repositoryManager.Administrator.UpdateAdministratorAsync(administratorId, administrator);
 
         return new ResponseMessage();
     }

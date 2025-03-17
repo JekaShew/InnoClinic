@@ -21,9 +21,9 @@ public class PatientRepository : IPatientRepository
         var query = 
             "Insert into Patients " +
                 "(Id, UserId, FirstName, LastName," +
-                " SecondName, Address, Phone, BirthDate, Photo)" +
+                " SecondName, Address, Phone, BirthDate, Photo) " +
             "Values (@Id, @UserId, @FirstName, @LastName, " +
-                "@SecondName, @Address, @Phone, @BirthDate, @Photo)";
+                "@SecondName, @Address, @Phone, @BirthDate, @Photo) ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -50,20 +50,57 @@ public class PatientRepository : IPatientRepository
 
     public async Task<ICollection<Patient>> GetAllPatientsAsync()
     {
-        var patients = await _profilesDBContext.Connection.GetAllAsync<Patient>();
+        //var patients = await _profilesDBContext.Connection.GetAllAsync<Patient>();
+        var query = "Select Patients.Id, Patients.UserId, Patients.WorkStatusId, " +
+           "Patients.FirstName, Patients.LastName, Patients.SecondName, Patients.Address, " +
+           "Patients.Phone, Patients.BirthDate, Patients.Photo, Patients.PhotoId " +
+           "From Patients ";
 
-        return patients.ToList();
+        using (var connection = _profilesDBContext.Connection)
+        {
+           var patients = await connection.QueryAsync<Patient>(query);
+
+            return patients.Distinct().ToList();
+        }
     }
 
     public async Task<Patient> GetPatientByIdAsync(Guid patientId)
     {
-        var patient = await _profilesDBContext.Connection.GetAsync<Patient>(patientId);
+        //var patient = await _profilesDBContext.Connection.GetAsync<Patient>(patientId);
 
-        return patient;
+        var query = "Select * From Patients " +
+            "Where Patients.Id = @PatientId ";
+
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var patient = await connection.QueryFirstOrDefaultAsync<Patient>(query, new { patientId });  
+            return patient;
+        }
     }
 
-    public async Task UpdatePatientAsync(Patient updatedPatient)
+    public async Task UpdatePatientAsync(Guid patientId, Patient updatedPatient)
     {
-        await _profilesDBContext.Connection.UpdateAsync<Patient>(updatedPatient);
+        //await _profilesDBContext.Connection.UpdateAsync<Patient>(updatedPatient);
+        var query = "Update Patients " +
+                   "Set FirstName = @FirstName, LastName = @LastName, SecondName = @SecondName, " +
+                       " Address = @Address, Phone = @Phone , BirthDate = @BirthDate, " +
+                       "Photo = @Photo, PhotoId = @PhotoId " +
+                   "Where Id = @PatientId ";
+
+        var patientParameters = new DynamicParameters();
+        patientParameters.Add("PatientId", patientId, System.Data.DbType.Guid);
+        patientParameters.Add("FirstName", updatedPatient.FirstName, System.Data.DbType.String);
+        patientParameters.Add("LastName", updatedPatient.LastName, System.Data.DbType.String);
+        patientParameters.Add("SecondName", updatedPatient.SecondName, System.Data.DbType.String);
+        patientParameters.Add("Address", updatedPatient.Address, System.Data.DbType.String);
+        patientParameters.Add("Phone", updatedPatient.Phone, System.Data.DbType.String);
+        patientParameters.Add("BirthDate", updatedPatient.BirthDate, System.Data.DbType.DateTime);
+        patientParameters.Add("Photo", updatedPatient.Photo, System.Data.DbType.String);
+        patientParameters.Add("PhotoId", updatedPatient.PhotoId, System.Data.DbType.Guid);
+
+        using (var connection = _profilesDBContext.Connection)
+        {
+            await connection.ExecuteAsync(query, patientParameters);
+        }
     }
 }

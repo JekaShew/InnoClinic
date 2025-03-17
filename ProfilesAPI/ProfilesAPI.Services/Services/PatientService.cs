@@ -152,7 +152,7 @@ public class PatientService : IPatientService
             patient.PhotoId = blobFileInfo.FileId;
         }
         
-        await _repositoryManager.Patient.UpdatePatientAsync(patient);
+        await _repositoryManager.Patient.UpdatePatientAsync(patientId, patient);
 
         return new ResponseMessage();
     }

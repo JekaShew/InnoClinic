@@ -14,4 +14,5 @@ public class DoctorTableInfoDTO
     public string? Photo { get; set; }
     public Guid OfficeId { get; set; }
     public Guid? WorkStatusId { get; set; }
+    public ICollection<SpecializationsOfDoctorInfoDTO>? DoctorSpecializations { get; set; }
 }

@@ -18,32 +18,47 @@ public class DoctorService : IDoctorService
     private readonly ICommonService _commonService;
     private readonly IMapper _mapper;
     private readonly IValidator<DoctorForCreateDTO> _doctorForCreateValidator;
+    private readonly IValidator<DoctorSpecializationForCreateDTO> _doctorSpecializationForCreateValidator;
     private readonly IValidator<DoctorForUpdateDTO> _doctorForUpdateValidator;
+    private readonly IValidator<DoctorSpecializationForUpdateDTO> _doctorSpecializationForUpdateValidator;
 
     public DoctorService(
             IRepositoryManager repositoryManager,
             IMapper mapper,
+            ICommonService commonService,
+            IBlobStorageService blobService,
             IValidator<DoctorForCreateDTO> doctorForCreateValidator,
             IValidator<DoctorForUpdateDTO> doctorForUpdateValidator,
-            ICommonService commonService,
-            IBlobStorageService blobService)
+            IValidator<DoctorSpecializationForCreateDTO> doctorSpecializationForCreateValidator,
+            IValidator<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateValidator)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
-        _doctorForCreateValidator = doctorForCreateValidator;
-        _doctorForUpdateValidator = doctorForUpdateValidator;
         _commonService = commonService;
         _blobService = blobService;
+        _doctorForCreateValidator = doctorForCreateValidator;
+        _doctorForUpdateValidator = doctorForUpdateValidator;
+        _doctorSpecializationForCreateValidator = doctorSpecializationForCreateValidator;
+        _doctorSpecializationForUpdateValidator = doctorSpecializationForUpdateValidator;
     }
 
     public async Task<ResponseMessage> AddDoctorAsync(DoctorForCreateDTO doctorForCreateDTO)
     {
-        var validationResult = await _doctorForCreateValidator.ValidateAsync(doctorForCreateDTO);
-        if (!validationResult.IsValid)
+        var doctorValidationResult = await _doctorForCreateValidator.ValidateAsync(doctorForCreateDTO);
+        if (!doctorValidationResult.IsValid)
         {
-            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            throw new ValidationAppException(doctorValidationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
+        foreach(var doctorSpecialization in doctorForCreateDTO.DoctorSpecializations)
+        {
+            var doctorSpecializationValidationResult = await _doctorSpecializationForCreateValidator.ValidateAsync(doctorSpecialization);
+            if (!doctorSpecializationValidationResult.IsValid)
+            {
+                throw new ValidationAppException(doctorSpecializationValidationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }
+        
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null)
         {
@@ -157,8 +172,39 @@ public class DoctorService : IDoctorService
             doctor.PhotoId = blobFileInfo.FileId;
         }
 
-        await _repositoryManager.Doctor.UpdateDoctorAsync(doctor);
+        await _repositoryManager.Doctor.UpdateDoctorAsync(doctorId, doctor);
 
+        return new ResponseMessage();
+    }
+
+    public async Task<ResponseMessage> UpdateDoctorSpecializationsAsync(Guid doctorId, IEnumerable<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateDTOs)
+    {
+        var doctor = await _repositoryManager.Doctor.GetDoctorByIdAsync(doctorId);
+        if (doctor is null)
+        {
+            return new ResponseMessage("Doctor's Profile Not Found!", 404);
+        }
+
+        foreach (var doctorSpecialization in doctorSpecializationForUpdateDTOs)
+        {
+            var doctorSpecializationValidationResult = await _doctorSpecializationForUpdateValidator.ValidateAsync(doctorSpecialization);
+            if (!doctorSpecializationValidationResult.IsValid)
+            {
+                throw new ValidationAppException(doctorSpecializationValidationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }   
+
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null || !doctor.UserId.Equals(currentUserInfo.Id))
+        {
+            return new ResponseMessage("Forbidden Action! You have no rights to manage this Doctor's Profile!", 403);
+        }
+
+        await _repositoryManager.Doctor.DeleteSelectedDoctorSpecializationsByDoctorIdAsync(doctorId);
+        var doctorSpecializationsToAdd = _mapper.Map<ICollection<DoctorSpecialization>>(doctorSpecializationForUpdateDTOs);
+        await _repositoryManager.Doctor.AddSelectedDoctorSpecializationAsync(doctorId, doctorSpecializationsToAdd);
+        // delete all with doctrorId
+        //add all from doctorSpecializationForUpdateDTOs 
         return new ResponseMessage();
     }
 }
