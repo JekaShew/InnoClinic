@@ -21,6 +21,7 @@ public class DoctorService : IDoctorService
     private readonly IValidator<DoctorSpecializationForCreateDTO> _doctorSpecializationForCreateValidator;
     private readonly IValidator<DoctorForUpdateDTO> _doctorForUpdateValidator;
     private readonly IValidator<DoctorSpecializationForUpdateDTO> _doctorSpecializationForUpdateValidator;
+    private readonly IValidator<DoctorParameters> _doctorParametersValidator;
 
     public DoctorService(
             IRepositoryManager repositoryManager,
@@ -30,7 +31,8 @@ public class DoctorService : IDoctorService
             IValidator<DoctorForCreateDTO> doctorForCreateValidator,
             IValidator<DoctorForUpdateDTO> doctorForUpdateValidator,
             IValidator<DoctorSpecializationForCreateDTO> doctorSpecializationForCreateValidator,
-            IValidator<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateValidator)
+            IValidator<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateValidator,
+            IValidator<DoctorParameters> doctorParametersValidator)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
@@ -40,6 +42,7 @@ public class DoctorService : IDoctorService
         _doctorForUpdateValidator = doctorForUpdateValidator;
         _doctorSpecializationForCreateValidator = doctorSpecializationForCreateValidator;
         _doctorSpecializationForUpdateValidator = doctorSpecializationForUpdateValidator;
+        _doctorParametersValidator = doctorParametersValidator;
     }
 
     public async Task<ResponseMessage> AddDoctorAsync(DoctorForCreateDTO doctorForCreateDTO)
@@ -63,6 +66,12 @@ public class DoctorService : IDoctorService
         if (currentUserInfo is null)
         {
             return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+        }
+
+        var isProfileExists = await _repositoryManager.Doctor.IsProfileExists(currentUserInfo.Id);
+        if(isProfileExists)
+        {
+            return new ResponseMessage("Error! This profile already exists!", 400);
         }
 
         var doctor = _mapper.Map<Doctor>(doctorForCreateDTO);
@@ -89,9 +98,11 @@ public class DoctorService : IDoctorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if ((currentUserInfo is null 
-            || !doctor.UserId.Equals(currentUserInfo.Id)) 
-            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            doctor.UserId.Equals(currentUserInfo.Id) ? true :
+            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Doctor's Profile!", 403);
         }
@@ -106,19 +117,22 @@ public class DoctorService : IDoctorService
         return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync(/*DoctorFilterDTO doctorFilterDTO*/)
+    public async Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync(DoctorParameters? doctorParameters)
     {
-        // Pagination
-        // Filtration
-        // Search
+        // Pagination +
+        // Filtration +
+        // Search +
 
-        //if(doctorFilterDTO is not null)
-        //{
-
-        //    //var filteredDoctors = await _repositoryManager.Doctor.GetDoctorsByExpression()
-        //}
+        if(doctorParameters is not null)
+        {
+            var validationResult = await _doctorParametersValidator.ValidateAsync(doctorParameters);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }
         
-        var doctors = await _repositoryManager.Doctor.GetAllDoctorsAsync();
+        var doctors = await _repositoryManager.Doctor.GetAllDoctorsAsync(doctorParameters);
         if (doctors.Count == 0)
         {
             return new ResponseMessage<ICollection<DoctorTableInfoDTO>>("No Doctor's Profiles Found in Database!", 404);
@@ -128,7 +142,7 @@ public class DoctorService : IDoctorService
 
         return new ResponseMessage<ICollection<DoctorTableInfoDTO>>(doctorTableInfoDTOs);
     }
-    // no mapping DoctorSpecializations! need to update in DoctorRepository!
+
     public async Task<ResponseMessage<DoctorInfoDTO>> GetDoctorByIdAsync(Guid doctorId) 
     {
         var doctor = await _repositoryManager.Doctor.GetDoctorByIdAsync(doctorId);
@@ -157,7 +171,10 @@ public class DoctorService : IDoctorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !doctor.UserId.Equals(currentUserInfo.Id))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            doctor.UserId.Equals(currentUserInfo.Id) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Doctor's Profile!", 403);
         }
@@ -195,7 +212,11 @@ public class DoctorService : IDoctorService
         }   
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !doctor.UserId.Equals(currentUserInfo.Id))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            doctor.UserId.Equals(currentUserInfo.Id) ? true :
+            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Doctor's Profile!", 403);
         }
@@ -203,8 +224,7 @@ public class DoctorService : IDoctorService
         await _repositoryManager.Doctor.DeleteSelectedDoctorSpecializationsByDoctorIdAsync(doctorId);
         var doctorSpecializationsToAdd = _mapper.Map<ICollection<DoctorSpecialization>>(doctorSpecializationForUpdateDTOs);
         await _repositoryManager.Doctor.AddSelectedDoctorSpecializationAsync(doctorId, doctorSpecializationsToAdd);
-        // delete all with doctrorId
-        //add all from doctorSpecializationForUpdateDTOs 
+ 
         return new ResponseMessage();
     }
 }

@@ -10,5 +10,5 @@ public interface IDoctorService
     public Task<ResponseMessage> UpdateDoctorSpecializationsAsync(Guid doctorId, IEnumerable<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateDTOs);
     public Task<ResponseMessage> DeleteDoctorByIdAsync(Guid doctorId);
     public Task<ResponseMessage<DoctorInfoDTO>> GetDoctorByIdAsync(Guid doctorId);
-    public Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync();
+    public Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync(DoctorParameters? doctorParameters);
 }

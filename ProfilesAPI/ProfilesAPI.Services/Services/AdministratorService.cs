@@ -49,6 +49,12 @@ public class AdministratorService : IAdministratorService
             return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
+        var isProfileExists = await _repositoryManager.Administrator.IsProfileExists(currentUserInfo.Id);
+        if (isProfileExists)
+        {
+            return new ResponseMessage("Error! This profile already exists!", 400);
+        }
+
         var administrator = _mapper.Map<Administrator>(administratorForCreateDTO);
         if (administratorForCreateDTO.Photo is not null)
         {
@@ -73,9 +79,12 @@ public class AdministratorService : IAdministratorService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if ((currentUserInfo is null
-            || !administrator.UserId.Equals(currentUserInfo.Id))
-            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            administrator.UserId.Equals(currentUserInfo.Id) ? true :
+            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
         }
@@ -133,10 +142,12 @@ public class AdministratorService : IAdministratorService
         {
             return new ResponseMessage("Administrator's Profile Not Found!", 404);
         }
-
         
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !administrator.UserId.Equals(currentUserInfo.Id))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            administrator.UserId.Equals(currentUserInfo.Id) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
         }

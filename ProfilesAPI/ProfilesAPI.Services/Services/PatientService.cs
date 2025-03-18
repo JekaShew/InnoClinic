@@ -51,6 +51,12 @@ public class PatientService : IPatientService
             return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
+        var isProfileExists = await _repositoryManager.Patient.IsProfileExists(currentUserInfo.Id);
+        if (isProfileExists)
+        {
+            return new ResponseMessage("Error! This profile already exists!", 400);
+        }
+
         var patient = _mapper.Map<Patient>(patientForCreateDTO);
         if (patientForCreateDTO.Photo is not null)
         {
@@ -75,9 +81,11 @@ public class PatientService : IPatientService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if ((currentUserInfo is null
-            || !patient.UserId.Equals(currentUserInfo.Id))
-            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            patient.UserId.Equals(currentUserInfo.Id) ? true :
+            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
         }
@@ -137,7 +145,10 @@ public class PatientService : IPatientService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            patient.UserId.Equals(currentUserInfo.Id) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
         }

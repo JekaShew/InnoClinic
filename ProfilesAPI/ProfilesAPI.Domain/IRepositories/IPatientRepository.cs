@@ -9,4 +9,5 @@ public interface IPatientRepository
     public Task DeletePatientByIdAsync(Guid patientId);
     public Task<Patient> GetPatientByIdAsync(Guid patientId);
     public Task<ICollection<Patient>> GetAllPatientsAsync();
+    public Task<bool> IsProfileExists(Guid userId);
 }

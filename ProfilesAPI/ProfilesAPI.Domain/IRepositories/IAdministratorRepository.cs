@@ -9,4 +9,5 @@ public interface IAdministratorRepository
     public Task DeleteAdministratorByIdAsync(Guid administratorId);
     public Task<Administrator> GetAdministratorByIdAsync(Guid administratorId);
     public Task<ICollection<Administrator>> GetAllAdministratorsAsync();
+    public Task<bool> IsProfileExists(Guid userId);
 }

@@ -21,9 +21,9 @@ public class ReceptionistRepository : IReceptionistRepository
         var query =
                    "Insert into Receptionists " +
                        "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName, " +
-                       "SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo) " +
+                       "SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
                    "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
-                       "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo) ";
+                       "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -38,8 +38,8 @@ public class ReceptionistRepository : IReceptionistRepository
         parameters.Add("Phone", receptionist.Phone, System.Data.DbType.String);
         parameters.Add("BirthDate", receptionist.BirthDate, System.Data.DbType.DateTime);
         parameters.Add("CareerStartDate", receptionist.CareerStartDate, System.Data.DbType.DateTime);
-
-        parameters.Add("Photo", receptionist.Photo, System.Data.DbType.Guid);
+        parameters.Add("Photo", receptionist.Photo, System.Data.DbType.String);
+        parameters.Add("PhotoId", receptionist.PhotoId, System.Data.DbType.Guid);
 
         using (var connection = _profilesDBContext.Connection)
         {
@@ -49,7 +49,13 @@ public class ReceptionistRepository : IReceptionistRepository
 
     public async Task DeleteReceptionistByIdAsync(Guid receptionistId)
     {
-        await _profilesDBContext.Connection.DeleteAsync<Receptionist>(new Receptionist { UserId = receptionistId });
+        //await _profilesDBContext.Connection.DeleteAsync<Receptionist>(new Receptionist { Id = receptionistId });
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var query = "Delete From Receptionists " +
+                "Where Receptionists.Id = @ReceptionistId ";
+            await connection.ExecuteAsync(query, new { receptionistId });
+        }
     }
 
     public async Task<ICollection<Receptionist>> GetAllReceptionistsAsync()
@@ -78,6 +84,19 @@ public class ReceptionistRepository : IReceptionistRepository
             var receptionist = await connection.QueryFirstOrDefaultAsync<Receptionist>(query, new { receptionistId});
             return receptionist;
         }        
+    }
+
+    public async Task<bool> IsProfileExists(Guid userId)
+    {
+        var query = "Select * From Receptionists " +
+            "Where Receptionists.UserId = @UserId ";
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var receptionist = await connection.QueryFirstOrDefaultAsync<Receptionist>(query, new { userId });
+            var result = receptionist is null ? false : true;
+
+            return result;
+        }
     }
 
     public async Task UpdateReceptionistAsync(Guid receptionistId, Receptionist updatedReceptionist)

@@ -1,10 +1,11 @@
 ﻿using Dapper;
-using Dapper.Contrib.Extensions;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Persistance.Data;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using System.Linq.Expressions;
-using System.Numerics;
+using System.Text;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ProfilesAPI.Persistance.Repositories;
 
@@ -20,7 +21,6 @@ public class DoctorRepository : IDoctorRepository
     public async Task AddDoctorAsync(Doctor doctor)
     {
         //await _profilesDBContext.Connection.InsertAsync<Doctor>(doctor);
-        // add check if Exists
         var queryDoctor =
                     "Insert into Doctors " +
                         "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
@@ -74,26 +74,115 @@ public class DoctorRepository : IDoctorRepository
 
     public async Task DeleteDoctorByIdAsync(Guid doctorId)
     {
-        await _profilesDBContext.Connection.DeleteAsync<Doctor>(new Doctor { UserId = doctorId });
+        //await _profilesDBContext.Connection.DeleteAsync<Doctor>(new Doctor { Id = doctorId });
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var query = "Delete From Doctors" +
+                "Where Doctors.Id = @DoctorId";
+            await connection.ExecuteAsync(query, new { doctorId });
+        }
     }
 
-    public async Task<ICollection<Doctor>> GetAllDoctorsAsync()
+    public async Task<ICollection<Doctor>> GetAllDoctorsAsync(DoctorParameters? doctorParameters)
     {
-        //var doctors = await _profilesDBContext.Connection.GetAllAsync<Doctor>();
-        var query = "Select Doctors.Id, Doctors.UserId, Doctors.WorkStatusId, Doctors.OfficeId, " +
-            "Doctors.FirstName, Doctors.LastName, Doctors.SecondName, Doctors.Address, Doctors.WorkEmail, " +
-            "Doctors.Phone, Doctors.BirthDate, Doctors.CareerStartDate, Doctors.Photo, Doctors.PhotoId, " +
-            "DoctorSpecializations.Id, DoctorSpecializations.DoctorId, DoctorSpecializations.SpecializationId, " +
-            "DoctorSpecializations.SpecialzationAchievementDate, DoctorSpecializations.Description " +
-            "From Doctors " +
-            "inner join DoctorSpecializations on Doctors.Id = DoctorSpecializations.DoctorId " +
-            "inner join Specializations on Specializations.Id = DoctorSpecializations.SpecializationId";
+        //var query = "Select Doctors.Id, Doctors.UserId, Doctors.WorkStatusId, Doctors.OfficeId, " +
+        //    "Doctors.FirstName, Doctors.LastName, Doctors.SecondName, Doctors.Address, Doctors.WorkEmail, " +
+        //    "Doctors.Phone, Doctors.BirthDate, Doctors.CareerStartDate, Doctors.Photo, Doctors.PhotoId, " +
+        //    "DoctorSpecializations.Id, DoctorSpecializations.DoctorId, DoctorSpecializations.SpecializationId, " +
+        //    "DoctorSpecializations.SpecialzationAchievementDate, DoctorSpecializations.Description " +
+        //    "From Doctors " +
+        //    "inner join DoctorSpecializations on Doctors.Id = DoctorSpecializations.DoctorId " +
+        //    "inner join Specializations on Specializations.Id = DoctorSpecializations.SpecializationId " +
+        //    doctorParameters.Specializations is null ? " " :
+        //        doctorParameters.Specializations.Count >= 1 ?
+        //            "Where Doctors.Id in " +
+        //            "(Select Distinct DoctorSpecializations.DoctorId " +
+        //            "From DoctorSpecializations " +
+        //            $"Where DoctorSpecializations.SpecializationId in {specializationList}) " : " " +
+        //    $"Limit {doctorParameters.PageSize} Offset {(doctorParameters.PageNumber - 1) * doctorParameters.PageSize} ";
 
+        var query = new StringBuilder(@"
+            SELECT Doctors.Id, Doctors.UserId, Doctors.WorkStatusId, Doctors.OfficeId, 
+                   Doctors.FirstName, Doctors.LastName, Doctors.SecondName, Doctors.Address, Doctors.WorkEmail, 
+                   Doctors.Phone, Doctors.BirthDate, Doctors.CareerStartDate, Doctors.Photo, Doctors.PhotoId, 
+                   DoctorSpecializations.Id, DoctorSpecializations.DoctorId, DoctorSpecializations.SpecializationId, 
+                   DoctorSpecializations.SpecialzationAchievementDate, DoctorSpecializations.Description 
+            FROM Doctors 
+            INNER JOIN DoctorSpecializations ON Doctors.Id = DoctorSpecializations.DoctorId 
+            INNER JOIN Specializations ON Specializations.Id = DoctorSpecializations.SpecializationId");
+
+        var specializationList = "";
+        var officeList = "";
+
+        switch (doctorParameters)
+        {
+            case null:
+                doctorParameters = new DoctorParameters();
+                break;
+
+            case { Specializations: { Count: > 0 }, Offices: { Count: <= 0} }:
+                // specializations
+                specializationList = string.Join(", ", doctorParameters.Specializations.Select(id => $"'{id}'"));
+                query.Append($@"
+                WHERE Doctors.Id IN (
+                    SELECT DISTINCT DoctorSpecializations.DoctorId 
+                    FROM DoctorSpecializations 
+                    WHERE DoctorSpecializations.SpecializationId IN ({specializationList})
+                )");
+                break;
+
+            case { Specializations: { Count: <= 0 }, Offices: { Count: > 0 } }:
+                // offices  
+                officeList = string.Join(", ", doctorParameters.Offices.Select(id => $"'{id}'"));                      
+                query.Append($@"
+                WHERE Doctors.OfficeId IN ({officeList}) ");
+                break;
+
+            case { Specializations: { Count: > 0 }, Offices: { Count: > 0 } }:
+                // Specializations and Offices
+                specializationList = string.Join(", ", doctorParameters.Specializations.Select(id => $"'{id}'"));
+                officeList = string.Join(", ", doctorParameters.Offices.Select(id => $"'{id}'"));
+                query.Append($@"
+                WHERE Doctors.Id IN 
+                (
+                    SELECT DISTINCT DoctorSpecializations.DoctorId 
+                    FROM DoctorSpecializations 
+                    WHERE DoctorSpecializations.SpecializationId IN ({specializationList})
+                ) AND
+                Doctors.OfficeId IN ({officeList}) ");
+                break;
+        }
+        if(doctorParameters.SearchString is not null && doctorParameters.SearchString.Length > 0)
+        {
+            if (
+                doctorParameters.Specializations is null
+                || doctorParameters.Specializations.Count == 0
+                    &&
+                doctorParameters.Offices is null
+                || doctorParameters.Offices.Count == 0)
+            {
+                query.Append($@"
+                WHERE 
+                CONCAT(Doctors.FirstName, ' ', Doctors.LastName, ' ', Doctors.SecondName) LIKE '%{doctorParameters.SearchString}%' ");
+            }
+            else
+            {
+                query.Append($@"
+                AND 
+                CONCAT(Doctors.FirstName, ' ', Doctors.LastName, ' ', Doctors.SecondName) LIKE '%{doctorParameters.SearchString}%' ");
+            }
+        }
+
+        query.Append($@"
+        ORDER BY Doctors.Id
+        OFFSET {(doctorParameters.PageNumber - 1) * doctorParameters.PageSize} ROWS 
+        FETCH NEXT {doctorParameters.PageSize} ROWS ONLY; ");
+        string finalQuery = query.ToString();
         using (var connection = _profilesDBContext.Connection)
         {
             var doctorDictionary = new Dictionary<Guid, Doctor>();
             var doctors = await connection.QueryAsync<Doctor, DoctorSpecialization, Doctor>(
-                query, (doctor, doctorSpecialization) =>
+                finalQuery, (doctor, doctorSpecialization) =>
                 {
                     if (!doctorDictionary.TryGetValue(doctor.Id, out var currentDoctor))
                     {
@@ -114,7 +203,6 @@ public class DoctorRepository : IDoctorRepository
     public async Task<Doctor> GetDoctorByIdAsync(Guid doctorId)
     {
         //var doctor = await _profilesDBContext.Connection.GetAsync<Doctor>(doctorId);
-
         var query = "Select * From Doctors " +
             "Where Doctors.Id = @DoctorId; " +
             "Select * From DoctorSpecializations " +
@@ -234,6 +322,19 @@ public class DoctorRepository : IDoctorRepository
             {
                 await connection.ExecuteAsync(query, doctorSpecializationsParameters);
             }
+        }
+    }
+
+    public async Task<bool> IsProfileExists(Guid userId)
+    {
+        var query = "Select * From Doctors " +
+            "Where Doctors.UserId = @UserId ";
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var doctor = await connection.QueryFirstOrDefaultAsync<Doctor>(query, new { userId });
+            var result = doctor is null ? false : true;
+            
+            return result;
         }
     }
 }

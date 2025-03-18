@@ -50,6 +50,12 @@ public class ReceptionistService : IReceptionistService
             return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
+        var isProfileExists = await _repositoryManager.Receptionist.IsProfileExists(currentUserInfo.Id);
+        if (isProfileExists)
+        {
+            return new ResponseMessage("Error! This profile already exists!", 400);
+        }
+
         var receptionist = _mapper.Map<Receptionist>(receptionistForCreateDTO);
         if (receptionistForCreateDTO.Photo is not null)
         {
@@ -74,9 +80,11 @@ public class ReceptionistService : IReceptionistService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if ((currentUserInfo is null
-            || !receptionist.UserId.Equals(currentUserInfo.Id))
-            && !currentUserInfo.Role.Equals(RoleConstants.Administrator))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            receptionist.UserId.Equals(currentUserInfo.Id) ? true :
+            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Receptionist's Profile!", 403);
         }
@@ -136,7 +144,10 @@ public class ReceptionistService : IReceptionistService
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        if (currentUserInfo is null || !receptionist.UserId.Equals(currentUserInfo.Id))
+        var currentUserInfoCheck =
+            currentUserInfo is null ? false :
+            receptionist.UserId.Equals(currentUserInfo.Id) ? true : false;
+        if (!currentUserInfoCheck)
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
         }

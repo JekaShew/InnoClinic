@@ -20,9 +20,9 @@ public class AdministratorRepository : IAdministratorRepository
         var query =
                    "Insert into Administrators " +
                        "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
-                       " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo) " +
+                       " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
                    "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
-                       "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo) ";
+                       "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -37,8 +37,8 @@ public class AdministratorRepository : IAdministratorRepository
         parameters.Add("Phone", administrator.Phone, System.Data.DbType.String);
         parameters.Add("BirthDate", administrator.BirthDate, System.Data.DbType.DateTime);
         parameters.Add("CareerStartDate", administrator.CareerStartDate, System.Data.DbType.DateTime);
-
-        parameters.Add("Photo", administrator.Photo, System.Data.DbType.Guid);
+        parameters.Add("Photo", administrator.Photo, System.Data.DbType.String);
+        parameters.Add("PhotoId", administrator.PhotoId, System.Data.DbType.Guid);
 
         using (var connection = _profilesDBContext.Connection)
         {
@@ -48,7 +48,13 @@ public class AdministratorRepository : IAdministratorRepository
 
     public async Task DeleteAdministratorByIdAsync(Guid administratorId)
     {
-        await _profilesDBContext.Connection.DeleteAsync<Administrator>(new Administrator { UserId = administratorId });
+        //await _profilesDBContext.Connection.DeleteAsync<Administrator>(new Administrator { Id = administratorId });
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var query = "Delete From Administrators " +
+                "Where Administrators.Id = @AdministratorId ";
+            await connection.ExecuteAsync(query, new { administratorId });
+        }
     }
 
     public async Task<Administrator> GetAdministratorByIdAsync(Guid administratorId)
@@ -59,7 +65,7 @@ public class AdministratorRepository : IAdministratorRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var administrator = await connection.QueryFirstOrDefaultAsync(query, new { administratorId});
+            var administrator = await connection.QueryFirstOrDefaultAsync<Administrator>(query, new { administratorId});
             return administrator;
         }        
     }
@@ -76,6 +82,19 @@ public class AdministratorRepository : IAdministratorRepository
         {
             var administrators = await connection.QueryAsync<Administrator>(query);
             return administrators.ToList();
+        }
+    }
+
+    public async Task<bool> IsProfileExists(Guid userId)
+    {
+        var query = "Select * From Administrators " +
+            "Where Administrators.UserId = @UserId ";
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var administrator = await connection.QueryFirstOrDefaultAsync<Administrator>(query, new { userId });
+            var result = administrator is null ? false : true;
+
+            return result;
         }
     }
 
