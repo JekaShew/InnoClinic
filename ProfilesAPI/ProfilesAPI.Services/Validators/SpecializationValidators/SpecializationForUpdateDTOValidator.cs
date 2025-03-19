@@ -8,8 +8,8 @@ public class SpecializationForUpdateDTOValidator : AbstractValidator<Specializat
     public SpecializationForUpdateDTOValidator()
     {
         RuleFor(c => c.Title)
-       .NotEmpty()
-       .NotNull()
-       .WithMessage("Specialization's title shouldn't be null!");
+           .NotEmpty()
+           .NotNull()
+           .WithMessage("Specialization's title shouldn't be null!");
     }
 }

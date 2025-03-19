@@ -8,13 +8,9 @@ public class PatientMappers : Profile
 {
     public PatientMappers()
     {
-        CreateMap<Patient, PatientInfoDTO>()
-            .ForMember(dest => dest.Photo, opt => opt.Ignore())
-            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo));
-        
-        CreateMap<Patient, PatientTableInfoDTO>()
-            .ForMember(dest => dest.Photo, opt => opt.Ignore())
-            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo)); 
+        CreateMap<Patient, PatientInfoDTO>();
+
+        CreateMap<Patient, PatientTableInfoDTO>(); 
         
         CreateMap<PatientForCreateDTO, Patient>()
             .ForMember(dest => dest.Photo, opt => opt.Ignore());

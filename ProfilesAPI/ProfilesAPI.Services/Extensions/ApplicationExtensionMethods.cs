@@ -25,9 +25,7 @@ namespace ProfilesAPI.Services.Extensions
             services.AddScoped<ISpecializationService, SpecializationService>();
             services.AddScoped<IWorkStatusService, WorkStatusService>();
 
-            services.AddScoped<IBlobStorageService, BlobStorageService>();
-            services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("AzureBlobStorage")));
-
+            services.AddAzureBlobStorageMethod(configuration);
             services.AddFluentValidationMethod();
             services.AddAutoMapperMethod();
 
@@ -38,6 +36,15 @@ namespace ProfilesAPI.Services.Extensions
         {
             // FluentValidation
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+            return services;
+        }
+
+        private static IServiceCollection AddAzureBlobStorageMethod(this IServiceCollection services, IConfiguration configuration)
+        {
+            // Azure Blob Storage
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
+            services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("AzureBlobStorageFromLocal")));
 
             return services;
         }

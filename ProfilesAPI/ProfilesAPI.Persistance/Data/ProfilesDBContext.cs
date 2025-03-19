@@ -14,8 +14,8 @@ namespace ProfilesAPI.Persistance.Data
         public ProfilesDBContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("ProfilesDBDocker");
-            _masterConnectionString = _configuration.GetConnectionString("MasterDBDocker");
+            _connectionString = _configuration.GetConnectionString("ProfilesDBDockerFromLocal");
+            _masterConnectionString = _configuration.GetConnectionString("MasterDBDockerFromLocal");
         }
 
         public IDbConnection? Connection

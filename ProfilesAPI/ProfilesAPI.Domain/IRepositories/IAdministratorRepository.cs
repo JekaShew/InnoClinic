@@ -1,4 +1,5 @@
 ﻿using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
 
 namespace ProfilesAPI.Domain.IRepositories;
 
@@ -8,6 +9,6 @@ public interface IAdministratorRepository
     public Task UpdateAdministratorAsync(Guid administratorId, Administrator updatedAdministrator);
     public Task DeleteAdministratorByIdAsync(Guid administratorId);
     public Task<Administrator> GetAdministratorByIdAsync(Guid administratorId);
-    public Task<ICollection<Administrator>> GetAllAdministratorsAsync();
+    public Task<ICollection<Administrator>> GetAllAdministratorsAsync(AdministratorParameters? administratorParameters);
     public Task<bool> IsProfileExists(Guid userId);
 }

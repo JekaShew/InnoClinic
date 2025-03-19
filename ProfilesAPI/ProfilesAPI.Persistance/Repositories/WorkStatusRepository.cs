@@ -16,7 +16,6 @@ public class WorkStatusRepository : IWorkStatusRepository
 
     public async Task AddWorkStatusAsync(WorkStatus workStatus)
     {
-        //await _profilesDBContext.Connection.InsertAsync<WorkStatus>(workStatus);
         var query = "Insert into WorkStatuses (Id, Title, Description) " +
             "Values (@Id, @Title, @Description) ";
 
@@ -33,7 +32,6 @@ public class WorkStatusRepository : IWorkStatusRepository
 
     public async Task DeleteWorkStatusByIdAsync(Guid workStatusId)
     {
-        //await _profilesDBContext.Connection.DeleteAsync<WorkStatus>(new WorkStatus { Id = workStatusId });
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Delete From WorkStatuses " +
@@ -44,7 +42,6 @@ public class WorkStatusRepository : IWorkStatusRepository
 
     public async Task<ICollection<WorkStatus>> GetAllWorkStatusesAsync()
     {
-        //var workStatuses = await _profilesDBContext.Connection.GetAllAsync<WorkStatus>();
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Select * From WorkStatuses ";
@@ -56,7 +53,6 @@ public class WorkStatusRepository : IWorkStatusRepository
 
     public async Task<WorkStatus> GetWorkStatusByIdAsync(Guid workStatusId)
     {
-        //var workStatus =  await _profilesDBContext.Connection.GetAsync<WorkStatus>(workStatusId);
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Select * From WorkStatuses " +
@@ -69,7 +65,6 @@ public class WorkStatusRepository : IWorkStatusRepository
 
     public async Task UpdateWorkStatusAsync(Guid workStatusId, WorkStatus updatedWorkStatus)
     {
-        //await _profilesDBContext.Connection.UpdateAsync<WorkStatus>(updatedWorkStatus);
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Update WorkStatuses " +

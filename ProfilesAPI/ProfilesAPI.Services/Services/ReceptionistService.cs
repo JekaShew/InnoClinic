@@ -7,6 +7,8 @@ using InnoClinic.CommonLibrary.Response;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Validators.DoctorValidators;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using ProfilesAPI.Shared.DTOs.ReceptionistDTOs;
 
 namespace ProfilesAPI.Services.Services;
@@ -19,21 +21,24 @@ public class ReceptionistService : IReceptionistService
     private readonly IMapper _mapper;
     private readonly IValidator<ReceptionistForCreateDTO> _receptionistForCreateValidator;
     private readonly IValidator<ReceptionistForUpdateDTO> _receptionistForUpdateValidator;
+    private readonly IValidator<ReceptionistParameters> _receptionistParametersValidator;
 
     public ReceptionistService(
             IRepositoryManager repositoryManager,
             IMapper mapper,
+            ICommonService commonService,
+            IBlobStorageService blobService,
             IValidator<ReceptionistForCreateDTO> receptionistForCreateValidator,
             IValidator<ReceptionistForUpdateDTO> receptionistForUpdateValidator,
-            ICommonService commonService,
-            IBlobStorageService blobService)
+            IValidator<ReceptionistParameters> receptionistParametersValidator)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
-        _receptionistForCreateValidator = receptionistForCreateValidator;
-        _receptionistForUpdateValidator = receptionistForUpdateValidator;
         _commonService = commonService;
         _blobService = blobService;
+        _receptionistForCreateValidator = receptionistForCreateValidator;
+        _receptionistForUpdateValidator = receptionistForUpdateValidator;
+        _receptionistParametersValidator = receptionistParametersValidator;
     }
 
     public async Task<ResponseMessage> AddReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO)
@@ -99,13 +104,21 @@ public class ReceptionistService : IReceptionistService
         return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage<ICollection<ReceptionistTableInfoDTO>>> GetAllReceptionistsAsync()
+    public async Task<ResponseMessage<ICollection<ReceptionistTableInfoDTO>>> GetAllReceptionistsAsync(ReceptionistParameters? receptionistParameters)
     {
         // Pagination
         // Filtration
         // Search
+        if (receptionistParameters is not null)
+        {
+            var validationResult = await _receptionistParametersValidator.ValidateAsync(receptionistParameters);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }
 
-        var receptionists = await _repositoryManager.Receptionist.GetAllReceptionistsAsync();
+        var receptionists = await _repositoryManager.Receptionist.GetAllReceptionistsAsync(receptionistParameters);
         if (receptionists.Count == 0)
         {
             return new ResponseMessage<ICollection<ReceptionistTableInfoDTO>>("No Receptionist's Profiles Found in Database!", 404);

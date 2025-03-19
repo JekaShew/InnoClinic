@@ -16,7 +16,6 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task AddSpecializationAsync(Specialization specialization)
     {
-        //await _profilesDBContext.Connection.InsertAsync<Specialization>(specialization);
         var query = "Insert into Specializations (Id, Title, Description) " +
             "Values (@Id, @Title, @Description) ";
 
@@ -33,7 +32,6 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task DeleteSpecializationByIdAsync(Guid specializationId)
     {
-        //await _profilesDBContext.Connection.DeleteAsync<Specialization>(new Specialization { Id = specializationId });
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Delete From Specializations " +
@@ -44,7 +42,6 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task<ICollection<Specialization>> GetAllSpecializationsAsync()
     {
-        //var specializations = await _profilesDBContext.Connection.GetAllAsync<Specialization>();
         using(var connection = _profilesDBContext.Connection)
         {
             var query = "Select * From Specializations ";
@@ -56,7 +53,6 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task<Specialization> GetSpecializationByIdAsync(Guid specializationId)
     {
-        //var specialization = await _profilesDBContext.Connection.GetAsync<Specialization>(specializationId);
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Select * From Specializations " +
@@ -69,7 +65,6 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task UpdateSpecializationAsync(Guid specializationId, Specialization updatedSpecialization)
     {
-        //await _profilesDBContext.Connection.UpdateAsync<Specialization>(updatedSpecialization);
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Update Specializations " +

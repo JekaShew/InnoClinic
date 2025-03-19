@@ -3,6 +3,9 @@ using Dapper.Contrib.Extensions;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Persistance.Data;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
+using ProfilesAPI.Shared.DTOs.PatientDTOs;
+using System.Text;
 
 namespace ProfilesAPI.Persistance.Repositories;
 
@@ -17,7 +20,6 @@ public class PatientRepository : IPatientRepository
 
     public async Task AddPatientAsync(Patient patient)
     {
-        //await _profilesDBContext.Connection.InsertAsync<Patient>(patient);
         var query = 
             "Insert into Patients " +
                 "(Id, UserId, FirstName, LastName," +
@@ -45,7 +47,6 @@ public class PatientRepository : IPatientRepository
 
     public async Task DeletePatientByIdAsync(Guid patientId)
     {
-        //await _profilesDBContext.Connection.DeleteAsync<Patient>(new Patient { Id = patientId });
         using(var connection  = _profilesDBContext.Connection)
         {
             var query = "Delete From Patients " +
@@ -54,17 +55,35 @@ public class PatientRepository : IPatientRepository
         }
     }
 
-    public async Task<ICollection<Patient>> GetAllPatientsAsync()
+    public async Task<ICollection<Patient>> GetAllPatientsAsync(PatientParameters? patientParameters)
     {
-        //var patients = await _profilesDBContext.Connection.GetAllAsync<Patient>();
-        var query = "Select Patients.Id, Patients.UserId, Patients.WorkStatusId, " +
-           "Patients.FirstName, Patients.LastName, Patients.SecondName, Patients.Address, " +
-           "Patients.Phone, Patients.BirthDate, Patients.Photo, Patients.PhotoId " +
-           "From Patients ";
+        var query = new StringBuilder(@"
+            SELECT Patients.Id, Patients.UserId, Patients.FirstName, Patients.LastName, 
+                Patients.SecondName, Patients.Address, Patients.Phone, Patients.BirthDate, 
+                Patients.Photo, Patients.PhotoId            
+            FROM Patients " );
 
+        if(patientParameters is null)
+        {
+            patientParameters = new PatientParameters();
+        }
+
+        if (patientParameters.SearchString is not null && patientParameters.SearchString.Length > 0)
+        {
+            query.Append($@"
+            WHERE 
+            CONCAT(Patients.FirstName, ' ', Patients.LastName, ' ', Patients.SecondName) LIKE '%{patientParameters.SearchString}%' ");
+        }
+
+        query.Append($@"
+        ORDER BY Patients.Id
+        OFFSET 
+        {(patientParameters.PageNumber - 1) * patientParameters.PageSize} ROWS 
+        FETCH NEXT {patientParameters.PageSize} ROWS ONLY; ");
+        string finalQuery = query.ToString();
         using (var connection = _profilesDBContext.Connection)
         {
-           var patients = await connection.QueryAsync<Patient>(query);
+            var patients = await connection.QueryAsync<Patient>(finalQuery);
 
             return patients.Distinct().ToList();
         }
@@ -72,8 +91,6 @@ public class PatientRepository : IPatientRepository
 
     public async Task<Patient> GetPatientByIdAsync(Guid patientId)
     {
-        //var patient = await _profilesDBContext.Connection.GetAsync<Patient>(patientId);
-
         var query = "Select * From Patients " +
             "Where Patients.Id = @PatientId ";
 
@@ -99,7 +116,6 @@ public class PatientRepository : IPatientRepository
 
     public async Task UpdatePatientAsync(Guid patientId, Patient updatedPatient)
     {
-        //await _profilesDBContext.Connection.UpdateAsync<Patient>(updatedPatient);
         var query = "Update Patients " +
                    "Set FirstName = @FirstName, LastName = @LastName, SecondName = @SecondName, " +
                        " Address = @Address, Phone = @Phone , BirthDate = @BirthDate, " +

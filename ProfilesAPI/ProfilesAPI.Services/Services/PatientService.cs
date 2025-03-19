@@ -7,6 +7,8 @@ using InnoClinic.CommonLibrary.Response;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Validators.DoctorValidators;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using ProfilesAPI.Shared.DTOs.PatientDTOs;
 
 namespace ProfilesAPI.Services.Services;
@@ -19,6 +21,7 @@ public class PatientService : IPatientService
     private readonly IMapper _mapper;
     private readonly IValidator<PatientForCreateDTO> _patientForCreateValidator;
     private readonly IValidator<PatientForUpdateDTO> _patientForUpdateValidator;
+    private readonly IValidator<PatientParameters> _patientParametersValidator;
 
     public PatientService(
             IRepositoryManager repositoryManager,
@@ -26,7 +29,8 @@ public class PatientService : IPatientService
             ICommonService commonService,
             IMapper mapper,
             IValidator<PatientForCreateDTO> patientForCreateValidator,
-            IValidator<PatientForUpdateDTO> patientForUpdateValidator)
+            IValidator<PatientForUpdateDTO> patientForUpdateValidator,
+            IValidator<PatientParameters> patientParametersValidator)
     {
         _repositoryManager = repositoryManager;
         _commonService = commonService;
@@ -34,7 +38,7 @@ public class PatientService : IPatientService
         _mapper = mapper;
         _patientForCreateValidator = patientForCreateValidator;
         _patientForUpdateValidator = patientForUpdateValidator;
-        
+        _patientParametersValidator = patientParametersValidator;
     }
 
     public async Task<ResponseMessage> AddPatientAsync(PatientForCreateDTO patientForCreateDTO)
@@ -100,13 +104,20 @@ public class PatientService : IPatientService
         return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage<ICollection<PatientTableInfoDTO>>> GetAllPatientsAsync()
+    public async Task<ResponseMessage<ICollection<PatientTableInfoDTO>>> GetAllPatientsAsync(PatientParameters? patientParameters)
     {
         // Pagination
-        // Filtration
         // Search
+        if (patientParameters is not null)
+        {
+            var validationResult = await _patientParametersValidator.ValidateAsync(patientParameters);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }
 
-        var patients = await _repositoryManager.Patient.GetAllPatientsAsync();
+        var patients = await _repositoryManager.Patient.GetAllPatientsAsync(patientParameters);
         if (patients.Count == 0)
         {
             return new ResponseMessage<ICollection<PatientTableInfoDTO>>("No Patient's Profiles Found in Database!", 404);

@@ -119,10 +119,9 @@ public class DoctorService : IDoctorService
 
     public async Task<ResponseMessage<ICollection<DoctorTableInfoDTO>>> GetAllDoctorsAsync(DoctorParameters? doctorParameters)
     {
-        // Pagination +
-        // Filtration +
-        // Search +
-
+        // Pagination 
+        // Filtration 
+        // Search 
         if(doctorParameters is not null)
         {
             var validationResult = await _doctorParametersValidator.ValidateAsync(doctorParameters);

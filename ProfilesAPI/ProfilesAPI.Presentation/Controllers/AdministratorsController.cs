@@ -51,9 +51,9 @@ public class AdministratorsController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllAdminitrators()
+    public async Task<IActionResult> GetAllAdminitrators([FromBody] AdministratorParameters? administratorParameters)
     {
-        var result = await _administratorService.GetAllAdministratorsAsync();
+        var result = await _administratorService.GetAllAdministratorsAsync(administratorParameters);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

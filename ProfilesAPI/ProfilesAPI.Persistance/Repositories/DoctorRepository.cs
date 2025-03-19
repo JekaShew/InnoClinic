@@ -5,7 +5,6 @@ using ProfilesAPI.Persistance.Data;
 using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using System.Linq.Expressions;
 using System.Text;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace ProfilesAPI.Persistance.Repositories;
 
@@ -20,18 +19,17 @@ public class DoctorRepository : IDoctorRepository
 
     public async Task AddDoctorAsync(Doctor doctor)
     {
-        //await _profilesDBContext.Connection.InsertAsync<Doctor>(doctor);
         var queryDoctor =
-                    "Insert into Doctors " +
-                        "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
-                        " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId)" +
-                    "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
-                        "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId)";
+            "Insert into Doctors " +
+                "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
+                " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId)" +
+            "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
+                "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId)";
 
         var queryDoctorSpecializations =
-                    "Insert into DoctorSpecializations " +
-                        "(Id, DoctorId, SpecializationId, SpecialzationAchievementDate, Description)" +
-                    "Values (@Id, @DoctorId, @SpecializationId, @SpecialzationAchievementDate, @Description)";
+            "Insert into DoctorSpecializations " +
+                "(Id, DoctorId, SpecializationId, SpecialzationAchievementDate, Description)" +
+            "Values (@Id, @DoctorId, @SpecializationId, @SpecialzationAchievementDate, @Description)";
 
         var doctorParameters = new DynamicParameters();
         doctorParameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -74,7 +72,6 @@ public class DoctorRepository : IDoctorRepository
 
     public async Task DeleteDoctorByIdAsync(Guid doctorId)
     {
-        //await _profilesDBContext.Connection.DeleteAsync<Doctor>(new Doctor { Id = doctorId });
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Delete From Doctors" +
@@ -85,22 +82,6 @@ public class DoctorRepository : IDoctorRepository
 
     public async Task<ICollection<Doctor>> GetAllDoctorsAsync(DoctorParameters? doctorParameters)
     {
-        //var query = "Select Doctors.Id, Doctors.UserId, Doctors.WorkStatusId, Doctors.OfficeId, " +
-        //    "Doctors.FirstName, Doctors.LastName, Doctors.SecondName, Doctors.Address, Doctors.WorkEmail, " +
-        //    "Doctors.Phone, Doctors.BirthDate, Doctors.CareerStartDate, Doctors.Photo, Doctors.PhotoId, " +
-        //    "DoctorSpecializations.Id, DoctorSpecializations.DoctorId, DoctorSpecializations.SpecializationId, " +
-        //    "DoctorSpecializations.SpecialzationAchievementDate, DoctorSpecializations.Description " +
-        //    "From Doctors " +
-        //    "inner join DoctorSpecializations on Doctors.Id = DoctorSpecializations.DoctorId " +
-        //    "inner join Specializations on Specializations.Id = DoctorSpecializations.SpecializationId " +
-        //    doctorParameters.Specializations is null ? " " :
-        //        doctorParameters.Specializations.Count >= 1 ?
-        //            "Where Doctors.Id in " +
-        //            "(Select Distinct DoctorSpecializations.DoctorId " +
-        //            "From DoctorSpecializations " +
-        //            $"Where DoctorSpecializations.SpecializationId in {specializationList}) " : " " +
-        //    $"Limit {doctorParameters.PageSize} Offset {(doctorParameters.PageNumber - 1) * doctorParameters.PageSize} ";
-
         var query = new StringBuilder(@"
             SELECT Doctors.Id, Doctors.UserId, Doctors.WorkStatusId, Doctors.OfficeId, 
                    Doctors.FirstName, Doctors.LastName, Doctors.SecondName, Doctors.Address, Doctors.WorkEmail, 
@@ -121,7 +102,7 @@ public class DoctorRepository : IDoctorRepository
                 break;
 
             case { Specializations: { Count: > 0 }, Offices: { Count: <= 0} }:
-                // specializations
+                // specializations filtering
                 specializationList = string.Join(", ", doctorParameters.Specializations.Select(id => $"'{id}'"));
                 query.Append($@"
                 WHERE Doctors.Id IN (
@@ -132,14 +113,14 @@ public class DoctorRepository : IDoctorRepository
                 break;
 
             case { Specializations: { Count: <= 0 }, Offices: { Count: > 0 } }:
-                // offices  
+                // offices  filtering
                 officeList = string.Join(", ", doctorParameters.Offices.Select(id => $"'{id}'"));                      
                 query.Append($@"
                 WHERE Doctors.OfficeId IN ({officeList}) ");
                 break;
 
             case { Specializations: { Count: > 0 }, Offices: { Count: > 0 } }:
-                // Specializations and Offices
+                // Specializations and Offices filtering
                 specializationList = string.Join(", ", doctorParameters.Specializations.Select(id => $"'{id}'"));
                 officeList = string.Join(", ", doctorParameters.Offices.Select(id => $"'{id}'"));
                 query.Append($@"
@@ -202,7 +183,6 @@ public class DoctorRepository : IDoctorRepository
 
     public async Task<Doctor> GetDoctorByIdAsync(Guid doctorId)
     {
-        //var doctor = await _profilesDBContext.Connection.GetAsync<Doctor>(doctorId);
         var query = "Select * From Doctors " +
             "Where Doctors.Id = @DoctorId; " +
             "Select * From DoctorSpecializations " +
@@ -224,8 +204,6 @@ public class DoctorRepository : IDoctorRepository
 
     public async Task UpdateDoctorAsync(Guid doctorId, Doctor updatedDoctor)
     {
-
-        //await _profilesDBContext.Connection.UpdateAsync<Doctor>(updatedDoctor);
         var queryDoctor = "Update Doctors " +
                     "Set WorkStatusId = @WorkStatusId, OfficeId = @OfficeId, FirstName = @FirstName, " +
                         "LastName = @LastName, SecondName = @SecondName, Address = @Address, WorkEmail = @WorkEmail, " +
@@ -254,34 +232,6 @@ public class DoctorRepository : IDoctorRepository
         }
     }
 
-    public Task<ICollection<Doctor>> GetDoctorsByExpression(Expression<Func<Doctor, bool>> expression)
-    {
-        throw new Exception("Not Implemented");
-    }
-
-    public async Task<ICollection<Doctor>> GetFilteredDoctors(ICollection<Guid> specializtions, ICollection<string> offices, string QueryString)
-    {
-        //var query1 = "Select Doctors.FirstName, Doctors.LastName, Doctors.SecondName," +
-        //    "Doctors.Adress, Doctors.Phone, Doctors.BirthDate, Doctors.Photo," +
-        //    "Doctors.Workemail, Doctors.CareerStartDate, Doctors.WorkStatusId, Doctors.OfficeId " +
-        //    "From DoctorSpecializations  inner join Doctors on Doctors.Id = DoctorSpecializations,DoctorId" +
-        //    "inner join WorkStatuses on WorkStatuses.Id = Doctors.WorkStatusId" +
-        //    "inner join Specializations on Specialization.Id = DoctorSpecializations.SpecializationId" +
-        //    "Where DoctorSpecializations.SpecializationId in @Specializations" +
-        //    "and "
-        //var query = "SELECT * FROM Doctors WHERE " +
-        //    " " +
-        //    " ";
-        //using (var connection = _profilesDBContext.Connection)
-        //{
-        //    var doctors = await connection.QueryAsync<Doctor>(query);
-
-        //    return doctors.ToList();
-        //}
-
-        throw new Exception("Not Implemented");
-    }
-
     public async Task DeleteSelectedDoctorSpecializationsByDoctorIdAsync(Guid doctorId)
     {
         var query = "Delete From DoctorSpecializations " +
@@ -289,7 +239,6 @@ public class DoctorRepository : IDoctorRepository
 
         var doctorParameters = new DynamicParameters();
         doctorParameters.Add("DoctorId", doctorId, System.Data.DbType.Guid);
-       
 
         using (var connection = _profilesDBContext.Connection)
         {

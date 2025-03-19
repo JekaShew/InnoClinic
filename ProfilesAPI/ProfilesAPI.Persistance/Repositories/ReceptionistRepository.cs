@@ -3,6 +3,11 @@ using Dapper.Contrib.Extensions;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Persistance.Data;
+using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
+using ProfilesAPI.Shared.DTOs.ReceptionistDTOs;
+using System.Linq;
+using System.Text;
 
 namespace ProfilesAPI.Persistance.Repositories;
 
@@ -17,13 +22,12 @@ public class ReceptionistRepository : IReceptionistRepository
 
     public async Task AddReceptionistAsync(Receptionist receptionist)
     {
-        //await _profilesDBContext.Connection.InsertAsync<Receptionist>(receptionist);
         var query =
-                   "Insert into Receptionists " +
-                       "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName, " +
-                       "SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
-                   "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
-                       "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
+            "Insert into Receptionists " +
+                "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName, " +
+                "SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
+            "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
+                "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -49,7 +53,6 @@ public class ReceptionistRepository : IReceptionistRepository
 
     public async Task DeleteReceptionistByIdAsync(Guid receptionistId)
     {
-        //await _profilesDBContext.Connection.DeleteAsync<Receptionist>(new Receptionist { Id = receptionistId });
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Delete From Receptionists " +
@@ -58,24 +61,57 @@ public class ReceptionistRepository : IReceptionistRepository
         }
     }
 
-    public async Task<ICollection<Receptionist>> GetAllReceptionistsAsync()
+    public async Task<ICollection<Receptionist>> GetAllReceptionistsAsync(ReceptionistParameters? receptionistPrameters)
     {
-        //var receptionists = await _profilesDBContext.Connection.GetAllAsync<Receptionist>();
-        var query = "Select Receptionists.Id, Receptionists.UserId, Receptionists.WorkStatusId, Receptionists.OfficeId, " +
-            "Receptionists.FirstName, Receptionists.LastName, DocReceptioniststors.SecondName, Receptionists.Address, Receptionists.WorkEmail, " +
-            "Receptionists.Phone, Receptionists.BirthDate, Receptionists.CareerStartDate, Receptionists.Photo, Receptionists.PhotoId, " +
-            "From Receptionists ";
+        var query = new StringBuilder(@"
+            SELECT Receptionists.Id, Receptionists.UserId, Receptionists.WorkStatusId, Receptionists.OfficeId,
+                  Receptionists.FirstName, Receptionists.LastName, Receptionists.SecondName, 
+                  Receptionists.Address, Receptionists.WorkEmail, Receptionists.Phone, Receptionists.BirthDate,
+                  Receptionists.CareerStartDate, Receptionists.Photo, Receptionists.PhotoId
+            FROM Receptionists ");
+        
+        if (receptionistPrameters is null)
+        {
+            receptionistPrameters = new ReceptionistParameters();
+        }
 
+        if (receptionistPrameters.Offices != null)
+        {
+            var officeList = string.Join(", ", receptionistPrameters.Offices.Select(id => $"'{id}'"));
+            query.Append($@"
+                WHERE Receptionists.OfficeId IN ({officeList}) ");
+        }
+
+        if (receptionistPrameters.SearchString is not null && receptionistPrameters.SearchString.Length > 0)
+        {
+            if (receptionistPrameters.Offices is null || receptionistPrameters.Offices.Count == 0)
+            {
+                query.Append($@"
+            WHERE 
+            CONCAT(Receptionists.FirstName, ' ', Receptionists.LastName, ' ', Receptionists.SecondName) LIKE '%{receptionistPrameters.SearchString}%' ");
+            }
+            else
+            {
+                query.Append($@"
+            AND 
+            CONCAT(Receptionists.FirstName, ' ', Receptionists.LastName, ' ', Receptionists.SecondName) LIKE '%{receptionistPrameters.SearchString}%' ");
+            }
+        }
+
+        query.Append($@"
+        ORDER BY Receptionists.Id
+        OFFSET {(receptionistPrameters.PageNumber - 1) * receptionistPrameters.PageSize} ROWS 
+        FETCH NEXT {receptionistPrameters.PageSize} ROWS ONLY; ");
+        string finalQuery = query.ToString();
         using (var connection = _profilesDBContext.Connection)
         {
-            var receptionists = await connection.QueryAsync<Receptionist>(query);
+            var receptionists = await connection.QueryAsync<Receptionist>(finalQuery);
             return receptionists.ToList();
         }
     }
 
     public async Task<Receptionist> GetReceptionistByIdAsync(Guid receptionistId)
     {
-        //var receptionist = await _profilesDBContext.Connection.GetAsync<Receptionist>(receptionistId);
         var query = "Select * From Receptionists " +
             "Where Receptionists.Id = @ReceptionistId ";
 
@@ -101,7 +137,7 @@ public class ReceptionistRepository : IReceptionistRepository
 
     public async Task UpdateReceptionistAsync(Guid receptionistId, Receptionist updatedReceptionist)
     {
-        //await _profilesDBContext.Connection.UpdateAsync<Receptionist>(updatedReceptionist);
+
         var query = "Update Receptionists " +
                     "Set WorkStatusId = @WorkStatusId, OfficeId = @OfficeId, FirstName = @FirstName, " +
                         "LastName = @LastName, SecondName = @SecondName, Address = @Address, WorkEmail = @WorkEmail, " +

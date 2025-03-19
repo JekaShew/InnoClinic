@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using ProfilesAPI.Shared.DTOs.PatientDTOs;
 
 namespace ProfilesAPI.Presentation.Controllers;
@@ -51,9 +52,9 @@ public class PatientsController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllPatients()
+    public async Task<IActionResult> GetAllPatients([FromBody] PatientParameters? patientParameters)
     {
-        var result = await _patientService.GetAllPatientsAsync();
+        var result = await _patientService.GetAllPatientsAsync(patientParameters);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

@@ -114,7 +114,5 @@ public class InitialMigration : Migration
             .OnTable("DoctorSpecializations")
             .OnColumn("DoctorId")
             .Ascending();
-
-        
     }
 }

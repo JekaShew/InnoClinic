@@ -8,13 +8,9 @@ public class ReceptionistMappers : Profile
 {
     public ReceptionistMappers()
     {
-        CreateMap<Receptionist, ReceptionistInfoDTO>()
-            .ForMember(dest => dest.Photo, opt => opt.Ignore())
-            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo));
+        CreateMap<Receptionist, ReceptionistInfoDTO>();
         
-        CreateMap<Receptionist, ReceptionistTableInfoDTO>()
-            .ForMember(dest => dest.Photo, opt => opt.Ignore())
-            .ForMember(dest => dest.PhotoId, opt => opt.MapFrom(src => src.Photo)); ;
+        CreateMap<Receptionist, ReceptionistTableInfoDTO>();
         
         CreateMap<ReceptionistForCreateDTO, Receptionist>()
             .ForMember(dest => dest.Photo, opt => opt.Ignore());

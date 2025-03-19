@@ -7,8 +7,6 @@ public interface IBlobStorageService
     public Task<BlobFileInfo> UploadAsync(Stream stream, string ContentType);
     public Task<FileResponse> DownloadAsync(Guid blobId);
     public Task DeleteAsync(Guid blobId);
-
-
 }
 
 

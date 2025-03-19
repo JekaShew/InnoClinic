@@ -11,10 +11,7 @@ public interface IDoctorRepository
     public Task DeleteDoctorByIdAsync(Guid doctorId);
     public Task<Doctor> GetDoctorByIdAsync(Guid doctorId);
     public Task<ICollection<Doctor>> GetAllDoctorsAsync(DoctorParameters? doctorParameters);
-    public Task<bool> IsProfileExists(Guid userId);
-    //public Task<ICollection<Doctor>> GetFilteredDoctors(ICollection<Guid> specializtions, ICollection<string> offices, string QueryString);
-    //public Task<ICollection<Doctor>> GetFilteredDoctors();
-    
+    public Task<bool> IsProfileExists(Guid userId);   
     public Task<ICollection<Doctor>> GetDoctorsByExpression(Expression<Func<Doctor, bool>> expression);
     public Task DeleteSelectedDoctorSpecializationsByDoctorIdAsync(Guid doctorId);
     public Task AddSelectedDoctorSpecializationAsync(Guid doctorId, ICollection<DoctorSpecialization> doctorSpecializationsToAdd);

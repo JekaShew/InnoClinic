@@ -8,8 +8,8 @@ public class WorkStatusForUpdateDTOValidator : AbstractValidator<WorkStatusForUp
     public WorkStatusForUpdateDTOValidator()
     {
         RuleFor(c => c.Title)
-       .NotEmpty()
-       .NotNull()
-       .WithMessage("Work Status's title shouldn't be null!");
+           .NotEmpty()
+           .NotNull()
+           .WithMessage("Work Status's title shouldn't be null!");
     }
 }

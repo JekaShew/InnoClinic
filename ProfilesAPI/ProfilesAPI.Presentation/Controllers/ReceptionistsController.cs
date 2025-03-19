@@ -51,9 +51,9 @@ public class ReceptionistsController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllReceptionists()
+    public async Task<IActionResult> GetAllReceptionists([FromBody] ReceptionistParameters? receptionistParameters)
     {
-        var result = await _receptionistService.GetAllReceptionistsAsync();
+        var result = await _receptionistService.GetAllReceptionistsAsync(receptionistParameters);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

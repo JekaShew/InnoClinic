@@ -3,6 +3,9 @@ using Dapper.Contrib.Extensions;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Persistance.Data;
+using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
+using System.Text;
 
 namespace ProfilesAPI.Persistance.Repositories;
 
@@ -16,13 +19,12 @@ public class AdministratorRepository : IAdministratorRepository
 
     public async Task AddAdministratorAsync(Administrator administrator)
     {
-        //await _profilesDBContext.Connection.InsertAsync<Administrator>(administrator);
         var query =
-                   "Insert into Administrators " +
-                       "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
-                       " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
-                   "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
-                       "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
+            "Insert into Administrators " +
+                "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
+                " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
+            "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
+                "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -48,7 +50,6 @@ public class AdministratorRepository : IAdministratorRepository
 
     public async Task DeleteAdministratorByIdAsync(Guid administratorId)
     {
-        //await _profilesDBContext.Connection.DeleteAsync<Administrator>(new Administrator { Id = administratorId });
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Delete From Administrators " +
@@ -59,7 +60,6 @@ public class AdministratorRepository : IAdministratorRepository
 
     public async Task<Administrator> GetAdministratorByIdAsync(Guid administratorId)
     {
-        //var administrator = await _profilesDBContext.Connection.GetAsync<Administrator>(administratorId);
         var query = "Select * From Administrators " +
             "Where Administrators.Id = @AdministratorId ";
 
@@ -70,17 +70,51 @@ public class AdministratorRepository : IAdministratorRepository
         }        
     }
 
-    public async Task<ICollection<Administrator>> GetAllAdministratorsAsync()
+    public async Task<ICollection<Administrator>> GetAllAdministratorsAsync(AdministratorParameters? administratorParameters)
     {
-        //var administrators = await _profilesDBContext.Connection.GetAllAsync<Administrator>();
-        var query = "Select Administrators.Id, Administrators.UserId, Administrators.WorkStatusId, Administrators.OfficeId, " +
-            "Administrators.FirstName, Administrators.LastName, Administrators.SecondName, Administrators.Address, Administrators.WorkEmail, " +
-            "Administrators.Phone, Administrators.BirthDate, Administrators.CareerStartDate, Administrators.Photo, Administrators.PhotoId " +
-            "From Administrators ";
+        var query = new StringBuilder(@"
+            SELECT Administrators.Id, Administrators.UserId, Administrators.WorkStatusId, Administrators.OfficeId, 
+                   Administrators.FirstName, Administrators.LastName, Administrators.SecondName, Administrators.Address,
+                   Administrators.WorkEmail, Administrators.Phone, Administrators.BirthDate, Administrators.CareerStartDate, 
+                   Administrators.Photo, Administrators.PhotoId
+            FROM Administrators ");
 
+        if(administratorParameters is null)
+        {
+            administratorParameters = new AdministratorParameters();
+        }
+        
+        if (administratorParameters.Offices != null)
+        {
+            var officeList = string.Join(", ", administratorParameters.Offices.Select(id => $"'{id}'"));
+            query.Append($@"
+                WHERE Administrators.OfficeId IN ({officeList}) ");
+        }
+
+        if (administratorParameters.SearchString is not null && administratorParameters.SearchString.Length > 0)
+        {           
+            if(administratorParameters.Offices is null || administratorParameters.Offices.Count == 0)
+            {
+                query.Append($@"
+            WHERE 
+            CONCAT(Administrators.FirstName, ' ', Administrators.LastName, ' ', Administrators.SecondName) LIKE '%{administratorParameters.SearchString}%' ");
+            }
+            else
+            {
+                query.Append($@"
+            AND
+            CONCAT(Administrators.FirstName, ' ', Administrators.LastName, ' ', Administrators.SecondName) LIKE '%{administratorParameters.SearchString}%' ");      
+            }
+        }
+
+        query.Append($@"
+        ORDER BY Administrators.Id
+        OFFSET {(administratorParameters.PageNumber - 1) * administratorParameters.PageSize} ROWS 
+        FETCH NEXT {administratorParameters.PageSize} ROWS ONLY; ");
+        string finalQuery = query.ToString();
         using (var connection = _profilesDBContext.Connection)
         {
-            var administrators = await connection.QueryAsync<Administrator>(query);
+            var administrators = await connection.QueryAsync<Administrator>(finalQuery);
             return administrators.ToList();
         }
     }
@@ -100,8 +134,6 @@ public class AdministratorRepository : IAdministratorRepository
 
     public async Task UpdateAdministratorAsync(Guid administratorId, Administrator updatedAdministrator)
     {
-        //await _profilesDBContext.Connection.UpdateAsync<Administrator>(updatedAdministrator);
-
         var query = "Update Administrators " +
                     "Set WorkStatusId = @WorkStatusId, OfficeId = @OfficeId, FirstName = @FirstName, " +
                         "LastName = @LastName, SecondName = @SecondName, Address = @Address, WorkEmail = @WorkEmail, " +

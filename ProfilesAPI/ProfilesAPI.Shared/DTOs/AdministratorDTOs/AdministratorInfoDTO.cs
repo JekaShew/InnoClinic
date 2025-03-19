@@ -10,8 +10,10 @@ public class AdministratorInfoDTO
     public string Phone { get; set; }
     public DateTime BirthDate { get; set; }
     public DateTime CareerStartDate { get; set; }
-    public Guid? PhotoId { get; set; }
-    public FileResponse? Photo { get; set; }
+    public Guid PhotoId { get; set; }
+    public string? Photo { get; set; }
+    // public OfficeInfoDTO Office { get; set; }
+    // public WorkStatusInfoDTO WorkStatus { get; set; }
     public Guid OfficeId { get; set; }
     public Guid? WorkStatusId { get; set; }
 }

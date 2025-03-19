@@ -45,15 +45,13 @@ public class BlobStorageService() : IBlobStorageService
 
     public async Task<BlobFileInfo> UploadAsync(Stream stream, string contentType)
     {
-        BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
         var fileId = Guid.NewGuid();
+        BlobContainerClient containerClient = _blobServiceClient.GetBlobContainerClient(_blobContainerTitles.ContainerTitle);
         BlobClient blobClient = containerClient.GetBlobClient(fileId.ToString());
         await blobClient.UploadAsync(
                 stream,
                 new BlobHttpHeaders { ContentType = contentType });
-        
-        //var qw = blobClient.Uri;
-        // link to image to entity
+
         return new BlobFileInfo() {FileId = fileId, Uri = blobClient.Uri.ToString() };
     }
 }

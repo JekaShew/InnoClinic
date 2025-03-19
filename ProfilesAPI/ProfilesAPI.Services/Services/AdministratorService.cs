@@ -7,7 +7,9 @@ using InnoClinic.CommonLibrary.Response;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Validators.DoctorValidators;
 using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 
 namespace ProfilesAPI.Services.Services;
 
@@ -19,20 +21,23 @@ public class AdministratorService : IAdministratorService
     private readonly IMapper _mapper;
     private readonly IValidator<AdministratorForCreateDTO> _administratorForCreateValidator;
     private readonly IValidator<AdministratorForUpdateDTO> _administratorForUpdateValidator;
+    private readonly IValidator<AdministratorParameters> _administratorParametersValidator;
     public AdministratorService(
             IRepositoryManager repositoryManager,
             IMapper mapper,
+            ICommonService commonService,
+            IBlobStorageService blobService,
             IValidator<AdministratorForCreateDTO> administratorForCreateValidator,
             IValidator<AdministratorForUpdateDTO> administratorForUpdateValidator,
-            ICommonService commonService,
-            IBlobStorageService blobService)
+            IValidator<AdministratorParameters> administratorParametersValidator)
     {
         _repositoryManager = repositoryManager;
         _mapper = mapper;
-        _administratorForCreateValidator = administratorForCreateValidator;
-        _administratorForUpdateValidator = administratorForUpdateValidator;
         _commonService = commonService;
         _blobService = blobService;
+        _administratorForCreateValidator = administratorForCreateValidator;
+        _administratorForUpdateValidator = administratorForUpdateValidator;
+        _administratorParametersValidator = administratorParametersValidator;
     }
 
     public async Task<ResponseMessage> AddAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO)
@@ -112,13 +117,21 @@ public class AdministratorService : IAdministratorService
         return new ResponseMessage<AdministratorInfoDTO>(administratorInfoDTO);
     }
 
-    public async Task<ResponseMessage<ICollection<AdministratorTableInfoDTO>>> GetAllAdministratorsAsync()
+    public async Task<ResponseMessage<ICollection<AdministratorTableInfoDTO>>> GetAllAdministratorsAsync(AdministratorParameters? administratorParameters)
     {
         // Pagination
         // Filtration
         // Search
+        if (administratorParameters is not null)
+        {
+            var validationResult = await _administratorParametersValidator.ValidateAsync(administratorParameters);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }
 
-        var administrators = await _repositoryManager.Administrator.GetAllAdministratorsAsync();
+        var administrators = await _repositoryManager.Administrator.GetAllAdministratorsAsync(administratorParameters);
         if (administrators.Count == 0)
         {
             return new ResponseMessage<ICollection<AdministratorTableInfoDTO>>("No Administrator's Profiles Found in Database!", 404);

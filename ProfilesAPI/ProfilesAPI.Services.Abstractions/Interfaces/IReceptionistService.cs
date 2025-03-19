@@ -9,5 +9,5 @@ public interface IReceptionistService
     public Task<ResponseMessage> UpdateReceptionistAsync(Guid receptionistId, ReceptionistForUpdateDTO receptionistForUpdateDTO);
     public Task<ResponseMessage> DeleteReceptionistByIdAsync(Guid receptionistId);
     public Task<ResponseMessage<ReceptionistInfoDTO>> GetReceptionistByIdAsync(Guid receptionistId);
-    public Task<ResponseMessage<ICollection<ReceptionistTableInfoDTO>>> GetAllReceptionistsAsync();
+    public Task<ResponseMessage<ICollection<ReceptionistTableInfoDTO>>> GetAllReceptionistsAsync(ReceptionistParameters? receptionistParameters);
 }

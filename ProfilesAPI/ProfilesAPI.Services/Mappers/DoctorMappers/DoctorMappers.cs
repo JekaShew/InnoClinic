@@ -12,10 +12,6 @@ public class DoctorMappers : Profile
             .ForMember(dest => dest.DoctorSpecializations, opt => opt.MapFrom(src => src.DoctorSpecializations));
 
         CreateMap<Doctor, DoctorTableInfoDTO>();
-            //.ForMember(dest => dest.Photo, opt => opt.Ignore())
-            //.ForMember(dest => dest.PhotoId, opt => opt.Ignore());
-
-        //CreateMap<List<Doctor>, List<DoctorTableInfoDTO>>();
             
         CreateMap<DoctorForCreateDTO, Doctor>()
             .ForMember(dest => dest.Photo, opt => opt.Ignore())
@@ -25,10 +21,8 @@ public class DoctorMappers : Profile
             .ForMember(dest => dest.Photo, opt => opt.Ignore());
 
         CreateMap<SpecializationsOfDoctorInfoDTO, DoctorSpecialization>().ReverseMap();
-        //CreateMap<List<SpecializationsOfDoctorInfoDTO>, List<DoctorSpecialization>>();
 
         CreateMap<DoctorSpecializationForCreateDTO, DoctorSpecialization>();
         CreateMap<DoctorSpecializationForUpdateDTO, DoctorSpecialization>();
-        //CreateMap<List<DoctorSpecializationForCreateDTO>, List<DoctorSpecialization>>();
     }
 }
