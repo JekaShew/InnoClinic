@@ -60,13 +60,13 @@ services:
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql-server
-    environment:
+    environment: 
       - ACCEPT_EULA=Y
       - SA_USERNAME=sa
       - SA_PASSWORD=SecretPassword123
     volumes:
-    - ./sqlserver/data:/var/opt/mssql/data
-    - ./sqlserver/log:/var/opt/mssql/log
+    - ./.containers/sqlserver/data:/var/opt/mssql/data
+    - ./.containers/sqlserver/log:/var/opt/mssql/log
     ports: 
     - "1433:1433"
     restart: always
@@ -107,7 +107,7 @@ services:
       - '143:143'
     volumes:
       # This is where smtp4dev stores the database..
-        - ./smtp4dev-data:/smtp4dev
+        - ./.containers/smtp4dev-data:/smtp4dev
     environment:
       #Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. "/" or "/smtp4dev"
       # - ServerOptions__BasePath=/smtp4dev
@@ -117,3 +117,15 @@ services:
 
       #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
       - ServerOptions__HostName=smtp4dev
+
+  rabbit-mq:
+    image: rabbitmq:management
+    container-name: rabbitmq
+    ports:
+      - "8080:8080"
+    hostname: innoclinic-rabbitmq
+    volumes:
+      - ./.containers/rabbitmq/data:/var/lib/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "guest" 

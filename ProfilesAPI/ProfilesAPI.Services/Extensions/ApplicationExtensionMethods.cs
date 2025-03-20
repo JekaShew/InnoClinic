@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using FluentValidation;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProfilesAPI.Services.Abstractions.Interfaces;
@@ -28,6 +29,26 @@ namespace ProfilesAPI.Services.Extensions
             services.AddAzureBlobStorageMethod(configuration);
             services.AddFluentValidationMethod();
             services.AddAutoMapperMethod();
+            services.AddRabbitMQMethod(configuration);
+
+            return services;
+        }
+
+        private static IServiceCollection AddRabbitMQMethod(this IServiceCollection services, IConfiguration configuration)
+        {
+            // FluentValidation
+            services.AddMassTransit(busConfigurator =>
+            {
+                busConfigurator.SetKebabCaseEndpointNameFormatter();
+                busConfigurator.UsingRabbitMq((context, configurator) =>
+                {
+                    configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
+                    {
+                        hostConfigurator.Username(configuration["MessageBroker:Username"]);
+                        hostConfigurator.Password(configuration["MessageBroker:Password"]);
+                    });
+                });
+            });
 
             return services;
         }

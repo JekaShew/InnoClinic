@@ -1,4 +1,5 @@
 ﻿using FluentValidation;
+using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OfficesAPI.Services.Abstractions.Interfaces;
@@ -16,6 +17,7 @@ public static class ApplicationServicesExtensionMethods
         services.AddScoped<IPhotoService, PhotoService>();
 
         services.AddFluentValidationMethod();
+        services.AddRabbitMQMethod(configuration);
 
         return services;
     }
@@ -24,6 +26,25 @@ public static class ApplicationServicesExtensionMethods
     {
         // FluentValidation
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+
+        return services;
+    }
+
+    private static IServiceCollection AddRabbitMQMethod(this IServiceCollection services, IConfiguration configuration)
+    {
+        // FluentValidation
+        services.AddMassTransit(busConfigurator =>
+        {
+            busConfigurator.SetKebabCaseEndpointNameFormatter();
+            busConfigurator.UsingRabbitMq((context, configurator) =>
+            {
+                configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
+                {
+                    hostConfigurator.Username(configuration["MessageBroker:Username"]);
+                    hostConfigurator.Password(configuration["MessageBroker:Password"]);
+                });
+            });
+        });
 
         return services;
     }
