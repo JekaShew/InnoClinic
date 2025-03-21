@@ -4,5 +4,7 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IOfficeRepository
 {
-    public Task AddSpecializationAsync(Specialization specialization);
+    public Task CreateAsync(Office office);
+    public Task UpdateAsync(string officeId, Office office);
+    public Task<Office> GetByIdAsync(string officeId);
 }

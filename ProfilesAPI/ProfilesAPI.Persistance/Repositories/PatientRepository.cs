@@ -18,12 +18,13 @@ public class PatientRepository : IPatientRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task AddPatientAsync(Patient patient)
+    public async Task<Guid> CreateAsync(Patient patient)
     {
         var query = 
             "Insert into Patients " +
                 "(Id, UserId, FirstName, LastName," +
                 " SecondName, Address, Phone, BirthDate, Photo, PhotoId) " +
+            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @Phone, @BirthDate, @Photo, @PhotoId) ";
 
@@ -41,11 +42,13 @@ public class PatientRepository : IPatientRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            await connection.ExecuteAsync(query, parameters);
+            var patientId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
+
+            return patientId;
         }
     }
 
-    public async Task DeletePatientByIdAsync(Guid patientId)
+    public async Task DeleteByIdAsync(Guid patientId)
     {
         using(var connection  = _profilesDBContext.Connection)
         {
@@ -55,7 +58,7 @@ public class PatientRepository : IPatientRepository
         }
     }
 
-    public async Task<ICollection<Patient>> GetAllPatientsAsync(PatientParameters? patientParameters)
+    public async Task<ICollection<Patient>> GetAllAsync(PatientParameters? patientParameters)
     {
         var query = new StringBuilder(@"
             SELECT Patients.Id, Patients.UserId, Patients.FirstName, Patients.LastName, 
@@ -89,7 +92,7 @@ public class PatientRepository : IPatientRepository
         }
     }
 
-    public async Task<Patient> GetPatientByIdAsync(Guid patientId)
+    public async Task<Patient> GetByIdAsync(Guid patientId)
     {
         var query = "Select * From Patients " +
             "Where Patients.Id = @PatientId ";
@@ -108,13 +111,12 @@ public class PatientRepository : IPatientRepository
         using (var connection = _profilesDBContext.Connection)
         {
             var patient = await connection.QueryFirstOrDefaultAsync<Patient>(query, new { userId });
-            var result = patient is null ? false : true;
 
-            return result;
+            return patient is not null;
         }
     }
 
-    public async Task UpdatePatientAsync(Guid patientId, Patient updatedPatient)
+    public async Task UpdateAsync(Guid patientId, Patient updatedPatient)
     {
         var query = "Update Patients " +
                    "Set FirstName = @FirstName, LastName = @LastName, SecondName = @SecondName, " +

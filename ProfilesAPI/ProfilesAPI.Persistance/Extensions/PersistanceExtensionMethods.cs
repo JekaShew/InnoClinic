@@ -28,6 +28,7 @@ public static class PersistanceExtensionMethods
     private static IServiceCollection AddFluentMigratorMethod(this IServiceCollection services, IConfiguration configuration)
     {
         // Fluent Migrator
+        // ProfilesDBDockerFromLocal
         services.AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddSqlServer()

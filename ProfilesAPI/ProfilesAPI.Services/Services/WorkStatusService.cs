@@ -15,6 +15,7 @@ public class WorkStatusService : IWorkStatusService
     private readonly IMapper _mapper;
     private readonly IValidator<WorkStatusForCreateDTO> _workStatusForCreateValidator;
     private readonly IValidator<WorkStatusForUpdateDTO> _workStatusForUpdateValidator;
+
     public WorkStatusService(
             IRepositoryManager repositoryManager,
             IMapper mapper,
@@ -27,7 +28,7 @@ public class WorkStatusService : IWorkStatusService
         _workStatusForUpdateValidator = workStatusForUpdateValidator;
     }
 
-    public async Task<ResponseMessage> AddWorkStatusAsync(WorkStatusForCreateDTO workStatusForCreateDTO)
+    public async Task<ResponseMessage<Guid>> CreateWorkStatusAsync(WorkStatusForCreateDTO workStatusForCreateDTO)
     {
         var validationResult = await _workStatusForCreateValidator.ValidateAsync(workStatusForCreateDTO);
         if (!validationResult.IsValid)
@@ -36,26 +37,21 @@ public class WorkStatusService : IWorkStatusService
         }
 
         var workStatus = _mapper.Map<WorkStatus>(workStatusForCreateDTO);
-        await _repositoryManager.WorkStatus.AddWorkStatusAsync(workStatus);
+        var workStatusId = await _repositoryManager.WorkStatus.CreateAsync(workStatus);
 
-        return new ResponseMessage();
+        return new ResponseMessage<Guid>(workStatusId);
     }
 
     public async Task<ResponseMessage> DeleteWorkStatusByIdAsync(Guid workStatusId)
     {
-        await _repositoryManager.WorkStatus.DeleteWorkStatusByIdAsync(workStatusId);
+        await _repositoryManager.WorkStatus.DeleteByIdAsync(workStatusId);
 
         return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<ICollection<WorkStatusTableInfoDTO>>> GetAllWorkStatusesAsync()
     {
-        var workStatuses = await _repositoryManager.WorkStatus.GetAllWorkStatusesAsync();
-        if(workStatuses.Count == 0)
-        {
-            return new ResponseMessage<ICollection<WorkStatusTableInfoDTO>>("No Work Statuses Found in Database!", 404);
-        }
-
+        var workStatuses = await _repositoryManager.WorkStatus.GetAllAsync();
         var workStatusTableInfoDTOs = _mapper.Map<ICollection<WorkStatusTableInfoDTO>>(workStatuses);
 
         return new ResponseMessage<ICollection<WorkStatusTableInfoDTO>>(workStatusTableInfoDTOs);
@@ -63,7 +59,7 @@ public class WorkStatusService : IWorkStatusService
 
     public async Task<ResponseMessage<WorkStatusInfoDTO>> GetWorkStatusByIdAsync(Guid workStatusId)
     {
-        var workStatus = await _repositoryManager.WorkStatus.GetWorkStatusByIdAsync(workStatusId);
+        var workStatus = await _repositoryManager.WorkStatus.GetByIdAsync(workStatusId);
         if(workStatus is null)
         {
             return new ResponseMessage<WorkStatusInfoDTO>("Work Status Not Found!", 404);
@@ -74,7 +70,7 @@ public class WorkStatusService : IWorkStatusService
         return new ResponseMessage<WorkStatusInfoDTO>(workStatusInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateWorkStatusAsync(Guid workStatusId, WorkStatusForUpdateDTO workStatusForUpdateDTO)
+    public async Task<ResponseMessage<WorkStatusInfoDTO>> UpdateWorkStatusAsync(Guid workStatusId, WorkStatusForUpdateDTO workStatusForUpdateDTO)
     {
         var validationResult = await _workStatusForUpdateValidator.ValidateAsync(workStatusForUpdateDTO);
         if (!validationResult.IsValid)
@@ -82,15 +78,16 @@ public class WorkStatusService : IWorkStatusService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var workStatus = await _repositoryManager.WorkStatus.GetWorkStatusByIdAsync(workStatusId);
+        var workStatus = await _repositoryManager.WorkStatus.GetByIdAsync(workStatusId);
         if(workStatus is null)
         {
-            return new ResponseMessage("Work Status Not Found!", 404);
+            return new ResponseMessage<WorkStatusInfoDTO>("Work Status Not Found!", 404);
         }
 
         workStatus = _mapper.Map(workStatusForUpdateDTO, workStatus);
-        await _repositoryManager.WorkStatus.UpdateWorkStatusAsync(workStatusId, workStatus);
+        await _repositoryManager.WorkStatus.UpdateAsync(workStatusId, workStatus);
+        var workStatusInfoDTO = _mapper.Map<WorkStatusInfoDTO>(workStatus);
 
-        return new ResponseMessage();
+        return new ResponseMessage<WorkStatusInfoDTO>(workStatusInfoDTO);
     }
 }

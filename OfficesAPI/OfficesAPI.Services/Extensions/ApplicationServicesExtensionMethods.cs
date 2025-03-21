@@ -1,9 +1,11 @@
-﻿using FluentValidation;
+﻿using CommonLibrary.RabbitMQEvents;
+using FluentValidation;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Services.Services;
+using OfficesAPI.Services.Services.OfficesConsumers;
 using System.Reflection;
 
 namespace OfficesAPI.Services.Extensions;
@@ -36,6 +38,9 @@ public static class ApplicationServicesExtensionMethods
         services.AddMassTransit(busConfigurator =>
         {
             busConfigurator.SetKebabCaseEndpointNameFormatter();
+
+            busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
+
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
                 configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>

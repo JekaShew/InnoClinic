@@ -2,7 +2,6 @@
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using Riok.Mapperly.Abstractions;
-using SharpCompress.Common;
 
 namespace OfficesAPI.Shared.Mappers;
 
@@ -17,4 +16,6 @@ public static partial class OfficeMapper
     public static partial Office? OfficeForCreateDTOToOffice(OfficeForCreateDTO? officeForCreateDTO);
 
     public static partial OfficeCreatedEvent? OfficeToOfficeCreatedEvent(Office? office);
+    public static partial OfficeUpdatedEvent? OfficeToOfficeUpdatedEvent(Office? office);
+    public static partial OfficeCheckConsistancyEvent? OfficeToOfficeCheckConsistancyEvent(Office? office);
 }

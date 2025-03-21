@@ -14,10 +14,11 @@ public class WorkStatusRepository : IWorkStatusRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task AddWorkStatusAsync(WorkStatus workStatus)
+    public async Task<Guid> CreateAsync(WorkStatus workStatus)
     {
-        var query = "Insert into WorkStatuses (Id, Title, Description) " +
-            "Values (@Id, @Title, @Description) ";
+        var query = "Insert into WorkStatuses (Id, Title, Description)" +
+            "OUTPUT Inserted.ID " +
+            "Values (@Id, @Title, @Description); ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -26,11 +27,13 @@ public class WorkStatusRepository : IWorkStatusRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            await connection.ExecuteAsync(query, parameters);
+            var workStatusId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
+
+            return workStatusId;
         }
     }
 
-    public async Task DeleteWorkStatusByIdAsync(Guid workStatusId)
+    public async Task DeleteByIdAsync(Guid workStatusId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -40,7 +43,7 @@ public class WorkStatusRepository : IWorkStatusRepository
         }
     }
 
-    public async Task<ICollection<WorkStatus>> GetAllWorkStatusesAsync()
+    public async Task<ICollection<WorkStatus>> GetAllAsync()
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -51,7 +54,7 @@ public class WorkStatusRepository : IWorkStatusRepository
         }
     }
 
-    public async Task<WorkStatus> GetWorkStatusByIdAsync(Guid workStatusId)
+    public async Task<WorkStatus> GetByIdAsync(Guid workStatusId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -63,7 +66,7 @@ public class WorkStatusRepository : IWorkStatusRepository
         }    
     }
 
-    public async Task UpdateWorkStatusAsync(Guid workStatusId, WorkStatus updatedWorkStatus)
+    public async Task UpdateAsync(Guid workStatusId, WorkStatus updatedWorkStatus)
     {
         using (var connection = _profilesDBContext.Connection)
         {

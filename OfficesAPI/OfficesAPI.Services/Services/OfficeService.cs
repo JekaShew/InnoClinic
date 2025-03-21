@@ -1,6 +1,8 @@
-﻿using FluentValidation;
+﻿using CommonLibrary.RabbitMQEvents;
+using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
+using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -17,15 +19,18 @@ public class OfficeService : IOfficeService
     private readonly IValidator<OfficeForCreateDTO> _officeForCreateValidator;
     private readonly IValidator<OfficeForUpdateDTO> _officeForUpdateValidator;
     private readonly IRepositoryManager _repositoryManager;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public OfficeService(
         IValidator<OfficeForCreateDTO> officeForCreateValidator,
         IValidator<OfficeForUpdateDTO> officeForUpdateValidator,
-        IRepositoryManager repositoryManager)
+        IRepositoryManager repositoryManager,
+        IPublishEndpoint publishEndpoint)
     {
         _officeForCreateValidator = officeForCreateValidator;
         _officeForUpdateValidator = officeForUpdateValidator;
         _repositoryManager = repositoryManager;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files)
@@ -36,6 +41,7 @@ public class OfficeService : IOfficeService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
+        var officeCreatedEvent = new OfficeCreatedEvent();
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
         office.Id = ObjectId.GenerateNewId().ToString();
         if (files is not null && files.Count == 0)
@@ -61,11 +67,16 @@ public class OfficeService : IOfficeService
             _repositoryManager.Office.CreateOffice(office);
             await _repositoryManager.TransactionExecution();
 
+            officeCreatedEvent = OfficeMapper.OfficeToOfficeCreatedEvent(office);
+            await _publishEndpoint.Publish(officeCreatedEvent);
+
             return new ResponseMessage();
         }
 
         _repositoryManager.Office.CreateOffice(office);
         await _repositoryManager.SingleExecution();
+        officeCreatedEvent = OfficeMapper.OfficeToOfficeCreatedEvent(office);
+        await _publishEndpoint.Publish(officeCreatedEvent);
 
         return new ResponseMessage();
     }
@@ -135,6 +146,8 @@ public class OfficeService : IOfficeService
 
         _repositoryManager.Office.UpdateOffice(office);
         await _repositoryManager.SingleExecution();
+        var officeUpdatedEvent = OfficeMapper.OfficeToOfficeUpdatedEvent(office);
+        await _publishEndpoint.Publish(officeUpdatedEvent);
 
         return new ResponseMessage();
     }
@@ -151,6 +164,9 @@ public class OfficeService : IOfficeService
 
         _repositoryManager.Office.UpdateOffice(office);
         await _repositoryManager.SingleExecution();
+
+        var officeUpdatedEvent = OfficeMapper.OfficeToOfficeUpdatedEvent(office);
+        await _publishEndpoint.Publish(officeUpdatedEvent);
 
         return new ResponseMessage();
     }

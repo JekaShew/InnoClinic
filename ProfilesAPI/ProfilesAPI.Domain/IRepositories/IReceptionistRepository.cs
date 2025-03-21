@@ -5,10 +5,10 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IReceptionistRepository
 {
-    public Task AddReceptionistAsync(Receptionist receptionist);
-    public Task UpdateReceptionistAsync(Guid receptionistId, Receptionist updatedReceptionist);
-    public Task DeleteReceptionistByIdAsync(Guid receptionistId);
-    public Task<Receptionist> GetReceptionistByIdAsync(Guid receptionistId);
-    public Task<ICollection<Receptionist>> GetAllReceptionistsAsync(ReceptionistParameters? receptionistParameters);
+    public Task<Guid> CreateAsync(Receptionist receptionist);
+    public Task UpdateAsync(Guid receptionistId, Receptionist updatedReceptionist);
+    public Task DeleteByIdAsync(Guid receptionistId);
+    public Task<Receptionist> GetByIdAsync(Guid receptionistId);
+    public Task<ICollection<Receptionist>> GetAllAsync(ReceptionistParameters? receptionistParameters);
     public Task<bool> IsProfileExists(Guid userId);
 }

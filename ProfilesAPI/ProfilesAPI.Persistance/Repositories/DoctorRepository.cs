@@ -17,12 +17,13 @@ public class DoctorRepository : IDoctorRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task AddDoctorAsync(Doctor doctor)
+    public async Task<Guid> CreateAsync(Doctor doctor)
     {
         var queryDoctor =
             "Insert into Doctors " +
                 "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
                 " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId)" +
+            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId)";
 
@@ -35,7 +36,7 @@ public class DoctorRepository : IDoctorRepository
         doctorParameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
         doctorParameters.Add("UserId", doctor.UserId, System.Data.DbType.Guid);
         doctorParameters.Add("WorkStatusId", doctor.WorkStatusId, System.Data.DbType.Guid);
-        doctorParameters.Add("OfficeId", doctor.OfficeId, System.Data.DbType.Guid);
+        doctorParameters.Add("OfficeId", doctor.OfficeId, System.Data.DbType.String);
         doctorParameters.Add("FirstName", doctor.FirstName, System.Data.DbType.String);
         doctorParameters.Add("LastName", doctor.LastName, System.Data.DbType.String);
         doctorParameters.Add("SecondName", doctor.SecondName, System.Data.DbType.String);
@@ -62,15 +63,17 @@ public class DoctorRepository : IDoctorRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            await connection.ExecuteAsync(queryDoctor, doctorParameters);
+            var doctorId = await connection.ExecuteScalarAsync<Guid>(queryDoctor, doctorParameters);
             foreach (var doctorSpecializationsParameters in doctorSpecializationsParametersList)
             {
-                await connection.ExecuteAsync(queryDoctorSpecializations, doctorSpecializationsParameters);
+                await connection.ExecuteAsync(queryDoctorSpecializations, doctorSpecializationsParameters);    
             }
+
+            return doctorId;
         }
     }
 
-    public async Task DeleteDoctorByIdAsync(Guid doctorId)
+    public async Task DeleteByIdAsync(Guid doctorId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -80,7 +83,7 @@ public class DoctorRepository : IDoctorRepository
         }
     }
 
-    public async Task<ICollection<Doctor>> GetAllDoctorsAsync(DoctorParameters? doctorParameters)
+    public async Task<ICollection<Doctor>> GetAllAsync(DoctorParameters? doctorParameters)
     {
         var query = new StringBuilder(@"
             SELECT Doctors.Id, Doctors.UserId, Doctors.WorkStatusId, Doctors.OfficeId, 
@@ -181,7 +184,7 @@ public class DoctorRepository : IDoctorRepository
         }           
     }
 
-    public async Task<Doctor> GetDoctorByIdAsync(Guid doctorId)
+    public async Task<Doctor> GetByIdAsync(Guid doctorId)
     {
         var query = "Select * From Doctors " +
             "Where Doctors.Id = @DoctorId; " +
@@ -202,7 +205,7 @@ public class DoctorRepository : IDoctorRepository
         }
     }
 
-    public async Task UpdateDoctorAsync(Guid doctorId, Doctor updatedDoctor)
+    public async Task UpdateAsync(Guid doctorId, Doctor updatedDoctor)
     {
         var queryDoctor = "Update Doctors " +
                     "Set WorkStatusId = @WorkStatusId, OfficeId = @OfficeId, FirstName = @FirstName, " +
@@ -214,7 +217,7 @@ public class DoctorRepository : IDoctorRepository
         var doctorParameters = new DynamicParameters();
         doctorParameters.Add("DoctorId", doctorId, System.Data.DbType.Guid);
         doctorParameters.Add("WorkStatusId", updatedDoctor.WorkStatusId, System.Data.DbType.Guid);
-        doctorParameters.Add("OfficeId", updatedDoctor.OfficeId, System.Data.DbType.Guid);
+        doctorParameters.Add("OfficeId", updatedDoctor.OfficeId, System.Data.DbType.String);
         doctorParameters.Add("FirstName", updatedDoctor.FirstName, System.Data.DbType.String);
         doctorParameters.Add("LastName", updatedDoctor.LastName, System.Data.DbType.String);
         doctorParameters.Add("SecondName", updatedDoctor.SecondName, System.Data.DbType.String);
@@ -232,7 +235,7 @@ public class DoctorRepository : IDoctorRepository
         }
     }
 
-    public async Task DeleteSelectedDoctorSpecializationsByDoctorIdAsync(Guid doctorId)
+    public async Task DeleteSelectedSpecializationsByDoctorIdAsync(Guid doctorId)
     {
         var query = "Delete From DoctorSpecializations " +
                          "Where DoctorSpecializations.DoctorId = @DoctorId ";
@@ -246,7 +249,7 @@ public class DoctorRepository : IDoctorRepository
         }
     }
 
-    public async Task AddSelectedDoctorSpecializationAsync(Guid doctorId, ICollection<DoctorSpecialization> doctorSpecializationsToAdd)
+    public async Task AddSelectedSpecializationAsync(Guid doctorId, ICollection<DoctorSpecialization> doctorSpecializationsToAdd)
     {
         var query = "Insert into DoctorSpecializations " +
                         "(Id, DoctorId, SpecializationId, SpecialzationAchievementDate, Description) " +
@@ -281,9 +284,8 @@ public class DoctorRepository : IDoctorRepository
         using (var connection = _profilesDBContext.Connection)
         {
             var doctor = await connection.QueryFirstOrDefaultAsync<Doctor>(query, new { userId });
-            var result = doctor is null ? false : true;
             
-            return result;
+            return doctor is not null;
         }
     }
 }

@@ -12,17 +12,19 @@ namespace ProfilesAPI.Persistance.Repositories;
 public class AdministratorRepository : IAdministratorRepository
 {
     private readonly ProfilesDBContext _profilesDBContext;
+
     public AdministratorRepository(ProfilesDBContext profilesDBContext)
     {
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task AddAdministratorAsync(Administrator administrator)
+    public async Task<Guid> CreateAsync(Administrator administrator)
     {
         var query =
             "Insert into Administrators " +
                 "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
                 " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
+            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
@@ -30,7 +32,7 @@ public class AdministratorRepository : IAdministratorRepository
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
         parameters.Add("UserId", administrator.UserId, System.Data.DbType.Guid);
         parameters.Add("WorkStatusId", administrator.WorkStatusId, System.Data.DbType.Guid);
-        parameters.Add("OfficeId", administrator.OfficeId, System.Data.DbType.Guid);
+        parameters.Add("OfficeId", administrator.OfficeId, System.Data.DbType.String);
         parameters.Add("FirstName", administrator.FirstName, System.Data.DbType.String);
         parameters.Add("LastName", administrator.LastName, System.Data.DbType.String);
         parameters.Add("SecondName", administrator.SecondName, System.Data.DbType.String);
@@ -44,11 +46,13 @@ public class AdministratorRepository : IAdministratorRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            await connection.ExecuteAsync(query, parameters);
+            var administratorId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
+            
+            return administratorId;
         }
     }
 
-    public async Task DeleteAdministratorByIdAsync(Guid administratorId)
+    public async Task DeleteByIdAsync(Guid administratorId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -58,7 +62,7 @@ public class AdministratorRepository : IAdministratorRepository
         }
     }
 
-    public async Task<Administrator> GetAdministratorByIdAsync(Guid administratorId)
+    public async Task<Administrator> GetByIdAsync(Guid administratorId)
     {
         var query = "Select * From Administrators " +
             "Where Administrators.Id = @AdministratorId ";
@@ -70,7 +74,7 @@ public class AdministratorRepository : IAdministratorRepository
         }        
     }
 
-    public async Task<ICollection<Administrator>> GetAllAdministratorsAsync(AdministratorParameters? administratorParameters)
+    public async Task<ICollection<Administrator>> GetAllAsync(AdministratorParameters? administratorParameters)
     {
         var query = new StringBuilder(@"
             SELECT Administrators.Id, Administrators.UserId, Administrators.WorkStatusId, Administrators.OfficeId, 
@@ -126,13 +130,12 @@ public class AdministratorRepository : IAdministratorRepository
         using (var connection = _profilesDBContext.Connection)
         {
             var administrator = await connection.QueryFirstOrDefaultAsync<Administrator>(query, new { userId });
-            var result = administrator is null ? false : true;
 
-            return result;
+            return administrator is not null;
         }
     }
 
-    public async Task UpdateAdministratorAsync(Guid administratorId, Administrator updatedAdministrator)
+    public async Task UpdateAsync(Guid administratorId, Administrator updatedAdministrator)
     {
         var query = "Update Administrators " +
                     "Set WorkStatusId = @WorkStatusId, OfficeId = @OfficeId, FirstName = @FirstName, " +
@@ -144,7 +147,7 @@ public class AdministratorRepository : IAdministratorRepository
         var administratorParameters = new DynamicParameters();
         administratorParameters.Add("AdministratorId", administratorId, System.Data.DbType.Guid);
         administratorParameters.Add("WorkStatusId", updatedAdministrator.WorkStatusId, System.Data.DbType.Guid);
-        administratorParameters.Add("OfficeId", updatedAdministrator.OfficeId, System.Data.DbType.Guid);
+        administratorParameters.Add("OfficeId", updatedAdministrator.OfficeId, System.Data.DbType.String);
         administratorParameters.Add("FirstName", updatedAdministrator.FirstName, System.Data.DbType.String);
         administratorParameters.Add("LastName", updatedAdministrator.LastName, System.Data.DbType.String);
         administratorParameters.Add("SecondName", updatedAdministrator.SecondName, System.Data.DbType.String);

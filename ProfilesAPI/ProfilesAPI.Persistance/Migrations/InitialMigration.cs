@@ -17,7 +17,8 @@ public class InitialMigration : Migration
         Delete.Table("Doctors");
         Delete.Table("Administrators");
         Delete.Table("WorkStatuses");
-        Delete.Table("Specializations");
+        Delete.Table("Specializations"); 
+        Delete.Table("Offices");
     }
 
     public override void Up()
@@ -31,6 +32,15 @@ public class InitialMigration : Migration
             .WithColumn("Id").AsGuid().PrimaryKey()
             .WithColumn("Title").AsString().NotNullable()
             .WithColumn("Description").AsString().Nullable();
+
+        Create.Table("Offices")
+        .WithColumn("Id").AsString().PrimaryKey()
+        .WithColumn("City").AsString().NotNullable()
+        .WithColumn("Street").AsString().NotNullable()
+        .WithColumn("HouseNumber").AsString().NotNullable()
+        .WithColumn("OfficeNumber").AsString().NotNullable()
+        .WithColumn("RegistryPhoneNumber").AsString().Nullable()
+        .WithColumn("IsActive").AsBoolean().NotNullable();
 
         Create.Table("Patients")
             .WithColumn("Id").AsGuid().PrimaryKey()
@@ -58,7 +68,7 @@ public class InitialMigration : Migration
             .WithColumn("CareerStartDate").AsDateTime().NotNullable()
             .WithColumn("Photo").AsString().NotNullable()
             .WithColumn("PhotoId").AsGuid().NotNullable()
-            .WithColumn("OfficeId").AsGuid().NotNullable()
+            .WithColumn("OfficeId").AsString().NotNullable().ForeignKey("Offices", "Id")
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
         Create.Table("Doctors")
@@ -74,7 +84,7 @@ public class InitialMigration : Migration
             .WithColumn("CareerStartDate").AsDateTime().NotNullable()
             .WithColumn("Photo").AsString().NotNullable()
             .WithColumn("PhotoId").AsGuid().NotNullable()
-            .WithColumn("OfficeId").AsGuid().NotNullable()
+            .WithColumn("OfficeId").AsString().NotNullable().ForeignKey("Offices", "Id")
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
         Create.Table("Administrators")
@@ -90,7 +100,7 @@ public class InitialMigration : Migration
             .WithColumn("CareerStartDate").AsDateTime().NotNullable()
             .WithColumn("Photo").AsString().NotNullable()
             .WithColumn("PhotoId").AsGuid().NotNullable()
-            .WithColumn("OfficeId").AsGuid().NotNullable()
+            .WithColumn("OfficeId").AsString().NotNullable().ForeignKey("Offices", "Id")
             .WithColumn("WorkStatusId").AsGuid().NotNullable().ForeignKey("WorkStatuses", "Id");
 
         Create.Table("DoctorSpecializations")

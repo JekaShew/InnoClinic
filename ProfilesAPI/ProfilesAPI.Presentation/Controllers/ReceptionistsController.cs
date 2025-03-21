@@ -67,7 +67,7 @@ public class ReceptionistsController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(typeof(Guid), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -77,21 +77,20 @@ public class ReceptionistsController : ControllerBase
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> AddReceptionist([FromForm] ReceptionistForCreateDTO receptionistForCreateDTO)
     {
-        var result = await _receptionistService.AddReceptionistAsync(receptionistForCreateDTO);
+        var result = await _receptionistService.CreateReceptionistAsync(receptionistForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return Created();
+        return CreatedAtAction(nameof(GetReceptionistById), new { receptionistId = result.Value }, result.Value);
     }
-
-    /// <summary>
-    /// Updates selected Receptionist's Profile
-    /// </summary>
-    /// <returns>Message</returns>
+        /// <summary>
+        /// Updates selected Receptionist's Profile
+        /// </summary>
+        /// <returns>Message</returns>
     [HttpPut("{receptionistId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(ReceptionistInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -107,7 +106,7 @@ public class ReceptionistsController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>

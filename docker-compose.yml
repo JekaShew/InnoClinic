@@ -35,7 +35,10 @@ services:
     ports:
     - "5001:5001"
     depends_on:
-    - authorization.web
+      rabbit-mq:
+        condition: service_started
+      authorization.web:
+        condition: service_started
 
   profiles.web:
     environment:
@@ -53,6 +56,8 @@ services:
     restart: on-failure
     depends_on:
       authorization.web:
+        condition: service_started
+      rabbit-mq:
         condition: service_started
       profiles-azure-blob-storage:
         condition: service_started
@@ -118,11 +123,22 @@ services:
       #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
       - ServerOptions__HostName=smtp4dev
 
+  newsletter-mq:
+    image: rabbitmq:management
+    container_name: Newsletter.RabbitMq
+    hostname: newsletter-mq
+    volumes:
+        - ./.containers/queue/data/:/var/lib/rabbitmq
+        - ./.containers/queue/log/:/var/log/rabbitmq
+    environment:
+        RABBITMQ_DEFAULT_USER: guest
+        RABBITMQ_DEFAULT_PASS: guest
+
   rabbit-mq:
     image: rabbitmq:management
-    container-name: rabbitmq
+    container_name: rabbitmq
     ports:
-      - "8080:8080"
+      - '15672:15672'
     hostname: innoclinic-rabbitmq
     volumes:
       - ./.containers/rabbitmq/data:/var/lib/rabbitmq

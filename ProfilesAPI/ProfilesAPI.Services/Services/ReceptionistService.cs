@@ -41,7 +41,7 @@ public class ReceptionistService : IReceptionistService
         _receptionistParametersValidator = receptionistParametersValidator;
     }
 
-    public async Task<ResponseMessage> AddReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO)
+    public async Task<ResponseMessage<Guid>> CreateReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO)
     {
         var validationResult = await _receptionistForCreateValidator.ValidateAsync(receptionistForCreateDTO);
         if (!validationResult.IsValid)
@@ -52,13 +52,13 @@ public class ReceptionistService : IReceptionistService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null)
         {
-            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+            return new ResponseMessage<Guid>("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
         var isProfileExists = await _repositoryManager.Receptionist.IsProfileExists(currentUserInfo.Id);
         if (isProfileExists)
         {
-            return new ResponseMessage("Error! This profile already exists!", 400);
+            return new ResponseMessage<Guid>("Error! This profile already exists!", 400);
         }
 
         var receptionist = _mapper.Map<Receptionist>(receptionistForCreateDTO);
@@ -71,25 +71,22 @@ public class ReceptionistService : IReceptionistService
         }
        
         receptionist.UserId = currentUserInfo.Id;
-        await _repositoryManager.Receptionist.AddReceptionistAsync(receptionist);
+        var receptionistId = await _repositoryManager.Receptionist.CreateAsync(receptionist);
 
-        return new ResponseMessage();
+        return new ResponseMessage<Guid>(receptionistId);
     }
 
     public async Task<ResponseMessage> DeleteReceptionistByIdAsync(Guid receptionistId)
     {
-        var receptionist = await _repositoryManager.Receptionist.GetReceptionistByIdAsync(receptionistId);
+        var receptionist = await _repositoryManager.Receptionist.GetByIdAsync(receptionistId);
         if (receptionist is null)
         {
             return new ResponseMessage("Receptionist's Profile Not Found!", 404);
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        var currentUserInfoCheck =
-            currentUserInfo is null ? false :
-            receptionist.UserId.Equals(currentUserInfo.Id) ? true :
-            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
-        if (!currentUserInfoCheck)
+        if (currentUserInfo is null || (!receptionist.UserId.Equals(currentUserInfo.Id) &&
+                                        !currentUserInfo.Role.Equals(RoleConstants.Administrator)))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Receptionist's Profile!", 403);
         }
@@ -99,7 +96,7 @@ public class ReceptionistService : IReceptionistService
             await _blobService.DeleteAsync(receptionist.PhotoId);
         }
         
-        await _repositoryManager.Receptionist.DeleteReceptionistByIdAsync(receptionistId);
+        await _repositoryManager.Receptionist.DeleteByIdAsync(receptionistId);
 
         return new ResponseMessage();
     }
@@ -118,12 +115,7 @@ public class ReceptionistService : IReceptionistService
             }
         }
 
-        var receptionists = await _repositoryManager.Receptionist.GetAllReceptionistsAsync(receptionistParameters);
-        if (receptionists.Count == 0)
-        {
-            return new ResponseMessage<ICollection<ReceptionistTableInfoDTO>>("No Receptionist's Profiles Found in Database!", 404);
-        }
-
+        var receptionists = await _repositoryManager.Receptionist.GetAllAsync(receptionistParameters);
         var receptionistTableInfoDTOs = _mapper.Map<ICollection<ReceptionistTableInfoDTO>>(receptionists);
         
         return new ResponseMessage<ICollection<ReceptionistTableInfoDTO>>(receptionistTableInfoDTOs);
@@ -131,7 +123,7 @@ public class ReceptionistService : IReceptionistService
 
     public async Task<ResponseMessage<ReceptionistInfoDTO>> GetReceptionistByIdAsync(Guid receptionistId)
     {
-        var receptionist = await _repositoryManager.Receptionist.GetReceptionistByIdAsync(receptionistId);
+        var receptionist = await _repositoryManager.Receptionist.GetByIdAsync(receptionistId);
         if (receptionist is null)
         {
             return new ResponseMessage<ReceptionistInfoDTO>("Receptionist's Profile Not Found!", 404);
@@ -142,7 +134,7 @@ public class ReceptionistService : IReceptionistService
         return new ResponseMessage<ReceptionistInfoDTO>(receptionistDTO);
     }
 
-    public async Task<ResponseMessage> UpdateReceptionistAsync(Guid receptionistId, ReceptionistForUpdateDTO receptionistForUpdateDTO)
+    public async Task<ResponseMessage<ReceptionistInfoDTO>> UpdateReceptionistAsync(Guid receptionistId, ReceptionistForUpdateDTO receptionistForUpdateDTO)
     {
         var validationResult = await _receptionistForUpdateValidator.ValidateAsync(receptionistForUpdateDTO);
         if (!validationResult.IsValid)
@@ -150,19 +142,16 @@ public class ReceptionistService : IReceptionistService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var receptionist = await _repositoryManager.Receptionist.GetReceptionistByIdAsync(receptionistId);
+        var receptionist = await _repositoryManager.Receptionist.GetByIdAsync(receptionistId);
         if (receptionist is null)
         {
-            return new ResponseMessage("Receptionist's Profile Not Found!", 404);
+            return new ResponseMessage<ReceptionistInfoDTO>("Receptionist's Profile Not Found!", 404);
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        var currentUserInfoCheck =
-            currentUserInfo is null ? false :
-            receptionist.UserId.Equals(currentUserInfo.Id) ? true : false;
-        if (!currentUserInfoCheck)
+        if (currentUserInfo is null || !receptionist.UserId.Equals(currentUserInfo.Id))
         {
-            return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
+            return new ResponseMessage<ReceptionistInfoDTO>("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
         }
 
         receptionist = _mapper.Map(receptionistForUpdateDTO, receptionist);
@@ -174,9 +163,16 @@ public class ReceptionistService : IReceptionistService
             receptionist.Photo = blobFileInfo.Uri;
             receptionist.PhotoId = blobFileInfo.FileId;
         }
+        else
+        {
+            await _blobService.DeleteAsync(receptionist.PhotoId);
+            receptionist.Photo = null;
+            receptionist.PhotoId = Guid.Empty;
+        }
 
-        await _repositoryManager.Receptionist.UpdateReceptionistAsync(receptionistId, receptionist);
+        await _repositoryManager.Receptionist.UpdateAsync(receptionistId, receptionist);
+        var receptionistInfoDTO = _mapper.Map<ReceptionistInfoDTO>(receptionist);
 
-        return new ResponseMessage();
+        return new ResponseMessage<ReceptionistInfoDTO>(receptionistInfoDTO);
     }
 }

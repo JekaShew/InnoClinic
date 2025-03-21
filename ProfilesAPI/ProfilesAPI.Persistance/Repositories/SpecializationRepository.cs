@@ -14,10 +14,11 @@ public class SpecializationRepository : ISpecializationRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task AddSpecializationAsync(Specialization specialization)
+    public async Task<Guid> CreateAsync(Specialization specialization)
     {
         var query = "Insert into Specializations (Id, Title, Description) " +
-            "Values (@Id, @Title, @Description) ";
+            "OUTPUT Inserted.ID " +
+            "Values (@Id, @Title, @Description); ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
@@ -26,11 +27,13 @@ public class SpecializationRepository : ISpecializationRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            await connection.ExecuteAsync(query, parameters);
+            var specializationId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
+           
+            return specializationId;
         }
     }
 
-    public async Task DeleteSpecializationByIdAsync(Guid specializationId)
+    public async Task DeleteByIdAsync(Guid specializationId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -40,7 +43,7 @@ public class SpecializationRepository : ISpecializationRepository
         }
     }
 
-    public async Task<ICollection<Specialization>> GetAllSpecializationsAsync()
+    public async Task<ICollection<Specialization>> GetAllAsync()
     {
         using(var connection = _profilesDBContext.Connection)
         {
@@ -51,7 +54,7 @@ public class SpecializationRepository : ISpecializationRepository
         }
     }
 
-    public async Task<Specialization> GetSpecializationByIdAsync(Guid specializationId)
+    public async Task<Specialization> GetByIdAsync(Guid specializationId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -63,7 +66,7 @@ public class SpecializationRepository : ISpecializationRepository
         }
     }
 
-    public async Task UpdateSpecializationAsync(Guid specializationId, Specialization updatedSpecialization)
+    public async Task UpdateAsync(Guid specializationId, Specialization updatedSpecialization)
     {
         using (var connection = _profilesDBContext.Connection)
         {

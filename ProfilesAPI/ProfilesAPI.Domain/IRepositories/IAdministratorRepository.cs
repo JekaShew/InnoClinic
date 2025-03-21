@@ -5,10 +5,10 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IAdministratorRepository
 {
-    public Task AddAdministratorAsync(Administrator administrator);
-    public Task UpdateAdministratorAsync(Guid administratorId, Administrator updatedAdministrator);
-    public Task DeleteAdministratorByIdAsync(Guid administratorId);
-    public Task<Administrator> GetAdministratorByIdAsync(Guid administratorId);
-    public Task<ICollection<Administrator>> GetAllAdministratorsAsync(AdministratorParameters? administratorParameters);
+    public Task<Guid> CreateAsync(Administrator administrator);
+    public Task UpdateAsync(Guid administratorId, Administrator updatedAdministrator);
+    public Task DeleteByIdAsync(Guid administratorId);
+    public Task<Administrator> GetByIdAsync(Guid administratorId);
+    public Task<ICollection<Administrator>> GetAllAsync(AdministratorParameters? administratorParameters);
     public Task<bool> IsProfileExists(Guid userId);
 }

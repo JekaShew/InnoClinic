@@ -1,6 +1,6 @@
 ﻿namespace ProfilesAPI.Domain.Data.Models;
 
-public class BaseProfileInformation
+public abstract class BaseProfileInformation
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }

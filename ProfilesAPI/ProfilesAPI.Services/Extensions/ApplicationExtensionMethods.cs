@@ -1,10 +1,12 @@
 ﻿using Azure.Storage.Blobs;
+using CommonLibrary.RabbitMQEvents;
 using FluentValidation;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Services.Services;
+using ProfilesAPI.Services.Services.OfficesConsumers;
 using System.Reflection;
 
 namespace ProfilesAPI.Services.Extensions
@@ -40,6 +42,11 @@ namespace ProfilesAPI.Services.Extensions
             services.AddMassTransit(busConfigurator =>
             {
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
+                    
+                busConfigurator.AddConsumer<OfficeCreatedConsumer>();
+                busConfigurator.AddConsumer<OfficeUpdatedConsumer>();
+                busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
+
                 busConfigurator.UsingRabbitMq((context, configurator) =>
                 {
                     configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
@@ -47,6 +54,8 @@ namespace ProfilesAPI.Services.Extensions
                         hostConfigurator.Username(configuration["MessageBroker:Username"]);
                         hostConfigurator.Password(configuration["MessageBroker:Password"]);
                     });
+
+                    configurator.ConfigureEndpoints(context);
                 });
             });
 
@@ -64,6 +73,7 @@ namespace ProfilesAPI.Services.Extensions
         private static IServiceCollection AddAzureBlobStorageMethod(this IServiceCollection services, IConfiguration configuration)
         {
             // Azure Blob Storage
+            // AzureBlobStorageFromLocal
             services.AddScoped<IBlobStorageService, BlobStorageService>();
             services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("AzureBlobStorageFromLocal")));
 

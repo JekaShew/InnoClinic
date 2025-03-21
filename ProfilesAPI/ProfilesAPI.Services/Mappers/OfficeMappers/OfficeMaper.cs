@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using AutoMapper;
+using CommonLibrary.RabbitMQEvents;
+using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Shared.DTOs.PatientDTOs;
 
-namespace ProfilesAPI.Services.Mappers.OfficeMappers
+namespace ProfilesAPI.Services.Mappers.OfficeMappers;
+
+public class OfficeMaper : Profile
 {
-    internal class OfficeMaper
+    public OfficeMaper()
     {
+        CreateMap<OfficeCreatedEvent, Office>();
+        CreateMap<OfficeUpdatedEvent, Office>();
+        CreateMap<OfficeCheckConsistancyEvent, Office>();
     }
 }

@@ -2,6 +2,7 @@
 using CommonLibrary.RabbitMQEvents;
 using MassTransit;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using System;
 using System.Collections.Generic;
@@ -20,9 +21,10 @@ namespace ProfilesAPI.Services.Services.OfficesConsumers
             _repositoryManager = repositoryManager;
             _mapper = mapper;
         }
-        public Task Consume(ConsumeContext<OfficeCreatedEvent> context)
+        public async Task Consume(ConsumeContext<OfficeCreatedEvent> context)
         {
-            
+            var office = _mapper.Map<Office>(context.Message);
+            await _repositoryManager.Office.CreateAsync(office);
         }
     }
 }

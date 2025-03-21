@@ -10,6 +10,7 @@ using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Services.Validators.DoctorValidators;
 using ProfilesAPI.Shared.DTOs.DoctorDTOs;
 using ProfilesAPI.Shared.DTOs.PatientDTOs;
+using System.Numerics;
 
 namespace ProfilesAPI.Services.Services;
 
@@ -41,7 +42,7 @@ public class PatientService : IPatientService
         _patientParametersValidator = patientParametersValidator;
     }
 
-    public async Task<ResponseMessage> AddPatientAsync(PatientForCreateDTO patientForCreateDTO)
+    public async Task<ResponseMessage<Guid>> CreatePatientAsync(PatientForCreateDTO patientForCreateDTO)
     {
         var validationResult = await _patientForCreateValidator.ValidateAsync(patientForCreateDTO);
         if (!validationResult.IsValid)
@@ -52,13 +53,13 @@ public class PatientService : IPatientService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if(currentUserInfo is null)
         {
-            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+            return new ResponseMessage<Guid>("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
         var isProfileExists = await _repositoryManager.Patient.IsProfileExists(currentUserInfo.Id);
         if (isProfileExists)
         {
-            return new ResponseMessage("Error! This profile already exists!", 400);
+            return new ResponseMessage<Guid>("Error! This profile already exists!", 400);
         }
 
         var patient = _mapper.Map<Patient>(patientForCreateDTO);
@@ -71,25 +72,22 @@ public class PatientService : IPatientService
         }
        
         patient.UserId = currentUserInfo.Id;
-        await _repositoryManager.Patient.AddPatientAsync(patient);
+        var patientId = await _repositoryManager.Patient.CreateAsync(patient);
 
-        return new ResponseMessage();
+        return new ResponseMessage<Guid>(patientId);
     }
 
     public async Task<ResponseMessage> DeletePatientByIdAsync(Guid patientId)
     {
-        var patient = await _repositoryManager.Patient.GetPatientByIdAsync(patientId);
+        var patient = await _repositoryManager.Patient.GetByIdAsync(patientId);
         if(patient is null)
         {
             return new ResponseMessage("Patient's Profile Not Found!", 404);
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        var currentUserInfoCheck =
-            currentUserInfo is null ? false :
-            patient.UserId.Equals(currentUserInfo.Id) ? true :
-            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
-        if (!currentUserInfoCheck)
+        if (currentUserInfo is null || (!patient.UserId.Equals(currentUserInfo.Id) &&
+                                        !currentUserInfo.Role.Equals(RoleConstants.Administrator)))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
         }
@@ -99,7 +97,7 @@ public class PatientService : IPatientService
             await _blobService.DeleteAsync(patient.PhotoId);
         }
         
-        await _repositoryManager.Patient.DeletePatientByIdAsync(patientId);
+        await _repositoryManager.Patient.DeleteByIdAsync(patientId);
 
         return new ResponseMessage();
     }
@@ -117,12 +115,7 @@ public class PatientService : IPatientService
             }
         }
 
-        var patients = await _repositoryManager.Patient.GetAllPatientsAsync(patientParameters);
-        if (patients.Count == 0)
-        {
-            return new ResponseMessage<ICollection<PatientTableInfoDTO>>("No Patient's Profiles Found in Database!", 404);
-        }
-
+        var patients = await _repositoryManager.Patient.GetAllAsync(patientParameters);
         var patientsTableInfoDTOs = _mapper.Map<ICollection<PatientTableInfoDTO>>(patients);
 
         return new ResponseMessage<ICollection<PatientTableInfoDTO>>(patientsTableInfoDTOs);
@@ -130,7 +123,7 @@ public class PatientService : IPatientService
 
     public async Task<ResponseMessage<PatientInfoDTO>> GetPatientByIdAsync(Guid patientId)
     {
-        var patient = await _repositoryManager.Patient.GetPatientByIdAsync(patientId);
+        var patient = await _repositoryManager.Patient.GetByIdAsync(patientId);
         if (patient is null)
         {
             return new ResponseMessage<PatientInfoDTO>("Patient's Profile Not Found!", 404);
@@ -141,7 +134,7 @@ public class PatientService : IPatientService
         return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO)
+    public async Task<ResponseMessage<PatientInfoDTO>> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO)
     {
         var validationResult = await _patientForUpdateValidator.ValidateAsync(patientForUpdateDTO);
         if (!validationResult.IsValid)
@@ -149,19 +142,16 @@ public class PatientService : IPatientService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var patient = await _repositoryManager.Patient.GetPatientByIdAsync(patientId);
+        var patient = await _repositoryManager.Patient.GetByIdAsync(patientId);
         if (patient is null)
         {
-            return new ResponseMessage("Patient's Profile Not Found!", 404);
+            return new ResponseMessage<PatientInfoDTO>("Patient's Profile Not Found!", 404);
         }
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
-        var currentUserInfoCheck =
-            currentUserInfo is null ? false :
-            patient.UserId.Equals(currentUserInfo.Id) ? true : false;
-        if (!currentUserInfoCheck)
+        if(currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id) )
         {
-            return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
+            return new ResponseMessage<PatientInfoDTO>("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
         }
 
         patient = _mapper.Map(patientForUpdateDTO, patient);
@@ -173,9 +163,16 @@ public class PatientService : IPatientService
             patient.Photo = blobFileInfo.Uri;
             patient.PhotoId = blobFileInfo.FileId;
         }
-        
-        await _repositoryManager.Patient.UpdatePatientAsync(patientId, patient);
+        else
+        {
+            await _blobService.DeleteAsync(patient.PhotoId);
+            patient.Photo = null;
+            patient.PhotoId = Guid.Empty;
+        }
 
-        return new ResponseMessage();
+        await _repositoryManager.Patient.UpdateAsync(patientId, patient);
+        var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
+
+        return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
     }
 }

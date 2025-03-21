@@ -20,12 +20,13 @@ public class ReceptionistRepository : IReceptionistRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task AddReceptionistAsync(Receptionist receptionist)
+    public async Task<Guid> CreateAsync(Receptionist receptionist)
     {
         var query =
             "Insert into Receptionists " +
                 "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName, " +
                 "SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
+            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
@@ -33,7 +34,7 @@ public class ReceptionistRepository : IReceptionistRepository
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
         parameters.Add("UserId", receptionist.UserId, System.Data.DbType.Guid);
         parameters.Add("WorkStatusId", receptionist.WorkStatusId, System.Data.DbType.Guid);
-        parameters.Add("OfficeId", receptionist.OfficeId, System.Data.DbType.Guid);
+        parameters.Add("OfficeId", receptionist.OfficeId, System.Data.DbType.String);
         parameters.Add("FirstName", receptionist.FirstName, System.Data.DbType.String);
         parameters.Add("LastName", receptionist.LastName, System.Data.DbType.String);
         parameters.Add("SecondName", receptionist.SecondName, System.Data.DbType.String);
@@ -47,11 +48,13 @@ public class ReceptionistRepository : IReceptionistRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            await connection.ExecuteAsync(query, parameters);
+            var receptionistId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
+            
+            return receptionistId;
         }
     }
 
-    public async Task DeleteReceptionistByIdAsync(Guid receptionistId)
+    public async Task DeleteByIdAsync(Guid receptionistId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -61,7 +64,7 @@ public class ReceptionistRepository : IReceptionistRepository
         }
     }
 
-    public async Task<ICollection<Receptionist>> GetAllReceptionistsAsync(ReceptionistParameters? receptionistPrameters)
+    public async Task<ICollection<Receptionist>> GetAllAsync(ReceptionistParameters? receptionistPrameters)
     {
         var query = new StringBuilder(@"
             SELECT Receptionists.Id, Receptionists.UserId, Receptionists.WorkStatusId, Receptionists.OfficeId,
@@ -110,7 +113,7 @@ public class ReceptionistRepository : IReceptionistRepository
         }
     }
 
-    public async Task<Receptionist> GetReceptionistByIdAsync(Guid receptionistId)
+    public async Task<Receptionist> GetByIdAsync(Guid receptionistId)
     {
         var query = "Select * From Receptionists " +
             "Where Receptionists.Id = @ReceptionistId ";
@@ -129,13 +132,12 @@ public class ReceptionistRepository : IReceptionistRepository
         using (var connection = _profilesDBContext.Connection)
         {
             var receptionist = await connection.QueryFirstOrDefaultAsync<Receptionist>(query, new { userId });
-            var result = receptionist is null ? false : true;
 
-            return result;
+            return receptionist is not null;
         }
     }
 
-    public async Task UpdateReceptionistAsync(Guid receptionistId, Receptionist updatedReceptionist)
+    public async Task UpdateAsync(Guid receptionistId, Receptionist updatedReceptionist)
     {
 
         var query = "Update Receptionists " +
@@ -148,7 +150,7 @@ public class ReceptionistRepository : IReceptionistRepository
         var receptionistParameters = new DynamicParameters();
         receptionistParameters.Add("ReceptionistId", receptionistId, System.Data.DbType.Guid);
         receptionistParameters.Add("WorkStatusId", updatedReceptionist.WorkStatusId, System.Data.DbType.Guid);
-        receptionistParameters.Add("OfficeId", updatedReceptionist.OfficeId, System.Data.DbType.Guid);
+        receptionistParameters.Add("OfficeId", updatedReceptionist.OfficeId, System.Data.DbType.String);
         receptionistParameters.Add("FirstName", updatedReceptionist.FirstName, System.Data.DbType.String);
         receptionistParameters.Add("LastName", updatedReceptionist.LastName, System.Data.DbType.String);
         receptionistParameters.Add("SecondName", updatedReceptionist.SecondName, System.Data.DbType.String);

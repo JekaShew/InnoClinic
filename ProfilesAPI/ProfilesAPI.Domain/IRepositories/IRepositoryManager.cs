@@ -8,6 +8,7 @@ public interface IRepositoryManager
     IReceptionistRepository Receptionist { get; }
     ISpecializationRepository Specialization { get; }
     IWorkStatusRepository WorkStatus { get; }
+    IOfficeRepository Office { get; }
     public abstract Task BeginTransactionAsync();
     public abstract Task CommitAsync();
     public abstract Task RollbackAsync();

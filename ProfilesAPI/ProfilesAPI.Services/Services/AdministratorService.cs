@@ -22,6 +22,7 @@ public class AdministratorService : IAdministratorService
     private readonly IValidator<AdministratorForCreateDTO> _administratorForCreateValidator;
     private readonly IValidator<AdministratorForUpdateDTO> _administratorForUpdateValidator;
     private readonly IValidator<AdministratorParameters> _administratorParametersValidator;
+
     public AdministratorService(
             IRepositoryManager repositoryManager,
             IMapper mapper,
@@ -40,7 +41,7 @@ public class AdministratorService : IAdministratorService
         _administratorParametersValidator = administratorParametersValidator;
     }
 
-    public async Task<ResponseMessage> AddAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO)
+    public async Task<ResponseMessage<Guid>> CreateAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO)
     {
         var validationResult = await _administratorForCreateValidator.ValidateAsync(administratorForCreateDTO);
         if (!validationResult.IsValid)
@@ -51,13 +52,13 @@ public class AdministratorService : IAdministratorService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null)
         {
-            return new ResponseMessage("Forbidden Action! You are UnAuthorizaed!", 403);
+            return new ResponseMessage<Guid>("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
         var isProfileExists = await _repositoryManager.Administrator.IsProfileExists(currentUserInfo.Id);
         if (isProfileExists)
         {
-            return new ResponseMessage("Error! This profile already exists!", 400);
+            return new ResponseMessage<Guid>("Error! This profile already exists!", 400);
         }
 
         var administrator = _mapper.Map<Administrator>(administratorForCreateDTO);
@@ -70,14 +71,14 @@ public class AdministratorService : IAdministratorService
         }
         
         administrator.UserId = currentUserInfo.Id;
-        await _repositoryManager.Administrator.AddAdministratorAsync(administrator);
+        var administratorId = await _repositoryManager.Administrator.CreateAsync(administrator);
 
-        return new ResponseMessage();
+        return new ResponseMessage<Guid>(administratorId);
     }
 
     public async Task<ResponseMessage> DeleteAdministratorByIdAsync(Guid administratorId)
     {
-        var administrator = await _repositoryManager.Administrator.GetAdministratorByIdAsync(administratorId);
+        var administrator = await _repositoryManager.Administrator.GetByIdAsync(administratorId);
         if (administrator is null)
         {
             return new ResponseMessage("Administrator's Profile Not Found!", 404);
@@ -85,11 +86,8 @@ public class AdministratorService : IAdministratorService
 
         var currentUserInfo = _commonService.GetCurrentUserInfo();
 
-        var currentUserInfoCheck =
-            currentUserInfo is null ? false :
-            administrator.UserId.Equals(currentUserInfo.Id) ? true :
-            currentUserInfo.Role.Equals(RoleConstants.Administrator) ? true : false;
-        if (!currentUserInfoCheck)
+        if (currentUserInfo is null || (!administrator.UserId.Equals(currentUserInfo.Id) && 
+                                        !currentUserInfo.Role.Equals(RoleConstants.Administrator)))
         {
             return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
         }
@@ -99,14 +97,14 @@ public class AdministratorService : IAdministratorService
             await _blobService.DeleteAsync(administrator.PhotoId);
         }
 
-        await _repositoryManager.Administrator.DeleteAdministratorByIdAsync(administratorId);
+        await _repositoryManager.Administrator.DeleteByIdAsync(administratorId);
 
         return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<AdministratorInfoDTO>> GetAdministratorByIdAsync(Guid administratorId)
     {
-        var administrator = await _repositoryManager.Administrator.GetAdministratorByIdAsync(administratorId);
+        var administrator = await _repositoryManager.Administrator.GetByIdAsync(administratorId);
         if (administrator is null)
         {
             return new ResponseMessage<AdministratorInfoDTO>("Administrator's Profile Not Found!", 404);
@@ -131,7 +129,7 @@ public class AdministratorService : IAdministratorService
             }
         }
 
-        var administrators = await _repositoryManager.Administrator.GetAllAdministratorsAsync(administratorParameters);
+        var administrators = await _repositoryManager.Administrator.GetAllAsync(administratorParameters);
         if (administrators.Count == 0)
         {
             return new ResponseMessage<ICollection<AdministratorTableInfoDTO>>("No Administrator's Profiles Found in Database!", 404);
@@ -142,7 +140,7 @@ public class AdministratorService : IAdministratorService
         return new ResponseMessage<ICollection<AdministratorTableInfoDTO>>(administratorTableInfoDTOs);
     }
 
-    public async Task<ResponseMessage> UpdateAdministratorAsync(Guid administratorId, AdministratorForUpdateDTO administratorForUpdateDTO)
+    public async Task<ResponseMessage<AdministratorInfoDTO>> UpdateAdministratorAsync(Guid administratorId, AdministratorForUpdateDTO administratorForUpdateDTO)
     {
         var validationResult = await _administratorForUpdateValidator.ValidateAsync(administratorForUpdateDTO);
         if (!validationResult.IsValid)
@@ -150,19 +148,19 @@ public class AdministratorService : IAdministratorService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var administrator = await _repositoryManager.Administrator.GetAdministratorByIdAsync(administratorId);
+        var administrator = await _repositoryManager.Administrator.GetByIdAsync(administratorId);
         if (administrator is null)
         {
-            return new ResponseMessage("Administrator's Profile Not Found!", 404);
+            return new ResponseMessage<AdministratorInfoDTO>("Administrator's Profile Not Found!", 404);
         }
         
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         var currentUserInfoCheck =
             currentUserInfo is null ? false :
             administrator.UserId.Equals(currentUserInfo.Id) ? true : false;
-        if (!currentUserInfoCheck)
+        if (currentUserInfo is null || !currentUserInfo.Id.Equals(administrator.UserId))
         {
-            return new ResponseMessage("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
+            return new ResponseMessage<AdministratorInfoDTO>("Forbidden Action! You have no rights to manage this Administrator's Profile!", 403);
         }
 
         administrator = _mapper.Map(administratorForUpdateDTO, administrator);
@@ -174,9 +172,15 @@ public class AdministratorService : IAdministratorService
             administrator.Photo = blobFileInfo.Uri;
             administrator.PhotoId = blobFileInfo.FileId;
         }
+        else
+        {
+            await _blobService.DeleteAsync(administrator.PhotoId);
+            administrator.Photo = null;
+            administrator.PhotoId = Guid.Empty;
+        }
 
-        await _repositoryManager.Administrator.UpdateAdministratorAsync(administratorId, administrator);
-
-        return new ResponseMessage();
+        await _repositoryManager.Administrator.UpdateAsync(administratorId, administrator);
+        var administratorInfoDTO = _mapper.Map<AdministratorInfoDTO>(administrator);
+        return new ResponseMessage<AdministratorInfoDTO>(administratorInfoDTO);
     }
 }

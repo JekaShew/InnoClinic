@@ -8,6 +8,7 @@ public class DapperRepositoryManager : IRepositoryManager
     private ProfilesDBContext _profilesDBContext;
     private IAdministratorRepository _administratorRepository;
     private IPatientRepository _patientRepository;
+    private IOfficeRepository _officeRepository;
     private IDoctorRepository _doctorRepository;
     private IReceptionistRepository _receptionistRepository;
     private ISpecializationRepository _specializationRepository;
@@ -29,6 +30,10 @@ public class DapperRepositoryManager : IRepositoryManager
     public IDoctorRepository Doctor
     {
         get => _doctorRepository ?? new DoctorRepository(_profilesDBContext);
+    }
+    public IOfficeRepository Office
+    {
+        get => _officeRepository?? new OfficeRepository(_profilesDBContext);
     }
     public IReceptionistRepository Receptionist
     {

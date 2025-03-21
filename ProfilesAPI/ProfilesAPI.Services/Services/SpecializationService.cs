@@ -28,7 +28,7 @@ public class SpecializationService : ISpecializationService
         _specializationForUpdateValidator = specializationForUpdateValidator;
     }
 
-    public async Task<ResponseMessage> AddSpecializationAsync(SpecializationForCreateDTO specializationForCreateDTO)
+    public async Task<ResponseMessage<Guid>> CreateSpecializationAsync(SpecializationForCreateDTO specializationForCreateDTO)
     {
         var validationResult = await _specializationForCreateValidator.ValidateAsync(specializationForCreateDTO);
         if (!validationResult.IsValid)
@@ -37,26 +37,21 @@ public class SpecializationService : ISpecializationService
         }
 
         var specialization = _mapper.Map<Specialization>(specializationForCreateDTO);
-        await _repositoryManager.Specialization.AddSpecializationAsync(specialization);
+        var specializationId = await _repositoryManager.Specialization.CreateAsync(specialization);
 
-        return new ResponseMessage();
+        return new ResponseMessage<Guid>(specializationId);
     }
 
     public async Task<ResponseMessage> DeleteSpecializationByIdAsync(Guid specializationId)
     {
-        await _repositoryManager.Specialization.DeleteSpecializationByIdAsync(specializationId);
+        await _repositoryManager.Specialization.DeleteByIdAsync(specializationId);
 
         return new ResponseMessage();
     }
 
     public async Task<ResponseMessage<ICollection<SpecializationTableInfoDTO>>> GetAllSpecializationsAsync()
     {
-        var specializations = await _repositoryManager.Specialization.GetAllSpecializationsAsync();
-        if (specializations.Count == 0)
-        {
-            return new ResponseMessage<ICollection<SpecializationTableInfoDTO>>("No Specializations Found in Database!", 404);
-        }
-
+        var specializations = await _repositoryManager.Specialization.GetAllAsync();
         var specializationTableInfoDTOs = _mapper.Map<ICollection<SpecializationTableInfoDTO>>(specializations);
 
         return new ResponseMessage<ICollection<SpecializationTableInfoDTO>>(specializationTableInfoDTOs);
@@ -64,7 +59,7 @@ public class SpecializationService : ISpecializationService
 
     public async Task<ResponseMessage<SpecializationInfoDTO>> GetSpecializationByIdAsync(Guid specializationId)
     {
-        var specialization = await _repositoryManager.Specialization.GetSpecializationByIdAsync(specializationId);
+        var specialization = await _repositoryManager.Specialization.GetByIdAsync(specializationId);
         if (specialization is null)
         {
             return new ResponseMessage<SpecializationInfoDTO>("Specialization Not Found!", 404);
@@ -75,7 +70,7 @@ public class SpecializationService : ISpecializationService
         return new ResponseMessage<SpecializationInfoDTO>(specializationInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateSpecializationAsync(Guid specializationId, SpecializationForUpdateDTO specializationForUpdateDTO)
+    public async Task<ResponseMessage<SpecializationInfoDTO>> UpdateSpecializationAsync(Guid specializationId, SpecializationForUpdateDTO specializationForUpdateDTO)
     {
         var validationResult = await _specializationForUpdateValidator.ValidateAsync(specializationForUpdateDTO);
         if (!validationResult.IsValid)
@@ -83,15 +78,16 @@ public class SpecializationService : ISpecializationService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var specialization = await _repositoryManager.Specialization.GetSpecializationByIdAsync(specializationId);
+        var specialization = await _repositoryManager.Specialization.GetByIdAsync(specializationId);
         if (specialization is null)
         {
-            return new ResponseMessage("Specialization Not Found!", 404);
+            return new ResponseMessage<SpecializationInfoDTO>("Specialization Not Found!", 404);
         }
 
         specialization = _mapper.Map(specializationForUpdateDTO, specialization);
-        await _repositoryManager.Specialization.UpdateSpecializationAsync(specializationId, specialization);
+        await _repositoryManager.Specialization.UpdateAsync(specializationId, specialization);
+        var specializationInfoDTO = _mapper.Map<SpecializationInfoDTO>(specialization);
 
-        return new ResponseMessage();
+        return new ResponseMessage<SpecializationInfoDTO>(specializationInfoDTO);
     }
 }

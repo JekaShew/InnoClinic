@@ -66,7 +66,7 @@ public class WorkStatusesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(typeof(Guid), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -76,13 +76,13 @@ public class WorkStatusesController : ControllerBase
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> AddWorkStatus([FromBody] WorkStatusForCreateDTO workStatusForCreateDTO)
     {
-        var result = await _workStatusService.AddWorkStatusAsync(workStatusForCreateDTO);
+        var result = await _workStatusService.CreateWorkStatusAsync(workStatusForCreateDTO);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return Created();
+        return CreatedAtAction(nameof(GetWorkStatusById), new { workStatusId = result.Value }, result.Value);
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ public class WorkStatusesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{workStatusId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(WorkStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -106,7 +106,7 @@ public class WorkStatusesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>
