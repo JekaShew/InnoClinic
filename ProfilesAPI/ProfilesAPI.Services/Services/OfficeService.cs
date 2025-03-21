@@ -7,20 +7,24 @@ using MassTransit;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using static MassTransit.Logging.DiagnosticHeaders.Messaging;
 
 namespace ProfilesAPI.Services.Services;
 
 public class OfficeService : IOfficeService
 {
     private readonly ICommonService _commonService;
+    private readonly IBus _bus;
     private readonly IPublishEndpoint _publishEndpoint;
-    
+
     public OfficeService(
         ICommonService commonService,
-        IPublishEndpoint publishEndpoint)
+        IPublishEndpoint publishEndpoint,
+        IBus bus)
     {
         _commonService = commonService;
         _publishEndpoint = publishEndpoint;
+        _bus = bus;
     }
 
     public async Task<ResponseMessage> RequestCheckOfficeConsistancyAsync()
@@ -37,6 +41,7 @@ public class OfficeService : IOfficeService
             DateTime = DateTime.UtcNow,
         };
 
+        await _bus.Publish(officeRequestCheckConsistancyEvent);
         await _publishEndpoint.Publish(officeRequestCheckConsistancyEvent);
         
         return new ResponseMessage();

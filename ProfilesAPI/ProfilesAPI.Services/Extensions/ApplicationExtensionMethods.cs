@@ -27,6 +27,7 @@ namespace ProfilesAPI.Services.Extensions
             services.AddScoped<IReceptionistService, ReceptionistService>();
             services.AddScoped<ISpecializationService, SpecializationService>();
             services.AddScoped<IWorkStatusService, WorkStatusService>();
+            services.AddScoped<IOfficeService, OfficeService>();
 
             services.AddAzureBlobStorageMethod(configuration);
             services.AddFluentValidationMethod();

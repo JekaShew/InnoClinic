@@ -123,17 +123,6 @@ services:
       #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
       - ServerOptions__HostName=smtp4dev
 
-  newsletter-mq:
-    image: rabbitmq:management
-    container_name: Newsletter.RabbitMq
-    hostname: newsletter-mq
-    volumes:
-        - ./.containers/queue/data/:/var/lib/rabbitmq
-        - ./.containers/queue/log/:/var/log/rabbitmq
-    environment:
-        RABBITMQ_DEFAULT_USER: guest
-        RABBITMQ_DEFAULT_PASS: guest
-
   rabbit-mq:
     image: rabbitmq:management
     container_name: rabbitmq

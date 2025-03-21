@@ -48,6 +48,8 @@ public static class ApplicationServicesExtensionMethods
                     hostConfigurator.Username(configuration["MessageBroker:Username"]);
                     hostConfigurator.Password(configuration["MessageBroker:Password"]);
                 });
+
+                configurator.ConfigureEndpoints(context);
             });
         });
 
