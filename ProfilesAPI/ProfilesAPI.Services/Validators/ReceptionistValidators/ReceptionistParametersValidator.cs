@@ -7,6 +7,9 @@ public class ReceptionistParametersValidator : AbstractValidator<ReceptionistPar
 {
     public ReceptionistParametersValidator()
     {
-        
+        RuleFor(x => x.Offices)
+           .Must(offices => offices == null
+            || offices.All(office => office is string))
+           .WithMessage("Incorrect Office value!");
     }
 }

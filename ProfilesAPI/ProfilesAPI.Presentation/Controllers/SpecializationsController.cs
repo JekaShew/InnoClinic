@@ -1,7 +1,9 @@
 ﻿using CommonLibrary.Response;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Shared.DTOs.SpecializationDTOs;
+using Serilog;
 
 namespace ProfilesAPI.Presentation.Controllers;
 
@@ -10,9 +12,11 @@ namespace ProfilesAPI.Presentation.Controllers;
 public class SpecializationsController : ControllerBase
 {
     private readonly ISpecializationService _specializationService;
-    public SpecializationsController(ISpecializationService specializationService)
+    private readonly ILogger<SpecializationsController> _logger;
+    public SpecializationsController(ISpecializationService specializationService, ILogger<SpecializationsController> logger)
     {
         _specializationService = specializationService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -55,6 +59,7 @@ public class SpecializationsController : ControllerBase
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
+        _logger.LogInformation("Specializations list was requested!!!!!!!!!!!!!!!!!!!!!");
 
         return Ok(result.Value);
     }

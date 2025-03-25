@@ -10,5 +10,5 @@ public class ReceptionistTableInfoDTO
     // public OfficeInfoDTO Office { get; set; }
     // public WorkStatusInfoDTO WorkStatus { get; set; }
     public Guid? WorkStatusId { get; set; }
-    public Guid OfficeId { get; set; }
+    public string? OfficeId { get; set; }
 }

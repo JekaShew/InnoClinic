@@ -7,6 +7,9 @@ public class AdministratorParametersValidator : AbstractValidator<AdministratorP
 {
     public AdministratorParametersValidator()
     {
-         
+        RuleFor(x => x.Offices)
+           .Must(offices => offices == null 
+            || offices.All(office => office is string))
+           .WithMessage("Incorrect Office value!");
     }
 }

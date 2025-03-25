@@ -18,7 +18,7 @@ public class OfficeRepository : IOfficeRepository
     {
         var query = "Insert into Offices (Id, City, Street, HouseNumber, OfficeNumber, " +
                 "RegistryPhoneNumber, IsActive) " +
-             "Values (@Id, @City, @Street, @HouseNumber, @OfficeNumber, @RegistryNumber, " +
+             "Values (@Id, @City, @Street, @HouseNumber, @OfficeNumber, @RegistryPhoneNumber, " +
                 "@IsActive) ";
 
         var parameters = new DynamicParameters();

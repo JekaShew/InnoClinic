@@ -4,12 +4,16 @@ using ProfilesAPI.Persistance.Extensions;
 using InnoClinic.CommonLibrary.Exceptions;
 using ProfilesAPI.Services.Extensions;
 using ProfilesAPI.Web.Extensions;
+using Serilog;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Host.AddSerilogMethod(builder.Configuration, builder.Configuration["ProfilesSerilog:FileName"]);
+
         builder.Services.AddControllers(config =>
         {
             config.RespectBrowserAcceptHeader = true;
@@ -18,7 +22,7 @@ internal class Program
 
         builder.Services.AddSwaggerMethod();
 
-        builder.Services.AddCommonServices(builder.Configuration, builder.Configuration["ProfilesSerilog:FileName"]);
+        builder.Services.AddCommonServices(builder.Configuration);
         
         builder.Services.AddPersistanceServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
@@ -39,6 +43,8 @@ internal class Program
         });
 
         app.UseHttpsRedirection();
+
+        app.UseSerilogRequestLogging();
 
         app.UseRouting();
 

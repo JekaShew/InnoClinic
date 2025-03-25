@@ -40,14 +40,20 @@ public static class ApplicationServicesExtensionMethods
             busConfigurator.SetKebabCaseEndpointNameFormatter();
 
             busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
-
+            
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
-                configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
+                configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
                 {
-                    hostConfigurator.Username(configuration["MessageBroker:Username"]);
-                    hostConfigurator.Password(configuration["MessageBroker:Password"]);
+                    hostConfigurator.Username("guest");
+                    hostConfigurator.Password("guest");
                 });
+                //configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
+                //{
+                   
+                //    //hostConfigurator.Username(configuration["MessageBroker:Username"]);
+                //    //hostConfigurator.Password(configuration["MessageBroker:Password"]);
+                //});
 
                 configurator.ConfigureEndpoints(context);
             });

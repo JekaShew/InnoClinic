@@ -48,13 +48,20 @@ namespace ProfilesAPI.Services.Extensions
                 busConfigurator.AddConsumer<OfficeUpdatedConsumer>();
                 busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
 
+
                 busConfigurator.UsingRabbitMq((context, configurator) =>
                 {
-                    configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
+                    configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
                     {
-                        hostConfigurator.Username(configuration["MessageBroker:Username"]);
-                        hostConfigurator.Password(configuration["MessageBroker:Password"]);
+                        hostConfigurator.Username("guest");
+                        hostConfigurator.Password("guest");
                     });
+
+                    //configurator.Host("127.0.0.1",5672,"/", hostConfigurator =>
+                    //{ 
+                    //    hostConfigurator.Username("guest");
+                    //    hostConfigurator.Password("guest");
+                    //});
 
                     configurator.ConfigureEndpoints(context);
                 });
@@ -76,7 +83,7 @@ namespace ProfilesAPI.Services.Extensions
             // Azure Blob Storage
             // AzureBlobStorageFromLocal
             services.AddScoped<IBlobStorageService, BlobStorageService>();
-            services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("AzureBlobStorageFromLocal")));
+            services.AddScoped(_ => new BlobServiceClient(configuration.GetConnectionString("AzureBlobStorage")));
 
             return services;
         }

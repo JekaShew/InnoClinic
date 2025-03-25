@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
+using Serilog;
+
 
 namespace OfficesAPI.Presentation.Controllers;
 
@@ -11,10 +13,14 @@ namespace OfficesAPI.Presentation.Controllers;
 public class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
+    private readonly ILogger _logger;
 
-    public OfficesController(IOfficeService officeService)
+    public OfficesController(
+            IOfficeService officeService,
+            ILogger logger)
     {
         _officeService = officeService;
+        _logger = logger;
     }
 
     /// <summary>
@@ -36,6 +42,7 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
+        _logger.Information("GetAllOffices method called!!!!!!!!");
         return Ok(result.Value);
     }
 

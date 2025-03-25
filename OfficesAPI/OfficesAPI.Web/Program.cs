@@ -2,10 +2,12 @@ using InnoClinic.CommonLibrary.Exceptions;
 using Microsoft.OpenApi.Models;
 using OfficesAPI.Persistance.Extensions;
 using OfficesAPI.Services.Extensions;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.AddSerilogMethod(builder.Configuration, builder.Configuration["OfficesSerolog:FileName"]);
 builder.Services.AddControllers(config =>
     {
         config.RespectBrowserAcceptHeader = true;
@@ -52,7 +54,7 @@ builder.Services.AddSwaggerGen(c =>
     c.IncludeXmlComments(xmlPath);
 });
 
-builder.Services.AddCommonServices(builder.Configuration, builder.Configuration["OfficesSerolog:FileName"]);
+builder.Services.AddCommonServices(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddPersistanceServices(builder.Configuration);
@@ -78,6 +80,8 @@ app.UseSwaggerUI(c =>
 });
 
 app.UseHttpsRedirection();
+
+app.UseSerilogRequestLogging();
 
 app.UseRouting();
 

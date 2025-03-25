@@ -32,7 +32,7 @@ public static class PersistanceExtensionMethods
         services.AddFluentMigratorCore()
             .ConfigureRunner(rb => rb
                 .AddSqlServer()
-                .WithGlobalConnectionString(configuration.GetConnectionString("ProfilesDBDockerFromLocal"))
+                .WithGlobalConnectionString(configuration.GetConnectionString("ProfilesDBDocker"))
                 .ScanIn(Assembly.GetExecutingAssembly()).For.Migrations()
             );
 

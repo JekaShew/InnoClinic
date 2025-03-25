@@ -15,15 +15,15 @@ public class OfficeService : IOfficeService
 {
     private readonly ICommonService _commonService;
     private readonly IBus _bus;
-    private readonly IPublishEndpoint _publishEndpoint;
+    //private readonly IPublishEndpoint _publishEndpoint;
 
     public OfficeService(
         ICommonService commonService,
-        IPublishEndpoint publishEndpoint,
+        //IPublishEndpoint publishEndpoint,
         IBus bus)
     {
         _commonService = commonService;
-        _publishEndpoint = publishEndpoint;
+        //_publishEndpoint = publishEndpoint;
         _bus = bus;
     }
 
@@ -42,7 +42,7 @@ public class OfficeService : IOfficeService
         };
 
         await _bus.Publish(officeRequestCheckConsistancyEvent);
-        await _publishEndpoint.Publish(officeRequestCheckConsistancyEvent);
+        //await _publishEndpoint.Publish(officeRequestCheckConsistancyEvent);
         
         return new ResponseMessage();
     }

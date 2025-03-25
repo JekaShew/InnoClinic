@@ -5,12 +5,15 @@ using Microsoft.OpenApi.Models;
 using System.Reflection;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
+using Serilog;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Host.AddSerilogMethod(builder.Configuration, builder.Configuration["AuthSerolog:FileName"]);
         builder.Services.AddControllers(config =>
             {
                 config.RespectBrowserAcceptHeader = true;
@@ -58,7 +61,7 @@ internal class Program
             c.IncludeXmlComments(xmlPath);
         });
 
-        builder.Services.AddCommonServices(builder.Configuration, builder.Configuration["AuthSerolog:FileName"]);
+        builder.Services.AddCommonServices(builder.Configuration);
 
         builder.Services.AddPersistanceServices(builder.Configuration);
         builder.Services.AddApplicationServices(builder.Configuration);
@@ -85,6 +88,8 @@ internal class Program
         });
 
         app.UseHttpsRedirection();
+
+        app.UseSerilogRequestLogging();
 
         app.UseRouting();
 
