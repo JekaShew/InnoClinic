@@ -92,7 +92,7 @@ public class UsersController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{userId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(UserInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -108,7 +108,7 @@ public class UsersController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -116,7 +116,7 @@ public class UsersController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{userId}/updatebyadministrator")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(UserInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -132,7 +132,7 @@ public class UsersController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>

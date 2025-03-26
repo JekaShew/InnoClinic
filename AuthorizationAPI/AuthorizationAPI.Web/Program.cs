@@ -6,6 +6,7 @@ using System.Reflection;
 using Hangfire;
 using HangfireBasicAuthenticationFilter;
 using Serilog;
+using AuthorizationAPI.Web.Extensions;
 
 internal class Program
 {
@@ -21,45 +22,8 @@ internal class Program
             .AddNewtonsoftJson()
             .AddApplicationPart(typeof(AuthorizationAPI.Presentation.Controllers.UsersController).Assembly);
 
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(c =>
-        {
-            c.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "Authorization API",
-                Version = "v1"
-            });
-            c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-            {
-                In = ParameterLocation.Header,
-                Description = "place to add JWT with Bearer",
-                Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey,
-                Scheme = "Bearer"
-            });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-            {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                },
-                Name = "Bearer",
-            },
-            new List<string>()
-        }
-            });
-
-            var swaggerAssambly = Assembly
-                .GetAssembly(typeof(AuthorizationAPI.Presentation.Controllers.AuthorizationController));
-            var swaggerPath = Path.GetDirectoryName(swaggerAssambly.Location);
-            var xmlFile = $"{swaggerAssambly.GetName().Name}.xml";
-            var xmlPath = Path.Combine(swaggerPath, xmlFile);
-            c.IncludeXmlComments(xmlPath);
-        });
+        
+        builder.Services.AddSwaggerMethod();
 
         builder.Services.AddCommonServices(builder.Configuration);
 
@@ -67,13 +31,8 @@ internal class Program
         builder.Services.AddApplicationServices(builder.Configuration);
 
         builder.Services.AddHttpContextAccessor();
-        builder.Services.AddCors(options =>
-        {
-            options.AddPolicy("CorsPolicy", builder =>
-            builder.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
-        });
+
+        builder.Services.AddCorsPolicies();
 
         var app = builder.Build();
 

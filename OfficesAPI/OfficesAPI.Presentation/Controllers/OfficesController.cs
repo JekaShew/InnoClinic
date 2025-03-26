@@ -42,7 +42,6 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        _logger.Information("GetAllOffices method called!!!!!!!!");
         return Ok(result.Value);
     }
 
@@ -73,7 +72,7 @@ public class OfficesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(typeof(string), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -91,7 +90,7 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Created();
+        return CreatedAtAction(nameof(GetOfficeByid), new { officeId = result.Value }, result.Value);
     }
 
     /// <summary>
@@ -99,7 +98,7 @@ public class OfficesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{officeId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(OfficeInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -115,7 +114,7 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>

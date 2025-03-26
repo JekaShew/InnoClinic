@@ -2,7 +2,6 @@
 using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
 using AuthorizationAPI.Shared.DTOs.RefreshTokenDTOs;
-using CommonLibrary.CommonService;
 using InnoClinic.CommonLibrary.Response;
 
 namespace AuthorizationAPI.Services.Services;
@@ -10,13 +9,11 @@ namespace AuthorizationAPI.Services.Services;
 public class RefreshTokenService : IRefreshTokenService
 {
     private readonly IRepositoryManager _repositoryManager;
-    private readonly ICommonService _commonService;
+
     public RefreshTokenService(
-            IRepositoryManager repositoryManager,
-            ICommonService commonService)
+            IRepositoryManager repositoryManager)
     {
         _repositoryManager = repositoryManager;
-        _commonService = commonService;
     }
 
     public async Task<ResponseMessage> DeleteRefreshTokenByRTokenId(Guid refreshTokenId)
@@ -50,12 +47,7 @@ public class RefreshTokenService : IRefreshTokenService
     public async Task<ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>> GetAllLoggedInUsers()
     {
         var refreshTokenCollection = await _repositoryManager.RefreshToken
-                .GetAllRefreshTokensAsync();
-        if (!refreshTokenCollection.Any())
-        {
-            return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>("No Logged in Users Found!", 404);
-        }         
-
+                .GetAllRefreshTokensAsync();      
         var userLoggedInInfoDTOs = refreshTokenCollection.Select(rt => RefreshTokenMapper.RefreshTokenToUserLoggedInInfoDTO(rt));
 
         return new ResponseMessage<IEnumerable<UserLoggedInInfoDTO>>(userLoggedInInfoDTOs);

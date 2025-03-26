@@ -36,7 +36,7 @@ public class OfficeService : IOfficeService
         _bus = bus;
     }
 
-    public async Task<ResponseMessage> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files)
+    public async Task<ResponseMessage<string>> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files)
     {
         var validationResult = await _officeForCreateValidator.ValidateAsync(officeForCreateDTO);
         if (!validationResult.IsValid)
@@ -47,7 +47,8 @@ public class OfficeService : IOfficeService
         var officeCreatedEvent = new OfficeCreatedEvent();
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
         office.Id = ObjectId.GenerateNewId().ToString();
-        if (files is not null && files.Count == 0)
+        var officeId = office.Id;
+        if (files is not null && files.Count != 0)
         {
             var photoList = new List<Photo>();
             foreach (var image in files)
@@ -75,7 +76,7 @@ public class OfficeService : IOfficeService
             await _bus.Publish(officeCreatedEvent);
             await _publishEndpoint.Publish(officeCreatedEvent);
 
-            return new ResponseMessage();
+            return new ResponseMessage<string>(officeId);
         }
 
         _repositoryManager.Office.CreateOffice(office);
@@ -84,7 +85,7 @@ public class OfficeService : IOfficeService
         await _bus.Publish(officeCreatedEvent);
         await _publishEndpoint.Publish(officeCreatedEvent);
 
-        return new ResponseMessage();
+        return new ResponseMessage<string>(officeId);
     }
 
     public async Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId)
@@ -111,11 +112,6 @@ public class OfficeService : IOfficeService
     public async Task<ResponseMessage<IEnumerable<OfficeTableInfoDTO>>> GetAllOfficesAsync()
     {
         var offices = await _repositoryManager.Office.GetAllOfficesAsync();
-        if (offices.Count == 0)
-        {
-            return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>("No Offices found!", 404);
-        }
-
         var officeTableInfoDTOs = offices.Select(o => OfficeMapper.OfficeToOfficeTableInfoDTO(o));
 
         return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(officeTableInfoDTOs);
@@ -134,7 +130,7 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateOfficeInfoAsync(string officeId,[FromBody] OfficeForUpdateDTO officeForUpdateDTO)
+    public async Task<ResponseMessage<OfficeInfoDTO>> UpdateOfficeInfoAsync(string officeId,[FromBody] OfficeForUpdateDTO officeForUpdateDTO)
     {
         var validationResult = await _officeForUpdateValidator.ValidateAsync(officeForUpdateDTO);
         if (!validationResult.IsValid)
@@ -145,7 +141,7 @@ public class OfficeService : IOfficeService
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
         {
-            return new ResponseMessage("No Office found!", 404);
+            return new ResponseMessage<OfficeInfoDTO>("No Office found!", 404);
         }
 
         OfficeMapper.UpdateOfficeFromOfficeForUpdateDTO(officeForUpdateDTO, office);
@@ -154,8 +150,9 @@ public class OfficeService : IOfficeService
         await _repositoryManager.SingleExecution();
         var officeUpdatedEvent = OfficeMapper.OfficeToOfficeUpdatedEvent(office);
         await _publishEndpoint.Publish(officeUpdatedEvent);
+        var officeInfoDTO = OfficeMapper.OfficeToOfficeInfoDTO(office); 
 
-        return new ResponseMessage();
+        return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
     public async Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(string officeId)

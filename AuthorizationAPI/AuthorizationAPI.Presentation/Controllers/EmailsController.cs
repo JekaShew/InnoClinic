@@ -21,7 +21,7 @@ public class EmailsController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost("{userId}/sendfromdoctoremail")]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -37,7 +37,7 @@ public class EmailsController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Created();
+        return Ok();
     }
 
     /// <summary>
@@ -45,7 +45,7 @@ public class EmailsController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost("{userId}/sendfromadministratoremail")]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -61,7 +61,7 @@ public class EmailsController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Created();
+        return Ok();
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class EmailsController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost("{userId:guid}/sendfromnoreplyemail")]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -85,6 +85,6 @@ public class EmailsController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Created();
+        return Ok();
     }
 }

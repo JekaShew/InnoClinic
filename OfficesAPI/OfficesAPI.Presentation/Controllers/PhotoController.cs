@@ -22,7 +22,7 @@ public class PhotoController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(typeof(string), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -38,7 +38,7 @@ public class PhotoController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Created();
+        return CreatedAtAction(nameof(GetPhotoById), new { photoId = result.Value }, result.Value);
     }
 
     /// <summary>

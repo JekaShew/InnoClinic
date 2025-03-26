@@ -5,7 +5,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5000
     image: authorizationapi
-    container_name: AuthorizationAPI
+    container_name: AuthorizationAPI-microsrervice
     build:
       context: .
       args:
@@ -32,7 +32,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5001
     image: officesapi
-    container_name: OfficesAPI
+    container_name: OfficesAPI-microsrervice
     build:
       context: .
       args:
@@ -58,7 +58,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5002
     image: profilesapi
-    container_name: ProfilesAPI
+    container_name: ProfilesAPI-microsrervice
     build:
       context: .
       args:
@@ -85,7 +85,7 @@ services:
 
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
-    container_name: mssql-server
+    container_name: mssql-server-database
     environment: 
       - ACCEPT_EULA=Y
       - SA_USERNAME=sa
@@ -114,6 +114,7 @@ services:
   
   smtp4dev:
     image: rnwood/smtp4dev:v3
+    container_name: smtp4dev-email-server
     restart: always
     ports:
       # Change the number before : to the port the web interface should be accessible on
@@ -137,6 +138,7 @@ services:
 
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.10.2"
+    container_name: elasticsearch-logs
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -163,6 +165,7 @@ services:
 
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.2
+    container_name: kibana-logsearch
     depends_on:
       elasticsearch:
         condition: service_healthy
@@ -181,7 +184,7 @@ services:
 
   seqlogs:
     image: datalust/seq:latest
-    container_name: seq
+    container_name: seq-logs
     environment:
       - ACCEPT_EULA=Y
     ports:
@@ -192,7 +195,7 @@ services:
 
   rabbit-mq:
     image: rabbitmq:management
-    container_name: rabbitmq
+    container_name: rabbitmq-messagebroker
     ports:
       - '15672:15672'
       - '5672:5672'

@@ -8,7 +8,7 @@ public interface IAuthorizationService
 {
     public Task<ResponseMessage<TokensDTO>> SignIn(LoginInfoDTO loginInfoDTO);
     public Task<ResponseMessage> SignOut(Guid rTokenId);
-    public Task<ResponseMessage> SignUp(RegistrationInfoDTO registrationInfoDTO);
+    public Task<ResponseMessage<Guid>> SignUp(RegistrationInfoDTO registrationInfoDTO);
     public Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId);
     public Task<ResponseMessage> ResendEmailVerification(LoginInfoDTO loginInfoDTO);
 }

@@ -27,7 +27,7 @@ public class UserStatusService : IUserStatusService
         _userStatusForCreateValidator = userStatusForCreateValidator;
         _userStatusForUpdateValidator = userStatusForUpdateValidator;
     }
-    public async Task<ResponseMessage> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
+    public async Task<ResponseMessage<Guid>> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
     {
         var validationResult = await _userStatusForCreateValidator.ValidateAsync(userStatusForCreateDTO);
         if (!validationResult.IsValid)
@@ -36,10 +36,10 @@ public class UserStatusService : IUserStatusService
         }
 
         var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
-        await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
+        var userStatusId = await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
         await _repositoryManager.CommitAsync();
         
-        return new ResponseMessage();
+        return new ResponseMessage<Guid>(userStatusId);
     }
 
     public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)
@@ -60,12 +60,7 @@ public class UserStatusService : IUserStatusService
 
     public async Task<ResponseMessage<IEnumerable<UserStatusInfoDTO>>> GetAllUserStatusesAsync()
     {
-        var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync();
-        if (!userStatuses.Any())
-        {
-            return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>("No UserStatuses Found in Database!", 404);
-        }
-            
+        var userStatuses = await _repositoryManager.UserStatus.GetAllUserStatusesAsync();            
         var userStatusInfoDTOs = userStatuses.Select(us => UserStatusMapper.UserStatusToUserStatusInfoDTO(us));
 
         return new ResponseMessage<IEnumerable<UserStatusInfoDTO>>(userStatusInfoDTOs);
@@ -84,7 +79,7 @@ public class UserStatusService : IUserStatusService
         return new ResponseMessage<UserStatusInfoDTO>(userStatusInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO)
+    public async Task<ResponseMessage<UserStatusInfoDTO>> UpdateUserStatusAsync(Guid userStatusId, UserStatusForUpdateDTO userStatusForUpdateDTO)
     {
         var validationResult = await _userStatusForUpdateValidator.ValidateAsync(userStatusForUpdateDTO);
         if (!validationResult.IsValid)
@@ -95,12 +90,13 @@ public class UserStatusService : IUserStatusService
         var userStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(userStatusId);
         if (userStatus is null)
         {
-            return new ResponseMessage("User Status not Found!", 404);
+            return new ResponseMessage<UserStatusInfoDTO>("User Status not Found!", 404);
         }
 
         UserStatusMapper.UpdateUserStatusFromUserStatusForUpdateDTO(userStatusForUpdateDTO, userStatus);
         await _repositoryManager.CommitAsync();
+        var userStatusInfoDTO = UserStatusMapper.UserStatusToUserStatusInfoDTO(userStatus);
 
-        return new ResponseMessage();
+        return new ResponseMessage<UserStatusInfoDTO>(userStatusInfoDTO);
     }
 }

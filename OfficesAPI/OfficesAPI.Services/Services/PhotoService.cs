@@ -16,12 +16,12 @@ public class PhotoService : IPhotoService
     {
         _repositoryManager = repositoryManager;
     }
-    public async Task<ResponseMessage> AddPhototoOffice(string officeId, IFormFile formFile)
+    public async Task<ResponseMessage<string>> AddPhototoOffice(string officeId, IFormFile formFile)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if(office is null)
         {
-            return new ResponseMessage("No Office found!", 404);
+            return new ResponseMessage<string>("No Office found!", 404);
         }
         var photo = new Photo();
 
@@ -37,8 +37,9 @@ public class PhotoService : IPhotoService
         _repositoryManager.Office.UpdateOffice(office);
 
         await _repositoryManager.TransactionExecution();
+        var photoId = photo.Id;
 
-        return new ResponseMessage();
+        return new ResponseMessage<string>(photoId);
     }
     public async Task<ResponseMessage> DeleteOfficePhotoById(string officeId,string photoId)
     {
@@ -65,11 +66,6 @@ public class PhotoService : IPhotoService
     public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotos()
     {
         var photos = await _repositoryManager.Photo.GetAllPhotos();
-        if(photos.Count == 0)
-        {
-            return new ResponseMessage<IEnumerable<PhotoInfoDTO>>("No Photos Found in Database!", 404);
-        }
-
         var photoDTOs = photos.Select(p => PhotoMapper.PhotoToPhotoInfoDTO(p));
 
         return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(photoDTOs);
@@ -78,11 +74,6 @@ public class PhotoService : IPhotoService
     public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(string officeId)
     {
         var photos = await _repositoryManager.Photo.GetPhotoListByFilter(x => x.OfficeId.Equals(officeId));
-        if(photos.Count == 0)
-        {
-            return new ResponseMessage<IEnumerable<PhotoInfoDTO>>("No Photos found!", 404);
-        }
-
         var photoDTOs = photos.Select(p => PhotoMapper.PhotoToPhotoInfoDTO(p));
 
         return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(photoDTOs);

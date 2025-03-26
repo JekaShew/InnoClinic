@@ -10,6 +10,7 @@ namespace AuthorizationAPI.Presentation.Controllers;
 public class UserStatusesController : ControllerBase
 {
     private readonly IUserStatusService _userStatusService;
+
     public UserStatusesController(IUserStatusService userStatusService)
     {
         _userStatusService = userStatusService;
@@ -66,7 +67,7 @@ public class UserStatusesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(201)]
+    [ProducesResponseType(typeof(Guid), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -82,7 +83,7 @@ public class UserStatusesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Created();
+        return CreatedAtAction(nameof(GetUserStatusById), new { userStatusId = result.Value }, result.Value);
     }
 
     /// <summary>
@@ -90,7 +91,7 @@ public class UserStatusesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("/{userStatusId:guid}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(UserStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -106,7 +107,7 @@ public class UserStatusesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>

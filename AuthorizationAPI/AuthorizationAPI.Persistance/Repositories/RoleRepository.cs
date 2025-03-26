@@ -30,9 +30,10 @@ public class RoleRepository : IRoleRepository
         return await _authDBContext.Roles.AsNoTracking().Where(expression).ToListAsync();
     }
      
-    public async Task CreateRoleAsync(Role role)
+    public async Task<Guid> CreateRoleAsync(Role role)
     {
         await _authDBContext.Roles.AddAsync(role);
+        return role.Id;
     }
 
     public void DeleteRole(Role role)
@@ -40,7 +41,7 @@ public class RoleRepository : IRoleRepository
         _authDBContext.Roles.Remove(role);
     }
 
-    public async Task UpdateRoleAsync(Role updatedRole)
+    public async Task<Role> UpdateRoleAsync(Role updatedRole)
     {
         var role = await _authDBContext.Roles.FindAsync(updatedRole.Id);
         if(role is not null)
@@ -49,5 +50,7 @@ public class RoleRepository : IRoleRepository
         }
         
         _authDBContext.Roles.Update(updatedRole);
+
+        return updatedRole;
     }
 }
