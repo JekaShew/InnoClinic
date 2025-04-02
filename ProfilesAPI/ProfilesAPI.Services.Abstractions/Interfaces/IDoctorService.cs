@@ -5,7 +5,7 @@ namespace ProfilesAPI.Services.Abstractions.Interfaces;
 
 public interface IDoctorService
 {
-    public Task<ResponseMessage<Guid>> CreateDoctorAsync(DoctorForCreateDTO doctorForCreateDTO);
+    public Task<ResponseMessage<DoctorInfoDTO>> CreateDoctorAsync(DoctorForCreateDTO doctorForCreateDTO);
     public Task<ResponseMessage<DoctorInfoDTO>> UpdateDoctorAsync(Guid doctorId, DoctorForUpdateDTO doctorForUpdateDTO);
     public Task<ResponseMessage> UpdateDoctorSpecializationsAsync(Guid doctorId, IEnumerable<DoctorSpecializationForUpdateDTO> doctorSpecializationForUpdateDTOs);
     public Task<ResponseMessage> DeleteDoctorByIdAsync(Guid doctorId);

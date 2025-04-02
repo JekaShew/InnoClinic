@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
+using OfficesAPI.Shared.DTOs.PhotoDTOs;
 using Serilog;
 
 
@@ -13,14 +14,12 @@ namespace OfficesAPI.Presentation.Controllers;
 public class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
-    private readonly ILogger _logger;
 
     public OfficesController(
             IOfficeService officeService,
             ILogger logger)
     {
         _officeService = officeService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -72,7 +71,7 @@ public class OfficesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(string), 201)]
+    [ProducesResponseType(typeof(OfficeInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -90,7 +89,7 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return CreatedAtAction(nameof(GetOfficeByid), new { officeId = result.Value }, result.Value);
+        return CreatedAtAction(nameof(GetOfficeByid), new { officeId = result.Value.Id }, result.Value);
     }
 
     /// <summary>

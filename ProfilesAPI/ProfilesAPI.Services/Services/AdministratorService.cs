@@ -41,7 +41,7 @@ public class AdministratorService : IAdministratorService
         _administratorParametersValidator = administratorParametersValidator;
     }
 
-    public async Task<ResponseMessage<Guid>> CreateAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO)
+    public async Task<ResponseMessage<AdministratorInfoDTO>> CreateAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO)
     {
         var validationResult = await _administratorForCreateValidator.ValidateAsync(administratorForCreateDTO);
         if (!validationResult.IsValid)
@@ -52,13 +52,13 @@ public class AdministratorService : IAdministratorService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null)
         {
-            return new ResponseMessage<Guid>("Forbidden Action! You are UnAuthorizaed!", 403);
+            return new ResponseMessage<AdministratorInfoDTO>("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
         var isProfileExists = await _repositoryManager.Administrator.IsProfileExists(currentUserInfo.Id);
         if (isProfileExists)
         {
-            return new ResponseMessage<Guid>("Error! This profile already exists!", 400);
+            return new ResponseMessage<AdministratorInfoDTO>("Error! This profile already exists!", 400);
         }
 
         var administrator = _mapper.Map<Administrator>(administratorForCreateDTO);
@@ -71,9 +71,10 @@ public class AdministratorService : IAdministratorService
         }
         
         administrator.UserId = currentUserInfo.Id;
-        var administratorId = await _repositoryManager.Administrator.CreateAsync(administrator);
+        await _repositoryManager.Administrator.CreateAsync(administrator);
+        var administratorInfoDTO = _mapper.Map<AdministratorInfoDTO>(administrator);
 
-        return new ResponseMessage<Guid>(administratorId);
+        return new ResponseMessage<AdministratorInfoDTO>(administratorInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteAdministratorByIdAsync(Guid administratorId)

@@ -67,7 +67,7 @@ public class AuthorizationController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost("signup")]
-    [ProducesResponseType(typeof(Guid), 201)]
+    [ProducesResponseType(typeof(UserInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -82,7 +82,7 @@ public class AuthorizationController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return CreatedAtAction("GetUserById", "UsersController", new { userId = result.Value }, result.Value);
+        return CreatedAtAction("GetUserById", "UsersController", new { userId = result.Value.Id }, result.Value);
     }
 
     /// <summary>

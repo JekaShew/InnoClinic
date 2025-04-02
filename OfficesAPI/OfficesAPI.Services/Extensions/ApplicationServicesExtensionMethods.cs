@@ -1,5 +1,4 @@
-﻿using CommonLibrary.RabbitMQEvents;
-using FluentValidation;
+﻿using FluentValidation;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -45,16 +44,10 @@ public static class ApplicationServicesExtensionMethods
             {
                 configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
                 {
-                    hostConfigurator.Username("guest");
-                    hostConfigurator.Password("guest");
+                    hostConfigurator.Username(configuration["MessageBroker:Username"]);
+                    hostConfigurator.Password(configuration["MessageBroker:Password"]);
                 });
-                //configurator.Host(new Uri(configuration["MessageBroker:Host"]), hostConfigurator =>
-                //{
-                   
-                //    //hostConfigurator.Username(configuration["MessageBroker:Username"]);
-                //    //hostConfigurator.Password(configuration["MessageBroker:Password"]);
-                //});
-
+                
                 configurator.ConfigureEndpoints(context);
             });
         });

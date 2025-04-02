@@ -5,7 +5,7 @@ namespace ProfilesAPI.Services.Abstractions.Interfaces;
 
 public interface IAdministratorService
 {
-    public Task<ResponseMessage<Guid>> CreateAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO);
+    public Task<ResponseMessage<AdministratorInfoDTO>> CreateAdministratorAsync(AdministratorForCreateDTO administratorForCreateDTO);
     public Task<ResponseMessage<AdministratorInfoDTO>> UpdateAdministratorAsync(Guid administratorId, AdministratorForUpdateDTO administratorForUpdateDTO);
     public Task<ResponseMessage> DeleteAdministratorByIdAsync(Guid administratorId);
     public Task<ResponseMessage<AdministratorInfoDTO>> GetAdministratorByIdAsync(Guid administratorId);

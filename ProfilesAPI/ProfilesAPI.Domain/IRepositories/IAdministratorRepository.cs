@@ -5,7 +5,7 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IAdministratorRepository
 {
-    public Task<Guid> CreateAsync(Administrator administrator);
+    public Task CreateAsync(Administrator administrator);
     public Task UpdateAsync(Guid administratorId, Administrator updatedAdministrator);
     public Task DeleteByIdAsync(Guid administratorId);
     public Task<Administrator> GetByIdAsync(Guid administratorId);

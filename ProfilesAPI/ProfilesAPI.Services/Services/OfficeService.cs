@@ -14,17 +14,14 @@ namespace ProfilesAPI.Services.Services;
 public class OfficeService : IOfficeService
 {
     private readonly ICommonService _commonService;
-    private readonly IBus _bus;
-    //private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IPublishEndpoint _publishEndpoint;
 
     public OfficeService(
         ICommonService commonService,
-        //IPublishEndpoint publishEndpoint,
-        IBus bus)
+        IPublishEndpoint publishEndpoint)
     {
         _commonService = commonService;
-        //_publishEndpoint = publishEndpoint;
-        _bus = bus;
+        _publishEndpoint = publishEndpoint;
     }
 
     public async Task<ResponseMessage> RequestCheckOfficeConsistancyAsync()
@@ -41,19 +38,8 @@ public class OfficeService : IOfficeService
             DateTime = DateTime.UtcNow,
         };
 
-        await _bus.Publish(officeRequestCheckConsistancyEvent);
-        //await _publishEndpoint.Publish(officeRequestCheckConsistancyEvent);
+        await _publishEndpoint.Publish(officeRequestCheckConsistancyEvent);
         
         return new ResponseMessage();
     }
-
-    //public Task<ResponseMessage> GetAllOfficesAsync()
-    //{
-    //    throw new NotImplementedException();
-    //}
-
-    //public Task<ResponseMessage> GetOfficeByIdAsync()
-    //{
-    //    throw new NotImplementedException();
-    //}
 }

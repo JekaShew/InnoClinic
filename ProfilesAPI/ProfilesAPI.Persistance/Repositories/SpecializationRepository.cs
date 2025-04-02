@@ -14,10 +14,9 @@ public class SpecializationRepository : ISpecializationRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task<Guid> CreateAsync(Specialization specialization)
+    public async Task CreateAsync(Specialization specialization)
     {
         var query = "Insert into Specializations (Id, Title, Description) " +
-            "OUTPUT Inserted.ID " +
             "Values (@Id, @Title, @Description); ";
 
         var parameters = new DynamicParameters();
@@ -27,9 +26,7 @@ public class SpecializationRepository : ISpecializationRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var specializationId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
-           
-            return specializationId;
+             await connection.ExecuteAsync(query, parameters);
         }
     }
 

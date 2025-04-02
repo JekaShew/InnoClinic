@@ -69,7 +69,7 @@ public class SpecializationsController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), 201)]
+    [ProducesResponseType(typeof(SpecializationInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -85,7 +85,7 @@ public class SpecializationsController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return CreatedAtAction(nameof(GetSpecializationById), new { specializationId = result.Value }, result.Value);
+        return CreatedAtAction(nameof(GetSpecializationById), new { specializationId = result.Value.Id }, result.Value);
     }
 
     /// <summary>

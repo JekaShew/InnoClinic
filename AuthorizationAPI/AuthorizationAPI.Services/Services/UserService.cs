@@ -10,8 +10,6 @@ using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
-using Newtonsoft.Json.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AuthorizationAPI.Services.Services;
 

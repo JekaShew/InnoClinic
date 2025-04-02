@@ -42,7 +42,7 @@ public class PatientService : IPatientService
         _patientParametersValidator = patientParametersValidator;
     }
 
-    public async Task<ResponseMessage<Guid>> CreatePatientAsync(PatientForCreateDTO patientForCreateDTO)
+    public async Task<ResponseMessage<PatientInfoDTO>> CreatePatientAsync(PatientForCreateDTO patientForCreateDTO)
     {
         var validationResult = await _patientForCreateValidator.ValidateAsync(patientForCreateDTO);
         if (!validationResult.IsValid)
@@ -53,13 +53,13 @@ public class PatientService : IPatientService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if(currentUserInfo is null)
         {
-            return new ResponseMessage<Guid>("Forbidden Action! You are UnAuthorizaed!", 403);
+            return new ResponseMessage<PatientInfoDTO>("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
         var isProfileExists = await _repositoryManager.Patient.IsProfileExists(currentUserInfo.Id);
         if (isProfileExists)
         {
-            return new ResponseMessage<Guid>("Error! This profile already exists!", 400);
+            return new ResponseMessage<PatientInfoDTO>("Error! This profile already exists!", 400);
         }
 
         var patient = _mapper.Map<Patient>(patientForCreateDTO);
@@ -72,9 +72,10 @@ public class PatientService : IPatientService
         }
        
         patient.UserId = currentUserInfo.Id;
-        var patientId = await _repositoryManager.Patient.CreateAsync(patient);
+        await _repositoryManager.Patient.CreateAsync(patient);
+        var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
 
-        return new ResponseMessage<Guid>(patientId);
+        return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
     }
 
     public async Task<ResponseMessage> DeletePatientByIdAsync(Guid patientId)

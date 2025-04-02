@@ -5,7 +5,7 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IReceptionistRepository
 {
-    public Task<Guid> CreateAsync(Receptionist receptionist);
+    public Task CreateAsync(Receptionist receptionist);
     public Task UpdateAsync(Guid receptionistId, Receptionist updatedReceptionist);
     public Task DeleteByIdAsync(Guid receptionistId);
     public Task<Receptionist> GetByIdAsync(Guid receptionistId);

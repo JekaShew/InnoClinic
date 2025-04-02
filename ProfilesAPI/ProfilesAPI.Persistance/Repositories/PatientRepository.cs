@@ -18,13 +18,12 @@ public class PatientRepository : IPatientRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task<Guid> CreateAsync(Patient patient)
+    public async Task CreateAsync(Patient patient)
     {
         var query = 
             "Insert into Patients " +
                 "(Id, UserId, FirstName, LastName," +
                 " SecondName, Address, Phone, BirthDate, Photo, PhotoId) " +
-            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @Phone, @BirthDate, @Photo, @PhotoId) ";
 
@@ -42,9 +41,7 @@ public class PatientRepository : IPatientRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var patientId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
-
-            return patientId;
+            await connection.ExecuteAsync(query, parameters);
         }
     }
 

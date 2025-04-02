@@ -17,13 +17,12 @@ public class DoctorRepository : IDoctorRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task<Guid> CreateAsync(Doctor doctor)
+    public async Task CreateAsync(Doctor doctor)
     {
         var queryDoctor =
             "Insert into Doctors " +
                 "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
                 " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId)" +
-            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId)";
 
@@ -63,13 +62,11 @@ public class DoctorRepository : IDoctorRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var doctorId = await connection.ExecuteScalarAsync<Guid>(queryDoctor, doctorParameters);
+            connection.ExecuteAsync(queryDoctor, doctorParameters);
             foreach (var doctorSpecializationsParameters in doctorSpecializationsParametersList)
             {
                 await connection.ExecuteAsync(queryDoctorSpecializations, doctorSpecializationsParameters);    
             }
-
-            return doctorId;
         }
     }
 

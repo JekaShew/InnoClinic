@@ -9,15 +9,15 @@ namespace OfficesAPI.Services.Services.OfficesConsumers
     public class OfficeCheckConsistancyConsumer : IConsumer<OfficeRequestCheckConsistancyEvent>
     {
         private readonly IRepositoryManager _repositoryManager;
-        private readonly IBus _bus;
+        private readonly IPublishEndpoint _publishEndpoint;
         private readonly ILogger _logger;
         public OfficeCheckConsistancyConsumer(
             IRepositoryManager repositoryManager,
-            IBus bus,
+            IPublishEndpoint publishEndpoint,
             ILogger logger)
         {
             _repositoryManager = repositoryManager;
-            _bus = bus;
+            _publishEndpoint = publishEndpoint;
             _logger = logger;
         }
 
@@ -28,7 +28,7 @@ namespace OfficesAPI.Services.Services.OfficesConsumers
             foreach (var consistantOffice in consistantOffices)
             {
                 var officeCheckConsistancyEvent = OfficeMapper.OfficeToOfficeCheckConsistancyEvent(consistantOffice);
-                await _bus.Publish(officeCheckConsistancyEvent);
+                await _publishEndpoint.Publish(officeCheckConsistancyEvent);
             }
         }
     }

@@ -30,10 +30,10 @@ public class RoleRepository : IRoleRepository
         return await _authDBContext.Roles.AsNoTracking().Where(expression).ToListAsync();
     }
      
-    public async Task<Guid> CreateRoleAsync(Role role)
+    public async Task<Role> CreateRoleAsync(Role role)
     {
         await _authDBContext.Roles.AddAsync(role);
-        return role.Id;
+        return role;
     }
 
     public void DeleteRole(Role role)

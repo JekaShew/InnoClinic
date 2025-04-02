@@ -27,7 +27,7 @@ public class UserStatusService : IUserStatusService
         _userStatusForCreateValidator = userStatusForCreateValidator;
         _userStatusForUpdateValidator = userStatusForUpdateValidator;
     }
-    public async Task<ResponseMessage<Guid>> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
+    public async Task<ResponseMessage<UserStatusInfoDTO>> CreateUserStatusAsync(UserStatusForCreateDTO userStatusForCreateDTO)
     {
         var validationResult = await _userStatusForCreateValidator.ValidateAsync(userStatusForCreateDTO);
         if (!validationResult.IsValid)
@@ -36,10 +36,11 @@ public class UserStatusService : IUserStatusService
         }
 
         var userStatus = UserStatusMapper.UserStatusForCreateDTOToUserStatus(userStatusForCreateDTO);
-        var userStatusId = await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
+        await _repositoryManager.UserStatus.CreateUserStatusAsync(userStatus);
         await _repositoryManager.CommitAsync();
-        
-        return new ResponseMessage<Guid>(userStatusId);
+        var userStatusInfoDTO = UserStatusMapper.UserStatusToUserStatusInfoDTO(userStatus);
+
+        return new ResponseMessage<UserStatusInfoDTO>(userStatusInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteUserStatusByIdAsync(Guid userStatusId)

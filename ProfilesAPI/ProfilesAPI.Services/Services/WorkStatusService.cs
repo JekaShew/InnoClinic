@@ -28,7 +28,7 @@ public class WorkStatusService : IWorkStatusService
         _workStatusForUpdateValidator = workStatusForUpdateValidator;
     }
 
-    public async Task<ResponseMessage<Guid>> CreateWorkStatusAsync(WorkStatusForCreateDTO workStatusForCreateDTO)
+    public async Task<ResponseMessage<WorkStatusInfoDTO>> CreateWorkStatusAsync(WorkStatusForCreateDTO workStatusForCreateDTO)
     {
         var validationResult = await _workStatusForCreateValidator.ValidateAsync(workStatusForCreateDTO);
         if (!validationResult.IsValid)
@@ -37,9 +37,10 @@ public class WorkStatusService : IWorkStatusService
         }
 
         var workStatus = _mapper.Map<WorkStatus>(workStatusForCreateDTO);
-        var workStatusId = await _repositoryManager.WorkStatus.CreateAsync(workStatus);
+        await _repositoryManager.WorkStatus.CreateAsync(workStatus);
+        var workStatusInfoDTO = _mapper.Map<WorkStatusInfoDTO>(workStatus);
 
-        return new ResponseMessage<Guid>(workStatusId);
+        return new ResponseMessage<WorkStatusInfoDTO>(workStatusInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteWorkStatusByIdAsync(Guid workStatusId)

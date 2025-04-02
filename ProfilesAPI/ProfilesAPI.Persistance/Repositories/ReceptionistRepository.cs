@@ -20,13 +20,12 @@ public class ReceptionistRepository : IReceptionistRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task<Guid> CreateAsync(Receptionist receptionist)
+    public async Task CreateAsync(Receptionist receptionist)
     {
         var query =
             "Insert into Receptionists " +
                 "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName, " +
                 "SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
-            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
@@ -48,9 +47,7 @@ public class ReceptionistRepository : IReceptionistRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var receptionistId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
-            
-            return receptionistId;
+            await connection.ExecuteAsync(query, parameters);   
         }
     }
 

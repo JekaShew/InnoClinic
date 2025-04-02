@@ -4,7 +4,7 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IWorkStatusRepository
 {
-    public Task<Guid> CreateAsync(WorkStatus workStatus);
+    public Task CreateAsync(WorkStatus workStatus);
     public Task UpdateAsync(Guid workStatusId, WorkStatus updatedWorkStatus);
     public Task DeleteByIdAsync(Guid workStatusId);
     public Task<WorkStatus> GetByIdAsync(Guid workStatusId);

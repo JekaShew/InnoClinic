@@ -67,7 +67,7 @@ public class UserStatusesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), 201)]
+    [ProducesResponseType(typeof(UserStatusInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -82,8 +82,8 @@ public class UserStatusesController : ControllerBase
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
-        return CreatedAtAction(nameof(GetUserStatusById), new { userStatusId = result.Value }, result.Value);
+
+        return CreatedAtAction(nameof(GetUserStatusById), new { userStatusId = result.Value.Id }, result.Value);
     }
 
     /// <summary>

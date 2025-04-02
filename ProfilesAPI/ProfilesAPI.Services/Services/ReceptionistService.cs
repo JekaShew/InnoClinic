@@ -41,7 +41,7 @@ public class ReceptionistService : IReceptionistService
         _receptionistParametersValidator = receptionistParametersValidator;
     }
 
-    public async Task<ResponseMessage<Guid>> CreateReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO)
+    public async Task<ResponseMessage<ReceptionistInfoDTO>> CreateReceptionistAsync(ReceptionistForCreateDTO receptionistForCreateDTO)
     {
         var validationResult = await _receptionistForCreateValidator.ValidateAsync(receptionistForCreateDTO);
         if (!validationResult.IsValid)
@@ -52,13 +52,13 @@ public class ReceptionistService : IReceptionistService
         var currentUserInfo = _commonService.GetCurrentUserInfo();
         if (currentUserInfo is null)
         {
-            return new ResponseMessage<Guid>("Forbidden Action! You are UnAuthorizaed!", 403);
+            return new ResponseMessage<ReceptionistInfoDTO>("Forbidden Action! You are UnAuthorizaed!", 403);
         }
 
         var isProfileExists = await _repositoryManager.Receptionist.IsProfileExists(currentUserInfo.Id);
         if (isProfileExists)
         {
-            return new ResponseMessage<Guid>("Error! This profile already exists!", 400);
+            return new ResponseMessage<ReceptionistInfoDTO>("Error! This profile already exists!", 400);
         }
 
         var receptionist = _mapper.Map<Receptionist>(receptionistForCreateDTO);
@@ -71,9 +71,10 @@ public class ReceptionistService : IReceptionistService
         }
        
         receptionist.UserId = currentUserInfo.Id;
-        var receptionistId = await _repositoryManager.Receptionist.CreateAsync(receptionist);
+        await _repositoryManager.Receptionist.CreateAsync(receptionist);
+        var receptionistInfoDTO = _mapper.Map<ReceptionistInfoDTO>(receptionist);
 
-        return new ResponseMessage<Guid>(receptionistId);
+        return new ResponseMessage<ReceptionistInfoDTO>(receptionistInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteReceptionistByIdAsync(Guid receptionistId)

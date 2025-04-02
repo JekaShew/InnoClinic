@@ -28,7 +28,7 @@ public class SpecializationService : ISpecializationService
         _specializationForUpdateValidator = specializationForUpdateValidator;
     }
 
-    public async Task<ResponseMessage<Guid>> CreateSpecializationAsync(SpecializationForCreateDTO specializationForCreateDTO)
+    public async Task<ResponseMessage<SpecializationInfoDTO>> CreateSpecializationAsync(SpecializationForCreateDTO specializationForCreateDTO)
     {
         var validationResult = await _specializationForCreateValidator.ValidateAsync(specializationForCreateDTO);
         if (!validationResult.IsValid)
@@ -37,9 +37,10 @@ public class SpecializationService : ISpecializationService
         }
 
         var specialization = _mapper.Map<Specialization>(specializationForCreateDTO);
-        var specializationId = await _repositoryManager.Specialization.CreateAsync(specialization);
+        await _repositoryManager.Specialization.CreateAsync(specialization);
+        var specializationInfoDTO = _mapper.Map<SpecializationInfoDTO>(specialization);
 
-        return new ResponseMessage<Guid>(specializationId);
+        return new ResponseMessage<SpecializationInfoDTO>(specializationInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteSpecializationByIdAsync(Guid specializationId)

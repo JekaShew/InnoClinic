@@ -5,7 +5,7 @@ namespace AuthorizationAPI.Domain.IRepositories;
 
 public interface IUserStatusRepository
 {
-    public Task<Guid> CreateUserStatusAsync(UserStatus userStatus);
+    public Task<UserStatus> CreateUserStatusAsync(UserStatus userStatus);
     public Task<IEnumerable<UserStatus>> GetAllUserStatusesAsync();
     public Task<UserStatus?> GetUserStatusByIdAsync(Guid userStatusId);
     public Task<UserStatus> UpdateUserStatusAsync(UserStatus userStatus);

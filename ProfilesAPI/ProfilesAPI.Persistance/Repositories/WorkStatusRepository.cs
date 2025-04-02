@@ -14,10 +14,9 @@ public class WorkStatusRepository : IWorkStatusRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task<Guid> CreateAsync(WorkStatus workStatus)
+    public async Task CreateAsync(WorkStatus workStatus)
     {
         var query = "Insert into WorkStatuses (Id, Title, Description)" +
-            "OUTPUT Inserted.ID " +
             "Values (@Id, @Title, @Description); ";
 
         var parameters = new DynamicParameters();
@@ -27,9 +26,7 @@ public class WorkStatusRepository : IWorkStatusRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var workStatusId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
-
-            return workStatusId;
+            await connection.ExecuteAsync(query, parameters);
         }
     }
 

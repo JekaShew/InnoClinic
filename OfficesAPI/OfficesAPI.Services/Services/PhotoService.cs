@@ -16,12 +16,12 @@ public class PhotoService : IPhotoService
     {
         _repositoryManager = repositoryManager;
     }
-    public async Task<ResponseMessage<string>> AddPhototoOffice(string officeId, IFormFile formFile)
+    public async Task<ResponseMessage<PhotoInfoDTO>> AddPhototoOffice(string officeId, IFormFile formFile)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if(office is null)
         {
-            return new ResponseMessage<string>("No Office found!", 404);
+            return new ResponseMessage<PhotoInfoDTO>("No Office found!", 404);
         }
         var photo = new Photo();
 
@@ -37,9 +37,9 @@ public class PhotoService : IPhotoService
         _repositoryManager.Office.UpdateOffice(office);
 
         await _repositoryManager.TransactionExecution();
-        var photoId = photo.Id;
+        var photoInfoDTO = PhotoMapper.PhotoToPhotoInfoDTO(photo);
 
-        return new ResponseMessage<string>(photoId);
+        return new ResponseMessage<PhotoInfoDTO>(photoInfoDTO);
     }
     public async Task<ResponseMessage> DeleteOfficePhotoById(string officeId,string photoId)
     {

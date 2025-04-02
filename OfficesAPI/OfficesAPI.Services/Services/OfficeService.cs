@@ -20,23 +20,21 @@ public class OfficeService : IOfficeService
     private readonly IValidator<OfficeForUpdateDTO> _officeForUpdateValidator;
     private readonly IRepositoryManager _repositoryManager;
     private readonly IPublishEndpoint _publishEndpoint;
-    private readonly IBus _bus;
 
     public OfficeService(
         IValidator<OfficeForCreateDTO> officeForCreateValidator,
         IValidator<OfficeForUpdateDTO> officeForUpdateValidator,
         IRepositoryManager repositoryManager,
-        IPublishEndpoint publishEndpoint,
-        IBus bus)
+        IPublishEndpoint publishEndpoint
+        )
     {
         _officeForCreateValidator = officeForCreateValidator;
         _officeForUpdateValidator = officeForUpdateValidator;
         _repositoryManager = repositoryManager;
         _publishEndpoint = publishEndpoint;
-        _bus = bus;
     }
 
-    public async Task<ResponseMessage<string>> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files)
+    public async Task<ResponseMessage<OfficeInfoDTO>> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files)
     {
         var validationResult = await _officeForCreateValidator.ValidateAsync(officeForCreateDTO);
         if (!validationResult.IsValid)
@@ -44,7 +42,6 @@ public class OfficeService : IOfficeService
             throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
         }
 
-        var officeCreatedEvent = new OfficeCreatedEvent();
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
         office.Id = ObjectId.GenerateNewId().ToString();
         var officeId = office.Id;
@@ -66,26 +63,17 @@ public class OfficeService : IOfficeService
                 _repositoryManager.Photo.AddPhoto(photo);
                 photoList.Add(photo);
             }
-
             office.Photos = photoList;
-            _repositoryManager.Office.CreateOffice(office);
-            await _repositoryManager.TransactionExecution();
-
-            officeCreatedEvent = OfficeMapper.OfficeToOfficeCreatedEvent(office);
-
-            await _bus.Publish(officeCreatedEvent);
-            await _publishEndpoint.Publish(officeCreatedEvent);
-
-            return new ResponseMessage<string>(officeId);
         }
 
         _repositoryManager.Office.CreateOffice(office);
-        await _repositoryManager.SingleExecution();
-        officeCreatedEvent = OfficeMapper.OfficeToOfficeCreatedEvent(office);
-        await _bus.Publish(officeCreatedEvent);
-        await _publishEndpoint.Publish(officeCreatedEvent);
+        await _repositoryManager.TransactionExecution(); 
 
-        return new ResponseMessage<string>(officeId);
+        var officeCreatedEvent = OfficeMapper.OfficeToOfficeCreatedEvent(office);
+        await _publishEndpoint.Publish(officeCreatedEvent);
+        var officeInfoDTO = OfficeMapper.OfficeToOfficeInfoDTO(office);
+
+        return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId)

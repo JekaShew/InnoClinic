@@ -94,7 +94,7 @@ public class AuthorizationService : IAuthorizationService
         return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage<Guid>> SignUp(RegistrationInfoDTO registrationInfoDTO)
+    public async Task<ResponseMessage<UserInfoDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
     {
         var validationResult = await _registrationInfoValidator.ValidateAsync(registrationInfoDTO);
         if (!validationResult.IsValid)
@@ -106,20 +106,20 @@ public class AuthorizationService : IAuthorizationService
         var user = await _repositoryManager.User.GetUserByEmailAsync(registrationInfoDTO.Email);
         if(user is not null)
         {
-            return new ResponseMessage<Guid>("Server's Error Occured!", 500);
+            return new ResponseMessage<UserInfoDTO>("Server's Error Occured!", 500);
         }    
 
         // Create User 
         var defaultRole = await _repositoryManager.Role.GetRoleByIdAsync(DBConstants.PatientRoleId);
         if (defaultRole is null || defaultRole.Id.Equals(Guid.Empty))
         {
-            return new ResponseMessage<Guid>("Server's Error Occured! Check Initial Database Data!", 500);
+            return new ResponseMessage<UserInfoDTO>("Server's Error Occured! Check Initial Database Data!", 500);
         }
 
         var defaultUserStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(DBConstants.NonActivatedUserStatusId);
         if (defaultUserStatus is null || defaultUserStatus.Equals(Guid.Empty))
         {
-            return new ResponseMessage<Guid>("Server's Error Occured! Check Initial Database Data!", 500);
+            return new ResponseMessage<UserInfoDTO>("Server's Error Occured! Check Initial Database Data!", 500);
         }
 
         var securityStamp = await _commonService.GetHashString(registrationInfoDTO.SecretPhrase);
@@ -133,12 +133,12 @@ public class AuthorizationService : IAuthorizationService
         newUser.SecretPhraseHash = secretPhraseHash;
         newUser.PasswordHash = passwordHash;
 
-        var userId = await _repositoryManager.User.CreateUserAsync(newUser);
+        await _repositoryManager.User.CreateUserAsync(newUser);
         await _repositoryManager.CommitAsync();
-        
+        var userInfoDTO = UserMapper.UserToUserInfoDTO(newUser);
         await _emailService.SendVerificationLetterToEmail(registrationInfoDTO.Email);
 
-        return new ResponseMessage<Guid>(userId);
+        return new ResponseMessage<UserInfoDTO>(userInfoDTO);
     }
     
     public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)

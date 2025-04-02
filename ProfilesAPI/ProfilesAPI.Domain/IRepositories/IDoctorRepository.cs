@@ -6,7 +6,7 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IDoctorRepository
 {
-    public Task<Guid> CreateAsync(Doctor doctor);
+    public Task CreateAsync(Doctor doctor);
     public Task UpdateAsync(Guid doctorId, Doctor updatedDoctor);
     public Task DeleteByIdAsync(Guid doctorId);
     public Task<Doctor> GetByIdAsync(Guid doctorId);

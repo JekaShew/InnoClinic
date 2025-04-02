@@ -18,13 +18,12 @@ public class AdministratorRepository : IAdministratorRepository
         _profilesDBContext = profilesDBContext;
     }
 
-    public async Task<Guid> CreateAsync(Administrator administrator)
+    public async Task CreateAsync(Administrator administrator)
     {
         var query =
             "Insert into Administrators " +
                 "(Id, UserId, WorkStatusId, OfficeId, FirstName, LastName," +
                 " SecondName, Address, WorkEmail, Phone, BirthDate, CareerStartDate, Photo, PhotoId) " +
-            "OUTPUT Inserted.ID " +
             "Values (@Id, @UserId, @WorkStatusId, @OfficeId, @FirstName, @LastName, " +
                 "@SecondName, @Address, @WorkEmail, @Phone, @BirthDate, @CareerStartDate, @Photo, @PhotoId) ";
 
@@ -46,9 +45,7 @@ public class AdministratorRepository : IAdministratorRepository
 
         using (var connection = _profilesDBContext.Connection)
         {
-            var administratorId = await connection.ExecuteScalarAsync<Guid>(query, parameters);
-            
-            return administratorId;
+            await connection.ExecuteAsync(query, parameters);
         }
     }
 

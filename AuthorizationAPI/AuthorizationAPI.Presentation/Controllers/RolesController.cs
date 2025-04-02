@@ -66,7 +66,7 @@ public class RolesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), 201)]
+    [ProducesResponseType(typeof(RoleInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -82,7 +82,7 @@ public class RolesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
            
-        return CreatedAtAction(nameof(GetRoleById), new { roleId = result.Value }, result.Value);
+        return CreatedAtAction(nameof(GetRoleById), new { roleId = result.Value.Id }, result.Value);
     }
 
     /// <summary>

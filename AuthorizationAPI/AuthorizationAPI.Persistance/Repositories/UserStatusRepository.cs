@@ -35,11 +35,11 @@ public class UserStatusRepository : IUserStatusRepository
                 .ToListAsync();
     }
 
-    public async Task<Guid> CreateUserStatusAsync(UserStatus userStatus)
+    public async Task<UserStatus> CreateUserStatusAsync(UserStatus userStatus)
     {
         await _authDBContext.UserStatuses.AddAsync(userStatus);
         
-        return userStatus.Id;
+        return userStatus;
     }
 
     public void DeleteUserStatus(UserStatus userStatus)

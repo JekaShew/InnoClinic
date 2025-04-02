@@ -5,7 +5,7 @@ namespace AuthorizationAPI.Domain.IRepositories;
 
 public interface IRoleRepository
 {
-    public Task<Guid> CreateRoleAsync(Role role);
+    public Task<Role> CreateRoleAsync(Role role);
     public Task<IEnumerable<Role>> GetAllRolesAsync();
     public Task<Role?> GetRoleByIdAsync(Guid roleID);
     public Task<Role> UpdateRoleAsync(Role role);

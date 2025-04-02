@@ -2,6 +2,7 @@
 
 public class DoctorInfoDTO
 {
+    public Guid Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string? SecondName { get; set; }
@@ -14,5 +15,5 @@ public class DoctorInfoDTO
     public string? Photo { get; set; }
     public string? OfficeId { get; set; }
     public Guid? WorkStatusId { get; set; }
-    public ICollection<SpecializationsOfDoctorInfoDTO>? DoctorSpecializations { get; set; }
+    public ICollection<SpecializationOfDoctorInfoDTO>? DoctorSpecializations { get; set; }
 }

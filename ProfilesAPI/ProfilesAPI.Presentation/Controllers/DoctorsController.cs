@@ -66,7 +66,7 @@ public class DoctorsController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), 201)]
+    [ProducesResponseType(typeof(DoctorInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -82,7 +82,7 @@ public class DoctorsController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Value }, result.Value);
+        return CreatedAtAction(nameof(GetDoctorById), new { doctorId = result.Value.Id }, result.Value);
     }
 
     /// <summary>

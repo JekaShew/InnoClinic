@@ -50,11 +50,11 @@ public class UserRepository : IUserRepository
                 .ToListAsync();
     }
 
-    public async Task<Guid> CreateUserAsync(User user)
+    public async Task<User> CreateUserAsync(User user)
     {
         await _authDBContext.Users.AddAsync(user);
 
-        return user.Id;
+        return user;
     }
 
     public void DeleteUser(User user)

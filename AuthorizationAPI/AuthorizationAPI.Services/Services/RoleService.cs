@@ -25,7 +25,7 @@ public class RoleService : IRoleService
         _roleForUpdateValidator = roleForUpdateValidator;
         
     }
-    public async Task<ResponseMessage<Guid>> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
+    public async Task<ResponseMessage<RoleInfoDTO>> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
     {
         var validationResult = await _roleForCreateValidator.ValidateAsync(roleForCreateDTO);
         if (!validationResult.IsValid)
@@ -34,10 +34,11 @@ public class RoleService : IRoleService
         }
 
         var role = RoleMapper.RoleForCreateDTOToRole(roleForCreateDTO);
-        var roleId = await _repositoryManager.Role.CreateRoleAsync(role);
+        await _repositoryManager.Role.CreateRoleAsync(role);
         await _repositoryManager.CommitAsync();
+        var roleInfoDTO = RoleMapper.RoleToRoleInfoDTO(role);
 
-        return new ResponseMessage<Guid>(roleId);
+        return new ResponseMessage<RoleInfoDTO>(roleInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)

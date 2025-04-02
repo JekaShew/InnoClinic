@@ -20,7 +20,7 @@ public class DoctorMappers : Profile
         CreateMap<DoctorForUpdateDTO, Doctor>()
             .ForMember(dest => dest.Photo, opt => opt.Ignore());
 
-        CreateMap<SpecializationsOfDoctorInfoDTO, DoctorSpecialization>().ReverseMap();
+        CreateMap<SpecializationOfDoctorInfoDTO, DoctorSpecialization>().ReverseMap();
 
         CreateMap<DoctorSpecializationForCreateDTO, DoctorSpecialization>();
         CreateMap<DoctorSpecializationForUpdateDTO, DoctorSpecialization>();

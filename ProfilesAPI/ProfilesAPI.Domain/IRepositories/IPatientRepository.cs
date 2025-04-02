@@ -5,7 +5,7 @@ namespace ProfilesAPI.Domain.IRepositories;
 
 public interface IPatientRepository
 {
-    public Task<Guid> CreateAsync(Patient patient);
+    public Task CreateAsync(Patient patient);
     public Task UpdateAsync(Guid patientId, Patient updatedPatient);
     public Task DeleteByIdAsync(Guid patientId);
     public Task<Patient> GetByIdAsync(Guid patientId);
