@@ -10,7 +10,7 @@ using System.Reflection;
 
 namespace ProfilesAPI.Persistance.Extensions;
 
-public static class PersistanceExtensionMethods
+public static class ServiceExtensions
 {
     public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -37,26 +37,5 @@ public static class PersistanceExtensionMethods
             );
 
         return services;
-    }
-
-    public static IApplicationBuilder ApplyFluentMigrationsMethodAsync(this IApplicationBuilder app)
-    {
-        using var scope = app.ApplicationServices.CreateScope();
-        
-        var migrator = scope.ServiceProvider.GetRequiredService<IMigrationRunner>();
-        var database = scope.ServiceProvider.GetRequiredService<Database>();
-
-        var context = migrator.RunnerContext;
-        if(context is null)
-        {
-            database.CreateDatabase("ProfilesDB");
-        }
-
-        if (migrator.HasMigrationsToApplyUp())
-        {
-            migrator.MigrateUp();
-        }
-
-        return app;
     }
 }

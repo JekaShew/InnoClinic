@@ -11,7 +11,7 @@ using System.Reflection;
 
 namespace ProfilesAPI.Services.Extensions
 {
-    public static class ApplicationExtensionMethods
+    public static class ServiceExtensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
         {

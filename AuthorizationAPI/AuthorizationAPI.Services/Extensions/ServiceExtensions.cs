@@ -2,7 +2,6 @@
 using AuthorizationAPI.Services.Services;
 using FluentValidation;
 using Hangfire;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
@@ -10,7 +9,7 @@ using System.Reflection;
 
 namespace AuthorizationAPI.Services.Extensions;
 
-public static class ApplicationServicesExtesionMethods
+public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
@@ -78,17 +77,5 @@ public static class ApplicationServicesExtesionMethods
         services.AddHangfireServer();
 
         return services;
-    }
-    public static IApplicationBuilder StartBackgroundTasks(this IApplicationBuilder app, IConfiguration configuration)
-    {
-        // Schedule Jobs
-        var crons = configuration.GetSection("HangFire:Crons");
-        IRecurringJobManager recurringJobManager = new RecurringJobManager();
-        recurringJobManager.AddOrUpdate<BackgroundTasks>(
-                "CleaningExpiredRefresTokens",
-                x => x.CleanExpiredRefreshTokensAsync(),
-                crons["Every15Minutes"]); 
-
-        return app;      
     }
 }

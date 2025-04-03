@@ -6,7 +6,7 @@ using OfficesAPI.Persistance.Repositories;
 
 namespace OfficesAPI.Persistance.Extensions;
 
-public static class PersistanceExtensionMethods
+public static class ServiceExtensions
 {
     public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration configuration)
     {

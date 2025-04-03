@@ -9,7 +9,7 @@ using System.Reflection;
 
 namespace OfficesAPI.Services.Extensions;
 
-public static class ApplicationServicesExtensionMethods
+public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {

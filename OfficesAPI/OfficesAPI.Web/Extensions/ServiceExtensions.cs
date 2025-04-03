@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace OfficesAPI.Web.Extensions
 {
-    public static class WebExtensionMethods
+    public static class ServiceExtensions
     {
         public static IServiceCollection AddSwaggerMethod(this IServiceCollection services)
         {

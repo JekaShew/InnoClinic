@@ -1,14 +1,13 @@
 ﻿using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Persistance.Data;
 using AuthorizationAPI.Persistance.Repositories;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AuthorizationAPI.Persistance.Extensions;
 
-public static class PersistanceExtensionMethods
+public static class ServiceExtensions
 {
 
     public static IServiceCollection AddPersistanceServices(this IServiceCollection services, IConfiguration configuration)
@@ -41,20 +40,5 @@ public static class PersistanceExtensionMethods
         services.AddScoped<IRepositoryManager, EFCoreRepositoryManger>();
 
         return services;
-    }
-
-    public static IApplicationBuilder ApplyMigrations(this IApplicationBuilder app)
-    {
-        using IServiceScope scope = app.ApplicationServices.CreateScope();
-
-        
-        using AuthDBContext authDBContext =
-                          scope.ServiceProvider.GetRequiredService<AuthDBContext>();
-        if(!authDBContext.Database.CanConnect())
-        {
-            authDBContext.Database.Migrate();
-        }    
-
-            return app;
     }
 }

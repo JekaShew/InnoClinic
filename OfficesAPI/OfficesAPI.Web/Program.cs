@@ -6,7 +6,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Host.AddSerilogMethod(builder.Configuration, builder.Configuration["OfficesSerolog:FileName"]);
+builder.Host.AddSerilogMethod(builder.Configuration, builder.Configuration["OfficesSerilog:FileName"]);
 builder.Services.AddControllers(config =>
     {
         config.RespectBrowserAcceptHeader = true;
