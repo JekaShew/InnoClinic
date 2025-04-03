@@ -1,9 +1,7 @@
 ﻿using AuthorizationAPI.Domain.IRepositories;
 using AuthorizationAPI.Services.Abstractions.Interfaces;
 using AuthorizationAPI.Services.Mappers;
-using AuthorizationAPI.Shared.Constants;
 using AuthorizationAPI.Shared.DTOs.RoleDTOs;
-using CommonLibrary.CommonService;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
@@ -14,23 +12,20 @@ public class RoleService : IRoleService
 {
     private readonly IValidator<RoleForCreateDTO> _roleForCreateValidator;
     private readonly IValidator<RoleForUpdateDTO> _roleForUpdateValidator;
-
     private readonly IRepositoryManager _repositoryManager;
-    private readonly ICommonService _commonService;
+
     public RoleService(
             IRepositoryManager repositoryManager,
-            ICommonService commonService,
             IValidator<RoleForCreateDTO> roleForCreateValidator,
             IValidator<RoleForUpdateDTO> roleForUpdateValidator
             )
     {
         _repositoryManager = repositoryManager;
-        _commonService = commonService;
         _roleForCreateValidator = roleForCreateValidator;
         _roleForUpdateValidator = roleForUpdateValidator;
         
     }
-    public async Task<ResponseMessage> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
+    public async Task<ResponseMessage<RoleInfoDTO>> CreateRoleAsync(RoleForCreateDTO roleForCreateDTO)
     {
         var validationResult = await _roleForCreateValidator.ValidateAsync(roleForCreateDTO);
         if (!validationResult.IsValid)
@@ -41,8 +36,9 @@ public class RoleService : IRoleService
         var role = RoleMapper.RoleForCreateDTOToRole(roleForCreateDTO);
         await _repositoryManager.Role.CreateRoleAsync(role);
         await _repositoryManager.CommitAsync();
+        var roleInfoDTO = RoleMapper.RoleToRoleInfoDTO(role);
 
-        return new ResponseMessage();
+        return new ResponseMessage<RoleInfoDTO>(roleInfoDTO);
     }
 
     public async Task<ResponseMessage> DeleteRoleByIdAsync(Guid roleId)
@@ -62,11 +58,6 @@ public class RoleService : IRoleService
     public async Task<ResponseMessage<IEnumerable<RoleInfoDTO>>> GetAllRolesAsync()
     {
         var roles = await _repositoryManager.Role.GetAllRolesAsync();
-        if (!roles.Any())
-        {
-            return new ResponseMessage<IEnumerable<RoleInfoDTO>>("No Role Found in Database!", 404);
-        }
-
         var roleInfoDTOs = roles.Select(r => RoleMapper.RoleToRoleInfoDTO(r));
 
         return new ResponseMessage<IEnumerable<RoleInfoDTO>>(roleInfoDTOs);
@@ -85,7 +76,7 @@ public class RoleService : IRoleService
         return new ResponseMessage<RoleInfoDTO>(roleInfoDTO);
     }
 
-    public async Task<ResponseMessage> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO)
+    public async Task<ResponseMessage<RoleInfoDTO>> UpdateRoleAsync(Guid roleId, RoleForUpdateDTO roleForUpdateDTO)
     {
         var validationResult = await _roleForUpdateValidator.ValidateAsync(roleForUpdateDTO);
         if (!validationResult.IsValid)
@@ -96,12 +87,13 @@ public class RoleService : IRoleService
         var role = await _repositoryManager.Role.GetRoleByIdAsync(roleId);
         if (role is null)
         {
-            return new ResponseMessage("No Role Found!", 404);
+            return new ResponseMessage<RoleInfoDTO>("No Role Found!", 404);
         }
   
         RoleMapper.UpdateRoleFromRoleForUpdateDTO(roleForUpdateDTO, role);
         await _repositoryManager.CommitAsync();
+        var roleInfoDTO = RoleMapper.RoleToRoleInfoDTO(role);
 
-        return new ResponseMessage();
+        return new ResponseMessage<RoleInfoDTO>(roleInfoDTO);
     }
 }

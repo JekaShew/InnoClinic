@@ -74,6 +74,12 @@ namespace AuthorizationAPI.Persistance.Migrations
                         },
                         new
                         {
+                            Id = new Guid("cefa7c0e-23ef-4c48-8696-b894be96bc68"),
+                            Description = "The role Receptionist gives semi full admin rights to manage Clinic's Registry.",
+                            Title = "Receptionist"
+                        },
+                        new
+                        {
                             Id = new Guid("0eec148a-43d6-4b32-afb6-1ecf3341be6d"),
                             Description = "The role Doctor gives some administrative rights.",
                             Title = "Doctor"

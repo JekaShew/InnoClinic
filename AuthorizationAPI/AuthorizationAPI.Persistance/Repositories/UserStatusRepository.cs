@@ -35,9 +35,11 @@ public class UserStatusRepository : IUserStatusRepository
                 .ToListAsync();
     }
 
-    public async Task CreateUserStatusAsync(UserStatus userStatus)
+    public async Task<UserStatus> CreateUserStatusAsync(UserStatus userStatus)
     {
         await _authDBContext.UserStatuses.AddAsync(userStatus);
+        
+        return userStatus;
     }
 
     public void DeleteUserStatus(UserStatus userStatus)
@@ -45,7 +47,7 @@ public class UserStatusRepository : IUserStatusRepository
         _authDBContext.UserStatuses.Remove(userStatus);
     }
 
-    public async Task UpdateUserStatusAsync(UserStatus updatedUserStatus)
+    public async Task<UserStatus> UpdateUserStatusAsync(UserStatus updatedUserStatus)
     {
         var userStatus = await _authDBContext.UserStatuses.FindAsync(updatedUserStatus.Id);
         if(userStatus is not null)
@@ -54,5 +56,7 @@ public class UserStatusRepository : IUserStatusRepository
         }
 
         _authDBContext.UserStatuses.Update(updatedUserStatus);
+
+        return updatedUserStatus;
     }
 }

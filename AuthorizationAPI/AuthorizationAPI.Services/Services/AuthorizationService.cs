@@ -10,7 +10,6 @@ using CommonLibrary.CommonService;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,11 +22,9 @@ public class AuthorizationService : IAuthorizationService
 {
     private readonly IValidator<LoginInfoDTO> _loginInfoValidator;
     private readonly IValidator<RegistrationInfoDTO> _registrationInfoValidator;
-
     private readonly IRepositoryManager _repositoryManager;
     private readonly ICommonService _commonService;
     private readonly IEmailService _emailService;
-
     private readonly AuthorizationJWTSettings _authorizationSettings;
 
     public AuthorizationService(
@@ -97,7 +94,7 @@ public class AuthorizationService : IAuthorizationService
         return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage> SignUp(RegistrationInfoDTO registrationInfoDTO)
+    public async Task<ResponseMessage<UserInfoDTO>> SignUp(RegistrationInfoDTO registrationInfoDTO)
     {
         var validationResult = await _registrationInfoValidator.ValidateAsync(registrationInfoDTO);
         if (!validationResult.IsValid)
@@ -109,20 +106,20 @@ public class AuthorizationService : IAuthorizationService
         var user = await _repositoryManager.User.GetUserByEmailAsync(registrationInfoDTO.Email);
         if(user is not null)
         {
-            return new ResponseMessage("Server's Error Occured!", 500);
+            return new ResponseMessage<UserInfoDTO>("Server's Error Occured!", 500);
         }    
 
         // Create User 
         var defaultRole = await _repositoryManager.Role.GetRoleByIdAsync(DBConstants.PatientRoleId);
         if (defaultRole is null || defaultRole.Id.Equals(Guid.Empty))
         {
-            return new ResponseMessage("Server's Error Occured! Check Initial Database Data!", 500);
+            return new ResponseMessage<UserInfoDTO>("Server's Error Occured! Check Initial Database Data!", 500);
         }
 
         var defaultUserStatus = await _repositoryManager.UserStatus.GetUserStatusByIdAsync(DBConstants.NonActivatedUserStatusId);
         if (defaultUserStatus is null || defaultUserStatus.Equals(Guid.Empty))
         {
-            return new ResponseMessage("Server's Error Occured! Check Initial Database Data!", 500);
+            return new ResponseMessage<UserInfoDTO>("Server's Error Occured! Check Initial Database Data!", 500);
         }
 
         var securityStamp = await _commonService.GetHashString(registrationInfoDTO.SecretPhrase);
@@ -138,8 +135,10 @@ public class AuthorizationService : IAuthorizationService
 
         await _repositoryManager.User.CreateUserAsync(newUser);
         await _repositoryManager.CommitAsync();
+        var userInfoDTO = UserMapper.UserToUserInfoDTO(newUser);
+        await _emailService.SendVerificationLetterToEmail(registrationInfoDTO.Email);
 
-        return await _emailService.SendVerificationLetterToEmail(registrationInfoDTO.Email);
+        return new ResponseMessage<UserInfoDTO>(userInfoDTO);
     }
     
     public async Task<ResponseMessage<TokensDTO>> Refresh(Guid rTokenId)
