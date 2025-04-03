@@ -4,7 +4,6 @@ namespace OfficesAPI.Shared.DTOs.OfficeDTOs;
 
 public class OfficeInfoDTO
 {
-    public string Id { get; set; }
     public string City { get; set; }
     public string Street { get; set; }
     public string HouseNumber { get; set; }
