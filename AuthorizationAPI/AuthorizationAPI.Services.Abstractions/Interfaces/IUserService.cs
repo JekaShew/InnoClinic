@@ -12,8 +12,8 @@ public interface IUserService
     public Task<ResponseMessage> DeleteCurrentAccount();
     public Task<ResponseMessage> ActivateUser(string email,string token);
     public Task<ResponseMessage> DeleteUserById(Guid userId);
-    public Task<ResponseMessage<UserInfoDTO>> UpdateUserInfo(Guid userId, UserForUpdateDTO userForUpdateDTO);
-    public Task<ResponseMessage<UserInfoDTO>> UpdateUserInfoByAdministrator(Guid userId, UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO);
+    public Task<ResponseMessage> UpdateUserInfo(Guid userId, UserForUpdateDTO userForUpdateDTO);
+    public Task<ResponseMessage> UpdateUserInfoByAdministrator(Guid userId, UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO);
     public Task<ResponseMessage> ChangePasswordByOldPassword(OldNewPasswordPairDTO oldNewPasswordPairDTO);
     public Task<ResponseMessage> ChangeForgottenPasswordBySecretPhrase(EmailSecretPhraseNewPasswordDTO emailSecretPhraseNewPasswordDTO);
     public Task<ResponseMessage> ChangeForgottenPasswordByEmailRequest(string email);

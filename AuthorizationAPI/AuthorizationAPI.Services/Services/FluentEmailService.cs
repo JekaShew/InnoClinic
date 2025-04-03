@@ -24,16 +24,17 @@ public class FluentEmailService : IEmailService
     private readonly FromEmailsSettings _fromEmailsSettings;
     private readonly IFluentEmail _fluentEmail;
     private readonly IFluentEmailFactory _fluentEmailFactory;
+    private readonly IRepositoryManager _repositoryManager;
     private readonly ICommonService _commonService;
     private readonly IMemoryCache _memoryCache;
     private readonly IValidator<UserEmailDTO> _userEmailValidator;
-
     public FluentEmailService(
             IOptions<FromEmailsSettings> options,
             IFluentEmail fluentEmail,
             IFluentEmailFactory fluentEmailFactory,
             IMemoryCache memoryCache,
             IValidator<UserEmailDTO> usrEmailValidator,
+            IRepositoryManager repositoryManager,
             ICommonService commonService)
     {
         _fromEmailsSettings = options.Value;
@@ -41,6 +42,7 @@ public class FluentEmailService : IEmailService
         _fluentEmailFactory = fluentEmailFactory;
         _memoryCache = memoryCache;
         _userEmailValidator = usrEmailValidator;
+        _repositoryManager = repositoryManager;
         _commonService = commonService;
     }
 

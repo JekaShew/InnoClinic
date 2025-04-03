@@ -10,6 +10,8 @@ using InnoClinic.CommonLibrary.Response;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft.Json.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace AuthorizationAPI.Services.Services;
 
@@ -20,11 +22,11 @@ public class UserService : IUserService
     private readonly IValidator<UserForUpdateDTO> _userForUpdateValidator;
     private readonly IValidator<UserForUpdateByAdministratorDTO> _userForUpdateByAdministratorValidator;
     private readonly IValidator<EmailPasswordPairDTO> _emailPasswordPairValidator;
+
     private readonly IRepositoryManager _repositoryManager;
     private readonly ICommonService _commonService;
     private readonly IEmailService _emailService;
     private readonly IMemoryCache _memoryCache;
-
     public UserService(
             IRepositoryManager repositoryManager,
             ICommonService commonService,
@@ -80,6 +82,11 @@ public class UserService : IUserService
     public async Task<ResponseMessage<IEnumerable<UserInfoDTO>>> GetAllUsersInfo()
     {
         var users = await _repositoryManager.User.GetAllUsersAsync();
+        if (!users.Any())
+        {
+            return new ResponseMessage<IEnumerable<UserInfoDTO>>("No Users Found in Database!", 404);
+        }
+
         var userInfoDTOs = users.Select(u => UserMapper.UserToUserInfoDTO(u)).ToList();
 
         return new ResponseMessage<IEnumerable<UserInfoDTO>>(userInfoDTOs);
@@ -111,7 +118,7 @@ public class UserService : IUserService
         return new ResponseMessage<UserDetailedDTO>(userDetailedInfoDTO);
     }
 
-    public async Task<ResponseMessage<UserInfoDTO>> UpdateUserInfo(Guid userId, UserForUpdateDTO userForUpdateDTO)
+    public async Task<ResponseMessage> UpdateUserInfo(Guid userId, UserForUpdateDTO userForUpdateDTO)
     {
         var validationResult = await _userForUpdateValidator.ValidateAsync(userForUpdateDTO);
         if (!validationResult.IsValid)
@@ -123,22 +130,21 @@ public class UserService : IUserService
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
-            return new ResponseMessage<UserInfoDTO>("User Not Found!", 404);
+            return new ResponseMessage("User Not Found!", 404);
         }
 
         if (!user.Id.Equals(currentUserInfo.Id))
         {
-            return new ResponseMessage<UserInfoDTO>("Forbidden Action! You Have No Rights to Manage this Account!", 403);
+            return new ResponseMessage("Forbidden Action! You Have No Rights to Manage this Account!", 403);
         }
 
         UserMapper.UpdateUserFromUserForUpdateDTO(userForUpdateDTO,user);
         await _repositoryManager.CommitAsync();
-        var userInfoDTO = UserMapper.UserToUserInfoDTO(user);
 
-        return new ResponseMessage<UserInfoDTO>(userInfoDTO);
+        return new ResponseMessage();
     }
 
-    public async Task<ResponseMessage<UserInfoDTO>> UpdateUserInfoByAdministrator(Guid userId, UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO)
+    public async Task<ResponseMessage> UpdateUserInfoByAdministrator(Guid userId, UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO)
     {
         var validationResult = await _userForUpdateByAdministratorValidator.ValidateAsync(userForUpdateByAdministratorDTO);
         if (!validationResult.IsValid)
@@ -149,14 +155,13 @@ public class UserService : IUserService
         var user = await _repositoryManager.User.GetUserByIdAsync(userId);
         if (user is null)
         {
-            return new ResponseMessage<UserInfoDTO>("User Not Found!", 404);
+            return new ResponseMessage("User Not Found!", 404);
         }
 
         UserMapper.UpdateUserFromUserForUpdateByAdministratorDTO(userForUpdateByAdministratorDTO, user);
         await _repositoryManager.CommitAsync();
-        var userInfoDTO = UserMapper.UserToUserInfoDTO(user);   
 
-        return new ResponseMessage<UserInfoDTO>(userInfoDTO);
+        return new ResponseMessage();
     }
 
     public async Task<ResponseMessage> ChangePasswordByOldPassword(OldNewPasswordPairDTO oldNewPasswordPairDTO)

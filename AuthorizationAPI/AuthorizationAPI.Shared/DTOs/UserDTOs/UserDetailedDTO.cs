@@ -5,7 +5,6 @@ namespace AuthorizationAPI.Shared.DTOs.UserDTOs;
 
 public class UserDetailedDTO
 {
-    public Guid Id { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string SecondName { get; set; }

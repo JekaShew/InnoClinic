@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
-using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using OfficesAPI.Shared.DTOs.PhotoDTOs;
 
 namespace OfficesAPI.Presentation.Controllers;
@@ -23,7 +22,7 @@ public class PhotoController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(PhotoInfoDTO), 201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -39,7 +38,7 @@ public class PhotoController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return CreatedAtAction(nameof(GetPhotoById), new { photoId = result.Value.Id }, result.Value);
+        return Created();
     }
 
     /// <summary>
