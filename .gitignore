@@ -372,3 +372,5 @@ InnoShop.CommonLibrary/.vs/
 **/bin/
 **/obj
 **/obj/
+**/.containers
+**/.containers/
