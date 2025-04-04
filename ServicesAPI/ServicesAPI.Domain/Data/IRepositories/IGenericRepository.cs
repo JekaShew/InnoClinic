@@ -6,6 +6,7 @@ public interface IGenericRepository<TEntity>
 {
     public Task<IEnumerable<TEntity>> GetAllAsync();
     public Task<TEntity?> GetByIdAsync(Guid id);
+    public IQueryable<TEntity> GetQueryable();
     public Task<TEntity?> CreateAsync(TEntity entity);
     public Task<TEntity?> UpdateAsync(Guid id, TEntity updatedEntity);
     public Task DeleteAsync(TEntity entity);

@@ -44,8 +44,8 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     {
         _servicesDBContext.Set<TEntity>().Update(updatedEntity);
 
-        var serviceCategorySpecialization = await _servicesDBContext.Set<TEntity>().FindAsync(Id);
-        if (updatedEntity is not null)
+        var entityModel = await _servicesDBContext.Set<TEntity>().FindAsync(Id);
+        if (entityModel is not null)
         {
             _servicesDBContext.Set<TEntity>().Entry(updatedEntity).State = EntityState.Detached;
             _servicesDBContext.Set<TEntity>().Update(updatedEntity);
@@ -54,12 +54,21 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return updatedEntity;
     }
 
-    public Task<TEntity?> GetSingleByExpressionAsync(Expression<Func<TEntity, bool>> expression)
+    public async Task<TEntity?> GetSingleByExpressionAsync(Expression<Func<TEntity, bool>> expression)
     {
-        throw new NotImplementedException();
+        var entityModel = await _servicesDBContext.Set<TEntity>().Where(expression).FirstOrDefaultAsync();
+
+        return entityModel;
     }
-    public Task<IEnumerable<TEntity>> GetAllByExpressionAsync(Expression<Func<TEntity, bool>> expression)
+    public async Task<IEnumerable<TEntity>> GetAllByExpressionAsync(Expression<Func<TEntity, bool>> expression)
     {
-        throw new NotImplementedException();
+        var entityModels = await _servicesDBContext.Set<TEntity>().Where(expression).ToListAsync();
+
+        return entityModels;
+    }
+
+    public IQueryable<TEntity> GetQueryable()
+    {
+        return _servicesDBContext.Set<TEntity>();
     }
 }
