@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
-using OfficesAPI.Shared.DTOs.PhotoDTOs;
-using Serilog;
-
 
 namespace OfficesAPI.Presentation.Controllers;
 
@@ -15,9 +12,7 @@ public class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
 
-    public OfficesController(
-            IOfficeService officeService,
-            ILogger logger)
+    public OfficesController(IOfficeService officeService)
     {
         _officeService = officeService;
     }
@@ -71,7 +66,7 @@ public class OfficesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(OfficeInfoDTO), 201)]
+    [ProducesResponseType(201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -89,7 +84,7 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return CreatedAtAction(nameof(GetOfficeByid), new { officeId = result.Value.Id }, result.Value);
+        return Created();
     }
 
     /// <summary>
@@ -97,7 +92,7 @@ public class OfficesController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{officeId}")]
-    [ProducesResponseType(typeof(OfficeInfoDTO), 200)]
+    [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -113,7 +108,7 @@ public class OfficesController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok(result.Value);
+        return Ok();
     }
 
     /// <summary>
