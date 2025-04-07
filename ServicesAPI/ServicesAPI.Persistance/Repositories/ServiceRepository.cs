@@ -34,7 +34,7 @@ public class ServiceRepository : GenericRepository<Service>, IServiceReposiotry
                 s.Price >= serviceParameters.MinPrice);
         }
 
-        if (serviceParameters.ServiceCategories.Count >= 1)
+        if (serviceParameters.ServiceCategories is not null && serviceParameters.ServiceCategories.Count >= 1)
         {
             services = _servicesDBContext.Services
                 .Where(s => serviceParameters.ServiceCategories.Any(sp => sp.Equals(s.ServiceCategoryId)));
@@ -54,9 +54,10 @@ public class ServiceRepository : GenericRepository<Service>, IServiceReposiotry
         IEnumerable<Service> serviceFinalList =
             await services
         .Skip(
-        (serviceParameters.PageNumber - 1) * serviceParameters.PageSize)
+            (serviceParameters.PageNumber - 1) * serviceParameters.PageSize)
         .Take(serviceParameters.PageSize)
-                .ToListAsync();
+        .Include(sc => sc.ServiceCategory)
+        .ToListAsync();
 
         return serviceFinalList;
     }

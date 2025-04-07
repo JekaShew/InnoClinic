@@ -20,8 +20,7 @@ public class GetServiceByIdQueryHandler : IRequestHandler<GetServiceByIdQuery, R
 
     public async Task<ResponseMessage<ServiceInfoDTO>> Handle(GetServiceByIdQuery request, CancellationToken cancellationToken)
     {
-        // add lazy or Exiplicit loading for service category and maybe specizaaliztions
-        var service = await _repositoryManager.Service.GetByIdAsync(request.Id);
+        var service = await _repositoryManager.Service.GetByIdAsync(request.Id, s => s.ServiceCategory);
         if (service is null)
         {
             return new ResponseMessage<ServiceInfoDTO>("Service not Found!", 404);

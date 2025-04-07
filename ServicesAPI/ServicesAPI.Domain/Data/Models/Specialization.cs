@@ -1,8 +1,7 @@
 ﻿namespace ServicesAPI.Domain.Data.Models;
 
-public class Specialization
+public class Specialization : BaseModel
 {
-    public Guid Id { get; set; }
     public string Title { get; set; }
     public string? Description { get; set; }
 

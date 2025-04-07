@@ -20,7 +20,6 @@ public class GetServiceCategoryByIdQueryHandler : IRequestHandler<GetServiceCate
 
     public async Task<ResponseMessage<ServiceCategoryInfoDTO>> Handle(GetServiceCategoryByIdQuery request, CancellationToken cancellationToken)
     {
-        // add lazy loading for specizaliztions ??
         var serviceCategory = await _repositoryManager.ServiceCategory.GetByIdAsync(request.Id);
         if (serviceCategory is null)
         {

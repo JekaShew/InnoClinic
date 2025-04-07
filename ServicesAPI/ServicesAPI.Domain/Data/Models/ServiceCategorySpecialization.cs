@@ -1,8 +1,7 @@
 ﻿namespace ServicesAPI.Domain.Data.Models;
 
-public class ServiceCategorySpecialization
+public class ServiceCategorySpecialization : BaseModel
 {
-    public Guid Id { get; set; }
     public Guid ServiceCategoryId { get; set; }
     public Guid SpecializationId { get; set; }
     public string? Description { get; set; }

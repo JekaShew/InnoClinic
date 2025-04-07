@@ -3,6 +3,7 @@ using ServicesAPI.Domain.Data.IRepositories;
 using ServicesAPI.Domain.Data.Models;
 using ServicesAPI.Persistance.Data;
 using ServicesAPI.Shared.DTOs.SpecializationDTOs;
+using System.Linq.Expressions;
 
 namespace ServicesAPI.Persistance.Repositories;
 
@@ -36,5 +37,16 @@ public class SpecializationRepository : GenericRepository<Specialization>, ISpec
                 .ToListAsync();
 
         return specializationFinalList;
+    }
+
+    public async new Task<Specialization?> GetByIdAsync(Guid id, params Expression<Func<ServiceCategory, object>>[] includeProperties)
+    {
+        var specialization = await _servicesDBContext.Specializations.
+                Include(scs => scs.ServiceCategorySpecializations)
+                    .ThenInclude(sc => sc.ServiceCategory)
+                .Where(s => s.Id.Equals(id))
+                .FirstOrDefaultAsync();
+
+        return specialization;
     }
 }

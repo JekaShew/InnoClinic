@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using ServicesAPI.Domain.Data.IRepositories;
+using ServicesAPI.Domain.Data.Models;
 using ServicesAPI.Persistance.Data;
 
 namespace ServicesAPI.Persistance.Repositories;
 
-public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
+public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : BaseModel
 {
     private readonly ServicesDBContext _servicesDBContext;
 
@@ -28,16 +29,36 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return Task.CompletedTask;
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    public async Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[]? includeProperties)
     {
-        return await _servicesDBContext.Set<TEntity>().ToListAsync();
+        IQueryable<TEntity> queryMultiple = _servicesDBContext.Set<TEntity>();
+        if (includeProperties is not null && includeProperties.Length != 0)
+        {
+            
+            foreach (var includeProperty in includeProperties)
+            {
+                queryMultiple = queryMultiple.Include(includeProperty);
+            }
+            
+        }    
+
+        return await queryMultiple.ToListAsync();
     }
 
-   
-
-    public async Task<TEntity?> GetByIdAsync(Guid id)
+    public async Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[]? includeProperties)
     {
-        return await _servicesDBContext.Set<TEntity>().FindAsync(id);
+        IQueryable<TEntity> querySingle = _servicesDBContext.Set<TEntity>();
+        if (includeProperties is not null && includeProperties.Length != 0)
+        {
+
+            foreach (var includeProperty in includeProperties)
+            {
+                querySingle = querySingle.Include(includeProperty);
+            }
+
+        }
+
+        return await querySingle.FirstOrDefaultAsync(entity => entity.Id.Equals(id));
     }
 
     public async Task<TEntity?> UpdateAsync(Guid Id, TEntity updatedEntity)

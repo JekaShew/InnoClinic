@@ -25,6 +25,8 @@ public class GetSpecializationByIdQueryHandler : IRequestHandler<GetSpecializati
         { 
             return new ResponseMessage<SpecializationInfoDTO>("Specialization not Found!", 404);
         }
+
+        
         var specializationInfoDTO = _mapper.Map<SpecializationInfoDTO>(specialization);
 
         return new ResponseMessage<SpecializationInfoDTO>(specializationInfoDTO);

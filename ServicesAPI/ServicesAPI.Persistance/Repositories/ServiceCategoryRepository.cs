@@ -4,6 +4,7 @@ using ServicesAPI.Domain.Data.Models;
 using ServicesAPI.Persistance.Data;
 using ServicesAPI.Shared.DTOs.ServiceCategoryDTOs;
 using ServicesAPI.Shared.DTOs.SpecializationDTOs;
+using System.Linq.Expressions;
 
 namespace ServicesAPI.Persistance.Repositories;
 
@@ -35,8 +36,19 @@ public class ServiceCategoryRepository : GenericRepository<ServiceCategory>, ISe
         .Skip(
         (serviceCategoryParameters.PageNumber - 1) * serviceCategoryParameters.PageSize)
         .Take(serviceCategoryParameters.PageSize)
-                .ToListAsync();
+        .ToListAsync();
 
         return serviceCategoryFinalList;
+    }
+
+    public async new Task<ServiceCategory?> GetByIdAsync(Guid id, params Expression<Func<ServiceCategory, object>>[] includeProperties)
+    {
+        var serviceCategory = await _servicesDBContext.ServiceCategiories.
+                Include(scs => scs.ServiceCategorySpecializations)
+                    .ThenInclude(s => s.Specialization)
+                .Where(sc => sc.Id.Equals(id))
+                .FirstOrDefaultAsync();
+
+        return serviceCategory;
     }
 }

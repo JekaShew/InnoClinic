@@ -4,4 +4,5 @@ public class ServiceCategoryForCreateDTO
 {
     public string Title { get; set; }
     public string? Description { get; set; }
+    public ICollection<Guid>? Specializations { get; set; }
 }

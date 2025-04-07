@@ -28,6 +28,37 @@ public class UpdateServiceCategoryCommandHandler : IRequestHandler<UpdateService
         }
 
         serviceCategory = _mapper.Map<ServiceCategory>(request.serviceCategoryForUpdateDTO);
+
+        await _repositoryManager.BeginAsync();
+        var oldServiceCategorySpecializations = await _repositoryManager.ServiceCategorySpecialization
+            .GetAllByExpressionAsync(scs => scs.ServiceCategoryId.Equals(request.ServiceCategoryId));
+        var newServiceCategorySpecializations = new List<ServiceCategorySpecialization>();
+
+        foreach (var oldServiceCategorySpecialization in oldServiceCategorySpecializations)
+        {
+            await _repositoryManager.ServiceCategorySpecialization.DeleteAsync(oldServiceCategorySpecialization);
+        }
+
+        if (request.serviceCategoryForUpdateDTO.Specialziations is not null
+        && request.serviceCategoryForUpdateDTO.Specialziations.Count >= 1)
+        {
+            foreach (var newSpecializationId in request.serviceCategoryForUpdateDTO.Specialziations)
+            {
+                var serviceCategorySpecialization = new ServiceCategorySpecialization
+                {
+                    ServiceCategoryId = serviceCategory.Id,
+                    SpecializationId = newSpecializationId
+                };
+                newServiceCategorySpecializations.Add(serviceCategorySpecialization);
+                // await _repositoryManager.ServiceCategorySpecialization.CreateAsync(serviceCategorySpercialization);
+            }
+        }
+
+        foreach (var newServiceCategorySpercialization in newServiceCategorySpecializations)
+        {
+            await _repositoryManager.ServiceCategorySpecialization.CreateAsync(newServiceCategorySpercialization);
+        }
+
         await _repositoryManager.ServiceCategory.UpdateAsync(request.ServiceCategoryId, serviceCategory);
         await _repositoryManager.CommitAsync();
         var serviceCategoryInfoDTO = _mapper.Map<ServiceCategoryInfoDTO>(serviceCategory);

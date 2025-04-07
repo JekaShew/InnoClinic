@@ -22,7 +22,18 @@ public class DeleteServiceCategoryCommandHandler : IRequestHandler<DeleteService
             return new ResponseMessage("Service Category not Found!", 404);
         }
 
+        await _repositoryManager.BeginAsync();
+        // Delete all ServiceCategorySpecializations related to this service category
+        var serviceCategorySpecializations = await _repositoryManager.ServiceCategorySpecialization
+            .GetAllByExpressionAsync(scs => scs.ServiceCategoryId.Equals(request.Id));
+
+        foreach (var serviceCategorySpecialization in serviceCategorySpecializations)
+        {
+            await _repositoryManager.ServiceCategorySpecialization.DeleteAsync(serviceCategorySpecialization);
+        }
+
         await _repositoryManager.ServiceCategory.DeleteAsync(serviceCategory);
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage();
     }

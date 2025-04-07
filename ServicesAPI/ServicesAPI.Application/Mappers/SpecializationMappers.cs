@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CommonLibrary.RabbitMQEvents.SpecializationEvents;
 using ServicesAPI.Domain.Data.Models;
 using ServicesAPI.Shared.DTOs.SpecializationDTOs;
 
@@ -15,5 +16,9 @@ public class SpecializationMappers : Profile
         CreateMap<SpecializationForCreateDTO, Specialization>();
         
         CreateMap<SpecializationForUpdateDTO, Specialization>();
+
+        CreateMap<SpecializationCreatedEvent, Specialization>();
+        CreateMap<SpecializationUpdatedEvent, Specialization>();
+        CreateMap<SpecializationDeletedEvent, Specialization>();
     }
 }

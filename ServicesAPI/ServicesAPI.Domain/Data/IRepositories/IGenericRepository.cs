@@ -4,8 +4,8 @@ namespace ServicesAPI.Domain.Data.IRepositories;
 
 public interface IGenericRepository<TEntity>
 {
-    public Task<IEnumerable<TEntity>> GetAllAsync();
-    public Task<TEntity?> GetByIdAsync(Guid id);
+    public Task<IEnumerable<TEntity>> GetAllAsync(params Expression<Func<TEntity, object>>[] includeProperties);
+    public Task<TEntity?> GetByIdAsync(Guid id, params Expression<Func<TEntity, object>>[] includeProperties);
     public IQueryable<TEntity> GetQueryable();
     public Task<TEntity?> CreateAsync(TEntity entity);
     public Task<TEntity?> UpdateAsync(Guid id, TEntity updatedEntity);

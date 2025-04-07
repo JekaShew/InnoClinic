@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using InnoClinic.CommonLibrary.Response;
+﻿using InnoClinic.CommonLibrary.Response;
 using MediatR;
 using ServicesAPI.Application.CQRS.Commands.ServiceCommands;
 using ServicesAPI.Domain.Data.IRepositories;
@@ -24,6 +23,7 @@ public class DeleteServiceCommandHandler : IRequestHandler<DeleteServiceCommand,
         }
 
         await _repositoryManager.Service.DeleteAsync(service);
+        await _repositoryManager.CommitAsync();
 
         return new ResponseMessage();
     }
