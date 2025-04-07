@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="7.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="7.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\CommonLibrary\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Domain\ProfilesAPI.Domain.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Persistance\ProfilesAPI.Persistance.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Presentation\ProfilesAPI.Presentation.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Services.Abstractions\ProfilesAPI.Services.Abstractions.csproj" />
+    <ProjectReference Include="..\ProfilesAPI.Services\ProfilesAPI.Services.csproj" />
+  </ItemGroup>
+
+</Project>

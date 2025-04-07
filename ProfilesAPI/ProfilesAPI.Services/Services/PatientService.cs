@@ -1,0 +1,179 @@
+﻿using AutoMapper;
+using CommonLibrary.CommonService;
+using CommonLibrary.Constants;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
+using InnoClinic.CommonLibrary.Response;
+using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Domain.IRepositories;
+using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Validators.DoctorValidators;
+using ProfilesAPI.Shared.DTOs.DoctorDTOs;
+using ProfilesAPI.Shared.DTOs.PatientDTOs;
+using System.Numerics;
+
+namespace ProfilesAPI.Services.Services;
+
+public class PatientService : IPatientService
+{
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly IBlobStorageService _blobService;
+    private readonly ICommonService _commonService;
+    private readonly IMapper _mapper;
+    private readonly IValidator<PatientForCreateDTO> _patientForCreateValidator;
+    private readonly IValidator<PatientForUpdateDTO> _patientForUpdateValidator;
+    private readonly IValidator<PatientParameters> _patientParametersValidator;
+
+    public PatientService(
+            IRepositoryManager repositoryManager,
+            IBlobStorageService blobService,
+            ICommonService commonService,
+            IMapper mapper,
+            IValidator<PatientForCreateDTO> patientForCreateValidator,
+            IValidator<PatientForUpdateDTO> patientForUpdateValidator,
+            IValidator<PatientParameters> patientParametersValidator)
+    {
+        _repositoryManager = repositoryManager;
+        _commonService = commonService;
+        _blobService = blobService;
+        _mapper = mapper;
+        _patientForCreateValidator = patientForCreateValidator;
+        _patientForUpdateValidator = patientForUpdateValidator;
+        _patientParametersValidator = patientParametersValidator;
+    }
+
+    public async Task<ResponseMessage<PatientInfoDTO>> CreatePatientAsync(PatientForCreateDTO patientForCreateDTO)
+    {
+        var validationResult = await _patientForCreateValidator.ValidateAsync(patientForCreateDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if(currentUserInfo is null)
+        {
+            return new ResponseMessage<PatientInfoDTO>("Forbidden Action! You are UnAuthorizaed!", 403);
+        }
+
+        var isProfileExists = await _repositoryManager.Patient.IsProfileExists(currentUserInfo.Id);
+        if (isProfileExists)
+        {
+            return new ResponseMessage<PatientInfoDTO>("Error! This profile already exists!", 400);
+        }
+
+        var patient = _mapper.Map<Patient>(patientForCreateDTO);
+        if (patientForCreateDTO.Photo is not null)
+        {
+            using Stream stream = patientForCreateDTO.Photo.OpenReadStream();
+            var blobFileInfo = await _blobService.UploadAsync(stream, patientForCreateDTO.Photo.ContentType);
+            patient.Photo = blobFileInfo.Uri;
+            patient.PhotoId = blobFileInfo.FileId;
+        }
+       
+        patient.UserId = currentUserInfo.Id;
+        await _repositoryManager.Patient.CreateAsync(patient);
+        var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
+
+        return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
+    }
+
+    public async Task<ResponseMessage> DeletePatientByIdAsync(Guid patientId)
+    {
+        var patient = await _repositoryManager.Patient.GetByIdAsync(patientId);
+        if(patient is null)
+        {
+            return new ResponseMessage("Patient's Profile Not Found!", 404);
+        }
+
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if (currentUserInfo is null || (!patient.UserId.Equals(currentUserInfo.Id) &&
+                                        !currentUserInfo.Role.Equals(RoleConstants.Administrator)))
+        {
+            return new ResponseMessage("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
+        }
+
+        if(patient.Photo is not null)
+        {
+            await _blobService.DeleteAsync(patient.PhotoId);
+        }
+        
+        await _repositoryManager.Patient.DeleteByIdAsync(patientId);
+
+        return new ResponseMessage();
+    }
+
+    public async Task<ResponseMessage<ICollection<PatientTableInfoDTO>>> GetAllPatientsAsync(PatientParameters? patientParameters)
+    {
+        // Pagination
+        // Search
+        if (patientParameters is not null)
+        {
+            var validationResult = await _patientParametersValidator.ValidateAsync(patientParameters);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+            }
+        }
+
+        var patients = await _repositoryManager.Patient.GetAllAsync(patientParameters);
+        var patientsTableInfoDTOs = _mapper.Map<ICollection<PatientTableInfoDTO>>(patients);
+
+        return new ResponseMessage<ICollection<PatientTableInfoDTO>>(patientsTableInfoDTOs);
+    }
+
+    public async Task<ResponseMessage<PatientInfoDTO>> GetPatientByIdAsync(Guid patientId)
+    {
+        var patient = await _repositoryManager.Patient.GetByIdAsync(patientId);
+        if (patient is null)
+        {
+            return new ResponseMessage<PatientInfoDTO>("Patient's Profile Not Found!", 404);
+        }
+
+        var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
+      
+        return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
+    }
+
+    public async Task<ResponseMessage<PatientInfoDTO>> UpdatePatientAsync(Guid patientId, PatientForUpdateDTO patientForUpdateDTO)
+    {
+        var validationResult = await _patientForUpdateValidator.ValidateAsync(patientForUpdateDTO);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
+        var patient = await _repositoryManager.Patient.GetByIdAsync(patientId);
+        if (patient is null)
+        {
+            return new ResponseMessage<PatientInfoDTO>("Patient's Profile Not Found!", 404);
+        }
+
+        var currentUserInfo = _commonService.GetCurrentUserInfo();
+        if(currentUserInfo is null || !patient.UserId.Equals(currentUserInfo.Id) )
+        {
+            return new ResponseMessage<PatientInfoDTO>("Forbidden Action! You have no rights to manage this Patient's Profile!", 403);
+        }
+
+        patient = _mapper.Map(patientForUpdateDTO, patient);
+        if(patientForUpdateDTO.Photo is not null)
+        {
+            using Stream stream = patientForUpdateDTO.Photo.OpenReadStream();
+            await _blobService.DeleteAsync(patient.PhotoId);
+            var blobFileInfo = await _blobService.UploadAsync(stream, patientForUpdateDTO.Photo.ContentType);
+            patient.Photo = blobFileInfo.Uri;
+            patient.PhotoId = blobFileInfo.FileId;
+        }
+        else
+        {
+            await _blobService.DeleteAsync(patient.PhotoId);
+            patient.Photo = null;
+            patient.PhotoId = Guid.Empty;
+        }
+
+        await _repositoryManager.Patient.UpdateAsync(patientId, patient);
+        var patientInfoDTO = _mapper.Map<PatientInfoDTO>(patient);
+
+        return new ResponseMessage<PatientInfoDTO>(patientInfoDTO);
+    }
+}

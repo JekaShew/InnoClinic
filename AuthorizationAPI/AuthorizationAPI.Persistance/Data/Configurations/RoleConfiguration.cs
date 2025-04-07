@@ -23,6 +23,12 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             },
             new Role
             {
+                Id = new Guid("CEFA7C0E-23EF-4C48-8696-B894BE96BC68"),
+                Title = "Receptionist",
+                Description = "The role Receptionist gives semi full admin rights to manage Clinic's Registry.",
+            },
+            new Role
+            {
                 Id = new Guid("0EEC148A-43D6-4B32-AFB6-1ECF3341BE6D"),
                 Title = "Doctor",
                 Description = "The role Doctor gives some administrative rights.",

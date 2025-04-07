@@ -1,4 +1,3 @@
-version: '3.4'
 
 services:
   authorization.web:
@@ -6,7 +5,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5000
     image: authorizationapi
-    container_name: AuthorizationAPI
+    container_name: AuthorizationAPI-microsrervice
     build:
       context: .
       args:
@@ -14,16 +13,26 @@ services:
       dockerfile: AuthorizationAPI/AuthorizationAPI.Web/Dockerfile
     ports:
     -  "5000:5000"
+    restart: on-failure
     depends_on:
-        mssql-server:
-            condition: service_healthy
-  
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+      smtp4dev:
+        condition: service_started
+      seqlogs:
+        condition: service_started
+      mssql-server:
+        condition: service_healthy
+        restart: true
+
   offices.web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5001
     image: officesapi
-    container_name: OfficesAPI
+    container_name: OfficesAPI-microsrervice
     build:
       context: .
       args:
@@ -111,10 +120,9 @@ services:
       - ACCEPT_EULA=Y
       - SA_USERNAME=sa
       - SA_PASSWORD=SecretPassword123
-      - MSSQL_DATABASE=mssql
     volumes:
-        - ./sqlserver/data:/var/opt/mssql/data
-        - ./sqlserver/log:/var/opt/mssql/log
+    - ./.containers/sqlserver/data:/var/opt/mssql/data
+    - ./.containers/sqlserver/log:/var/opt/mssql/log
     ports: 
     - "1433:1433"
     restart: always
@@ -131,7 +139,6 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: SecretPassword321
-      #POSTGRES_DB: ServicesDB
     volumes:
       - ./.containers/postgres/data:/var/lib/postgresql/data
       - ./.containers/postgres/log:/var/log/postgresql

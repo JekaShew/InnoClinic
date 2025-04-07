@@ -92,7 +92,7 @@ public class UsersController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{userId}")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(UserInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -108,7 +108,7 @@ public class UsersController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>
@@ -116,14 +116,14 @@ public class UsersController : ControllerBase
     /// </summary>
     /// <returns>Message</returns>
     [HttpPut("{userId}/updatebyadministrator")]
-    [ProducesResponseType(200)]
+    [ProducesResponseType(typeof(UserInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize]
+    //[Authorize(Roles ="Administrator")]
     public async Task<IActionResult> UpdateUserInfoByAdministrator(Guid userId, [FromBody] UserForUpdateByAdministratorDTO userForUpdateByAdministratorDTO)
     {
         var result = await _userService.UpdateUserInfoByAdministrator(userId, userForUpdateByAdministratorDTO);
@@ -132,7 +132,7 @@ public class UsersController : ControllerBase
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
             
-        return Ok();
+        return Ok(result.Value);
     }
 
     /// <summary>
