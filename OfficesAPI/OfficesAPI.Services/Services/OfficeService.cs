@@ -93,6 +93,8 @@ public class OfficeService : IOfficeService
 
         _repositoryManager.Office.DeleteOfficeById(officeId);
         await _repositoryManager.SingleExecution();
+        var officeDeletedEvent = OfficeMapper.OfficeToOfficeDeletedEvent(office);
+        await _publishEndpoint.Publish(officeDeletedEvent);
 
         return new ResponseMessage();
     }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CommonLibrary.RabbitMQEvents;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Shared.DTOs.PatientDTOs;
 
@@ -11,6 +12,7 @@ public class OfficeMaper : Profile
     {
         CreateMap<OfficeCreatedEvent, Office>();
         CreateMap<OfficeUpdatedEvent, Office>();
+        CreateMap<OfficeDeletedEvent, Office>();
         CreateMap<OfficeCheckConsistancyEvent, Office>();
     }
 }

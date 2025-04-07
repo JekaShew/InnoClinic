@@ -69,4 +69,14 @@ public class OfficeRepository : IOfficeRepository
             await connection.ExecuteAsync(query, parameters);
         }
     }
+
+    public async Task DeleteAsync(Office office)
+    {
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var query = "Delete From Offices " +
+                "Where Offices.Id = @OfficeId ";
+            await connection.ExecuteAsync(query, new { office.Id });
+        }
+    }
 }

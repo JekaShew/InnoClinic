@@ -80,38 +80,38 @@ services:
         condition: service_started
       offices.web:
         condition: service_started
-      #services.web:
-       # condition: service_started
+      services.web:
+       condition: service_started
       authorization.web:
         condition: service_started
    
-  # services.web:
-  #   environment:
-  #     - ASPNETCORE_ENVIRONMENT=Development
-  #     - ASPNETCORE_HTTP_PORTS=5003
-  #   image: servicesapi
-  #   container_name: ServicesAPI-microsrervice
-  #   build:
-  #     context: .
-  #     args:
-  #     - BUILD_CONFIGURATION=Development
-  #     dockerfile: ServicesAPI/ServicesAPI.Web/Dockerfile
-  #   ports:
-  #   - "5003:5003"
-  #   restart: on-failure
-  #   depends_on:
-  #     elasticsearch:
-  #       condition: service_healthy
-  #     kibana:
-  #       condition: service_healthy
-  #     seqlogs:
-  #       condition: service_started
-  #     #rabbit-mq:
-  #      # condition: service_healthy
-  #     #offices.web:
-  #      # condition: service_started
-  #     authorization.web:
-  #       condition: service_started
+  services.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5003
+    image: servicesapi
+    container_name: ServicesAPI-microsrervice
+    build:
+      context: .
+      args:
+      - BUILD_CONFIGURATION=Development
+      dockerfile: ServicesAPI/ServicesAPI.Web/Dockerfile
+    ports:
+    - "5003:5003"
+    restart: on-failure
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kibana:
+        condition: service_healthy
+      seqlogs:
+        condition: service_started
+      rabbit-mq:
+       condition: service_healthy
+      authorization.web:
+        condition: service_started
+      postgresql-server:
+        condition: service_healthy
         
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
@@ -134,11 +134,12 @@ services:
       start_period: 15s
 
   postgresql-server:
-    image: postgres:latest
+    image: postgres:17-bookworm
     container_name: postgressql-server-database
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: SecretPassword321
+      #POSTGRES_DATABASE: ServicesDB
     volumes:
       - ./.containers/postgres/data:/var/lib/postgresql/data
       - ./.containers/postgres/log:/var/log/postgresql
@@ -215,9 +216,6 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:7.10.2
     container_name: kibana-logsearch
-    depends_on:
-      elasticsearch:
-        condition: service_healthy
     ports:
       - "5601:5601"
     environment:
@@ -225,6 +223,9 @@ services:
       - 'ELASTICSEARCH_HOSTS=["http://elasticsearch:9200"]'
     networks:
       - elastic
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl http://localhost:5601"]
       interval: 15s

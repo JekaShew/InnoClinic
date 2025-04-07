@@ -1,6 +1,6 @@
-﻿namespace CommonLibrary.RabbitMQEvents;
+﻿namespace CommonLibrary.RabbitMQEvents.OfficeEvents;
 
-public class OfficeCreatedEvent
+public class OfficeUpdatedEvent
 {
     public string Id { get; set; }
     public string City { get; set; }

@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
+using CommonLibrary.RabbitMQEvents.SpecializationEvents;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Shared.DTOs.SpecializationDTOs;
 
@@ -14,5 +16,10 @@ public class SpecializationMappers : Profile
             .ForMember(s => s.Id, opt => opt.Ignore())
             .ForMember(s => s.DoctorSpecializations, opt => opt.Ignore());
         CreateMap<SpecializationForUpdateDTO, Specialization>();
+
+        CreateMap<SpecializationCreatedEvent, Specialization>();
+        CreateMap<SpecializationUpdatedEvent, Specialization>();
+        CreateMap<SpecializationDeletedEvent, Specialization>();
+        CreateMap<SpecializationCheckConsistancyEvent, Specialization>();
     }
 }

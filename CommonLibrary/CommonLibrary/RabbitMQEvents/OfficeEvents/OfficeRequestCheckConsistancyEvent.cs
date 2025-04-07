@@ -1,4 +1,4 @@
-﻿namespace CommonLibrary.RabbitMQEvents;
+﻿namespace CommonLibrary.RabbitMQEvents.OfficeEvents;
 
 public class OfficeRequestCheckConsistancyEvent
 {

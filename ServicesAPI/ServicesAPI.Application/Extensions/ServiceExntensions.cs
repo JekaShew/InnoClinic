@@ -46,8 +46,8 @@ public static class ServiceExntensions
             {
                 configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
                 {
-                    hostConfigurator.Username("guest");
-                    hostConfigurator.Password("guest");
+                    hostConfigurator.Username(configuration["MessageBroker:Username"]);
+                    hostConfigurator.Password(configuration["MessageBroker:Password"]);
                 });
 
                 configurator.ConfigureEndpoints(context);

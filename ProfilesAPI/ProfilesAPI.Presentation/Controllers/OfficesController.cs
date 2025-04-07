@@ -7,7 +7,6 @@ namespace ProfilesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-
 public class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
@@ -17,7 +16,7 @@ public class OfficesController : ControllerBase
     }
 
     /// <summary>
-    /// Administrator's Request to check and rewrite Offices From OfficesAPI
+    /// Administrator's Request to check and add Offices From OfficesAPI
     /// </summary>
     /// <returns>Message</returns>
     [HttpPost("requestcheckofficeconsistancy")]

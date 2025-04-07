@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CommonLibrary.RabbitMQEvents;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using MassTransit;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using ProfilesAPI.Domain.Data.Models;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProfilesAPI.Services.Services.OfficesConsumers
+namespace ProfilesAPI.Services.Services.OfficeConsumers
 {
     public class OfficeCreatedConsumer : IConsumer<OfficeCreatedEvent>
     {

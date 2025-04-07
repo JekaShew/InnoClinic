@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using CommonLibrary.RabbitMQEvents;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using MassTransit;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
@@ -10,7 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProfilesAPI.Services.Services.OfficesConsumers;
+namespace ProfilesAPI.Services.Services.OfficeConsumers;
 
 public class OfficeCheckConsistancyConsumer : IConsumer<OfficeCheckConsistancyEvent>
 {

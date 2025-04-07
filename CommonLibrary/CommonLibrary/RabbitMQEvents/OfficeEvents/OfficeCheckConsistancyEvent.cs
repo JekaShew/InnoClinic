@@ -1,6 +1,6 @@
-﻿namespace CommonLibrary.RabbitMQEvents;
+﻿namespace CommonLibrary.RabbitMQEvents.OfficeEvents;
 
-public class OfficeUpdatedEvent
+public class OfficeCheckConsistancyEvent
 {
     public string Id { get; set; }
     public string City { get; set; }

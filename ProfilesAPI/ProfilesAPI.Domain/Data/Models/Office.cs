@@ -11,6 +11,7 @@ public class Office
     public string? OfficeNumber { get; set; }
     public string RegistryPhoneNumber { get; set; }
     public bool IsActive { get; set; }
+    public bool? ToDelete { get; set; } = false;
 
     public override bool Equals(object obj)
     {

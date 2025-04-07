@@ -1,13 +1,9 @@
-﻿using AutoMapper;
-using CommonLibrary.CommonService;
+﻿using CommonLibrary.CommonService;
 using CommonLibrary.Constants;
-using CommonLibrary.RabbitMQEvents;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using InnoClinic.CommonLibrary.Response;
 using MassTransit;
-using ProfilesAPI.Domain.Data.Models;
-using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
-using static MassTransit.Logging.DiagnosticHeaders.Messaging;
 
 namespace ProfilesAPI.Services.Services;
 

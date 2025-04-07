@@ -30,13 +30,13 @@ public class SpecializationRepository : ISpecializationRepository
         }
     }
 
-    public async Task DeleteByIdAsync(Guid specializationId)
+    public async Task DeleteAsync(Specialization specialization)
     {
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Delete From Specializations " +
                 "Where Specializations.Id = @SpecializationId ";
-            await connection.ExecuteAsync(query, new { specializationId});
+            await connection.ExecuteAsync(query, new { specialization .Id});
         }
     }
 

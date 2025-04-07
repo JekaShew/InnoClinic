@@ -1,4 +1,4 @@
-﻿using CommonLibrary.RabbitMQEvents;
+﻿using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using MassTransit;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Shared.Mappers;

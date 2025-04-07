@@ -15,6 +15,7 @@ public class PhotoService : IPhotoService
     public PhotoService(IRepositoryManager repositoryManager)
     {
         _repositoryManager = repositoryManager;
+
     }
     public async Task<ResponseMessage<PhotoInfoDTO>> AddPhototoOffice(string officeId, IFormFile formFile)
     {
@@ -35,8 +36,8 @@ public class PhotoService : IPhotoService
         _repositoryManager.Photo.AddPhoto(photo);
         office.Photos.Add(photo);
         _repositoryManager.Office.UpdateOffice(office);
-
         await _repositoryManager.TransactionExecution();
+
         var photoInfoDTO = PhotoMapper.PhotoToPhotoInfoDTO(photo);
 
         return new ResponseMessage<PhotoInfoDTO>(photoInfoDTO);

@@ -1,6 +1,4 @@
-﻿using CommonLibrary.RabbitMQEvents;
-using InnoClinic.CommonLibrary.Response;
-using ProfilesAPI.Shared.DTOs.PatientDTOs;
+﻿using InnoClinic.CommonLibrary.Response;
 
 namespace ProfilesAPI.Services.Abstractions.Interfaces;
 

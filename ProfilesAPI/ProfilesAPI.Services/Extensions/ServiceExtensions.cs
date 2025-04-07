@@ -6,7 +6,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Services.Services;
-using ProfilesAPI.Services.Services.OfficesConsumers;
+using ProfilesAPI.Services.Services.OfficeConsumers;
+using ProfilesAPI.Services.Services.SpecializationConsumers;
 using System.Reflection;
 
 namespace ProfilesAPI.Services.Extensions
@@ -39,29 +40,29 @@ namespace ProfilesAPI.Services.Extensions
 
         private static IServiceCollection AddRabbitMQMethod(this IServiceCollection services, IConfiguration configuration)
         {
-            // FluentValidation
+            // RabbitMQ
             services.AddMassTransit(busConfigurator =>
             {
                 busConfigurator.SetKebabCaseEndpointNameFormatter();
                     
                 busConfigurator.AddConsumer<OfficeCreatedConsumer>();
+                busConfigurator.AddConsumer<OfficeDeletedConsumer>();
                 busConfigurator.AddConsumer<OfficeUpdatedConsumer>();
                 busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
 
+                busConfigurator.AddConsumer<SpecializationCreatedConsumer>();
+                busConfigurator.AddConsumer<SpecializationDeletedConsumer>();
+                busConfigurator.AddConsumer<SpecializationUpdatedConsumer>();
+                busConfigurator.AddConsumer<SpecializationCheckConsistancyConsumer>();
 
                 busConfigurator.UsingRabbitMq((context, configurator) =>
                 {
                     configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
                     {
-                        hostConfigurator.Username("guest");
-                        hostConfigurator.Password("guest");
+                        hostConfigurator.Username(configuration["MessageBroker:Username"]);
+                        hostConfigurator.Password(configuration["MessageBroker:Password"]);
                     });
 
-                    //configurator.Host("127.0.0.1",5672,"/", hostConfigurator =>
-                    //{ 
-                    //    hostConfigurator.Username("guest");
-                    //    hostConfigurator.Password("guest");
-                    //});
 
                     configurator.ConfigureEndpoints(context);
                 });
