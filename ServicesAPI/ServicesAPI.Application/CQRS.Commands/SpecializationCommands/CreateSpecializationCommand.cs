@@ -6,5 +6,5 @@ namespace ServicesAPI.Application.CQRS.Commands.SpecializationCommands;
 
 public class CreateSpecializationCommand : IRequest<ResponseMessage<SpecializationInfoDTO>>
 {
-    public SpecializationForCreateDTO? specializationForCreateDTO { get; set; }
+    public SpecializationForCreateDTO? SpecializationForCreateDTO { get; set; }
 }

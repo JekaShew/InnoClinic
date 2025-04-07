@@ -25,15 +25,15 @@ public class CreateSpecializationCommandHandler : IRequestHandler<CreateSpeciali
 
     public async Task<ResponseMessage<SpecializationInfoDTO>> Handle(CreateSpecializationCommand request, CancellationToken cancellationToken)
     {
-        var specialization = _mapper.Map<Specialization>(request.specializationForCreateDTO);
+        var specialization = _mapper.Map<Specialization>(request.SpecializationForCreateDTO);
         
         await _repositoryManager.BeginAsync();
         await _repositoryManager.Specialization.CreateAsync(specialization);
         var serviceCategorySpecializations = new List<ServiceCategorySpecialization>();
-        if (request.specializationForCreateDTO.ServiceCategories is not null 
-            && request.specializationForCreateDTO.ServiceCategories.Count >= 1)
+        if (request.SpecializationForCreateDTO.ServiceCategories is not null 
+            && request.SpecializationForCreateDTO.ServiceCategories.Count >= 1)
         {   
-            foreach(var serviceCategoryId in request.specializationForCreateDTO.ServiceCategories)
+            foreach(var serviceCategoryId in request.SpecializationForCreateDTO.ServiceCategories)
             {
                 var serviceCategorySpecialization = new ServiceCategorySpecialization
                 {

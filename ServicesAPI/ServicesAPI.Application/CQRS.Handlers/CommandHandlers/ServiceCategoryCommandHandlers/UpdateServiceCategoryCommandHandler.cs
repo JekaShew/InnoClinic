@@ -27,7 +27,7 @@ public class UpdateServiceCategoryCommandHandler : IRequestHandler<UpdateService
             return new ResponseMessage<ServiceCategoryInfoDTO>("Service Category not Found!", 404);
         }
 
-        serviceCategory = _mapper.Map<ServiceCategory>(request.serviceCategoryForUpdateDTO);
+        serviceCategory = _mapper.Map<ServiceCategory>(request.ServiceCategoryForUpdateDTO);
 
         await _repositoryManager.BeginAsync();
         var oldServiceCategorySpecializations = await _repositoryManager.ServiceCategorySpecialization
@@ -39,10 +39,10 @@ public class UpdateServiceCategoryCommandHandler : IRequestHandler<UpdateService
             await _repositoryManager.ServiceCategorySpecialization.DeleteAsync(oldServiceCategorySpecialization);
         }
 
-        if (request.serviceCategoryForUpdateDTO.Specialziations is not null
-        && request.serviceCategoryForUpdateDTO.Specialziations.Count >= 1)
+        if (request.ServiceCategoryForUpdateDTO.Specialziations is not null
+        && request.ServiceCategoryForUpdateDTO.Specialziations.Count >= 1)
         {
-            foreach (var newSpecializationId in request.serviceCategoryForUpdateDTO.Specialziations)
+            foreach (var newSpecializationId in request.ServiceCategoryForUpdateDTO.Specialziations)
             {
                 var serviceCategorySpecialization = new ServiceCategorySpecialization
                 {

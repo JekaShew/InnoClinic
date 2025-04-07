@@ -21,14 +21,14 @@ public class CreateServiceCategoryCommandHandler : IRequestHandler<CreateService
 
     public async Task<ResponseMessage<ServiceCategoryInfoDTO>> Handle(CreateServiceCategoryCommand request, CancellationToken cancellationToken)
     {
-        var serviceCategory = _mapper.Map<ServiceCategory>(request.serviceCategoryForCreateDTO);
+        var serviceCategory = _mapper.Map<ServiceCategory>(request.ServiceCategoryForCreateDTO);
         await _repositoryManager.BeginAsync();
         await _repositoryManager.ServiceCategory.CreateAsync(serviceCategory);
         var serviceCategorySpecializations = new List<ServiceCategorySpecialization>();
-        if (request.serviceCategoryForCreateDTO.Specializations is not null
-            && request.serviceCategoryForCreateDTO.Specializations.Count >= 1)
+        if (request.ServiceCategoryForCreateDTO.Specializations is not null
+            && request.ServiceCategoryForCreateDTO.Specializations.Count >= 1)
         {
-            foreach (var specializtionId in request.serviceCategoryForCreateDTO.Specializations)
+            foreach (var specializtionId in request.ServiceCategoryForCreateDTO.Specializations)
             {
                 var serviceCategorySpecialization = new ServiceCategorySpecialization
                 {

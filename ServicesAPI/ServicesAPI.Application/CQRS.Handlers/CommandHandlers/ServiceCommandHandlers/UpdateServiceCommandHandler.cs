@@ -29,7 +29,7 @@ public class UpdateServiceCommandHandler : IRequestHandler<UpdateServiceCommand,
             return new ResponseMessage<ServiceInfoDTO>("Service not Found!", 404);
         }
 
-        service = _mapper.Map<Service>(request.serviceForUpdateDTO);
+        service = _mapper.Map<Service>(request.ServiceForUpdateDTO);
         await _repositoryManager.Service.UpdateAsync(request.ServiceId, service);
         await _repositoryManager.CommitAsync();
         var serviceInfoDTO = _mapper.Map<ServiceInfoDTO>(service);

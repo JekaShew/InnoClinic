@@ -6,5 +6,5 @@ namespace ServicesAPI.Application.CQRS.Commands.ServiceCategoryCommands;
 
 public class CreateServiceCategoryCommand : IRequest<ResponseMessage<ServiceCategoryInfoDTO>>
 {
-    public ServiceCategoryForCreateDTO? serviceCategoryForCreateDTO { get; set; }
+    public ServiceCategoryForCreateDTO? ServiceCategoryForCreateDTO { get; set; }
 }

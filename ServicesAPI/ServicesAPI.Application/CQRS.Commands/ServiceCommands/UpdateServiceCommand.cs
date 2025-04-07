@@ -7,5 +7,5 @@ namespace ServicesAPI.Application.CQRS.Commands.ServiceCommands;
 public class UpdateServiceCommand : IRequest<ResponseMessage<ServiceInfoDTO>>
 {
     public Guid ServiceId { get; set; }
-    public ServiceForUpdateDTO? serviceForUpdateDTO { get; set; }
+    public ServiceForUpdateDTO? ServiceForUpdateDTO { get; set; }
 }

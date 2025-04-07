@@ -20,9 +20,9 @@ public class GetAllServiceCategorySpecializationQueryHandler : IRequestHandler<G
 
     public async Task<ResponseMessage<IEnumerable<ServiceCategorySpecializationInfoDTO>>> Handle(GetAllServiceCategorySpecializationQuery request, CancellationToken cancellationToken)
     {
-        var serviceCategorySpecializations = await _repositoryManager.ServiceCategorySpecialization.GetAllAsync(request.ServiceCategorySpecializationParameters);
+        var serviceCategorySpecializations = await _repositoryManager.ServiceCategorySpecialization.GetAllWithParametersAsync(request.ServiceCategorySpecializationParameters);
         var serviceCategorySpecializationInfoDTOs = _mapper.Map<IEnumerable<ServiceCategorySpecializationInfoDTO>>(serviceCategorySpecializations);
 
-        return new ResponseMessage<IEnumerable<ServiceCategorySpecializationInfoDTO>>(serviceCategorySpecializationInfoDTOs)
+        return new ResponseMessage<IEnumerable<ServiceCategorySpecializationInfoDTO>>(serviceCategorySpecializationInfoDTOs);
     }
 }

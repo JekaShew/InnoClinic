@@ -7,6 +7,6 @@ namespace ServicesAPI.Application.CQRS.Commands.ServiceCategoryCommands;
 public class UpdateServiceCategoryCommand : IRequest<ResponseMessage<ServiceCategoryInfoDTO>>
 {
     public Guid ServiceCategoryId { get; set; }
-    public ServiceCategoryForUpdateDTO? serviceCategoryForUpdateDTO { get; set; }
+    public ServiceCategoryForUpdateDTO? ServiceCategoryForUpdateDTO { get; set; }
 }
 

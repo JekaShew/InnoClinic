@@ -1,38 +1,38 @@
 ﻿using CommonLibrary.Response;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using ServicesAPI.Application.CQRS.Commands.ServiceCommands;
-using ServicesAPI.Application.CQRS.Queries.ServiceQueries;
-using ServicesAPI.Shared.DTOs.ServiceDTOs;
+using ServicesAPI.Application.CQRS.Commands.SpecializationCommands;
+using ServicesAPI.Application.CQRS.Queries.SpecializationQueries;
+using ServicesAPI.Shared.DTOs.SpecializationDTOs;
 
 namespace ServicesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ServiceController : ControllerBase
+public class SpecializationsController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public ServiceController(IMediator mediator)
+    public SpecializationsController(IMediator mediator)
     {
         _mediator = mediator;
     }
 
     /// <summary>
-    /// Gets selected Service
+    /// Gets selected Specialization
     /// </summary>
-    /// <returns>Single Service</returns>
-    [HttpGet("{serviceId}")]
-    [ProducesResponseType(typeof(ServiceInfoDTO), 200)]
+    /// <returns>Single Specialization</returns>
+    [HttpGet("{specializationId}")]
+    [ProducesResponseType(typeof(SpecializationInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetServiceById(Guid serviceId)
+    public async Task<IActionResult> GetSpecializationById(Guid specializationId)
     {
-        var result = await _mediator.Send(new GetServiceByIdQuery() { Id = serviceId });
+        var result = await _mediator.Send(new GetSpecializationByIdQuery() { Id = specializationId });
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -42,20 +42,20 @@ public class ServiceController : ControllerBase
     }
 
     /// <summary>
-    /// Gets the list of all Services
+    /// Gets the list of all Specializations
     /// </summary>
-    /// <returns>The Service list</returns>
+    /// <returns>The Specialization list</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(ICollection<ServiceTableInfoDTO>), 200)]
+    [ProducesResponseType(typeof(ICollection<SpecializationTableInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> GetAllServices([FromBody] ServiceParameters? serviceParameters)
+    public async Task<IActionResult> GetAllSpecializations([FromBody] SpecializationParameters? specializationParameters)
     {
-        var result = await _mediator.Send(new GetAllServicesQuery() { ServiceParameters = serviceParameters });
+        var result = await _mediator.Send(new GetAllSpecializationsQuery() { SpecializationParameters = specializationParameters });
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -65,11 +65,11 @@ public class ServiceController : ControllerBase
     }
 
     /// <summary>
-    /// Creates new Service
+    /// Creates new Specialization
     /// </summary>
-    /// <returns>Created Service</returns>
+    /// <returns>Created Specialization</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(ServiceInfoDTO), 201)]
+    [ProducesResponseType(typeof(SpecializationInfoDTO), 201)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -77,23 +77,23 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> AddService([FromBody] ServiceForCreateDTO serviceForCreateDTO)
+    public async Task<IActionResult> AddSpecialization([FromBody] SpecializationForCreateDTO specializationForCreateDTO)
     {
-        var result = await _mediator.Send(new CreateServiceCommand() { serviceForCreateDTO = serviceForCreateDTO});
+        var result = await _mediator.Send(new CreateSpecializationCommand() { SpecializationForCreateDTO = specializationForCreateDTO });
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
 
-        return CreatedAtAction(nameof(GetServiceById), new { serviceId = result.Value.Id }, result.Value);
+        return CreatedAtAction(nameof(GetSpecializationById), new { specializationId = result.Value.Id }, result.Value);
     }
 
     /// <summary>
-    /// Updates selected Service
+    /// Updates selected Specialization
     /// </summary>
-    /// <returns>Updated Service</returns>
-    [HttpPut("{serviceId}")]
-    [ProducesResponseType(typeof(ServiceInfoDTO), 200)]
+    /// <returns>Updated Specialization</returns>
+    [HttpPut("{specializationId}")]
+    [ProducesResponseType(typeof(SpecializationInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 404)]
@@ -101,9 +101,9 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateService(Guid serviceId, [FromBody] ServiceForUpdateDTO serviceForUpdateDTO)
+    public async Task<IActionResult> UpdateSpecialization(Guid specializationId, [FromBody] SpecializationForUpdateDTO specializationForUpdateDTO)
     {
-        var result = await _mediator.Send(new UpdateServiceCommand() { ServiceId = serviceId, ServiceForUpdateDTO = serviceForUpdateDTO});
+        var result = await _mediator.Send(new UpdateSpecializationCommand() { SpecializationId = specializationId, specializationForUpdateDTO = specializationForUpdateDTO});
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
@@ -113,34 +113,10 @@ public class ServiceController : ControllerBase
     }
 
     /// <summary>
-    /// Change Service Status
+    /// Deletes Specialization By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{serviceId}")]
-    [ProducesResponseType(200)]
-    [ProducesResponseType(typeof(FailMessage), 400)]
-    [ProducesResponseType(typeof(FailMessage), 403)]
-    [ProducesResponseType(typeof(FailMessage), 404)]
-    [ProducesResponseType(typeof(FailMessage), 408)]
-    [ProducesResponseType(typeof(FailMessage), 422)]
-    [ProducesResponseType(typeof(FailMessage), 500)]
-    //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> ChangeServiceStatus(Guid serviceId)
-    {
-        var result = await _mediator.Send(new ChangeServiceStatusCommand() { ServiceId = serviceId });
-        if (!result.IsComplited)
-        {
-            return new FailMessage(result.ErrorMessage, result.StatusCode);
-        }
-
-        return Ok();
-    }
-
-    /// <summary>
-    /// Deletes Service By Id
-    /// </summary>
-    /// <returns>Message</returns>
-    [HttpDelete("{serviceId}")]
+    [HttpDelete("{specializationId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -148,9 +124,9 @@ public class ServiceController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteServiceById(Guid serviceId)
+    public async Task<IActionResult> DeleteSpecializationById(Guid specializationId)
     {
-        var result = await _mediator.Send(new DeleteServiceCommand() { Id = serviceId });
+        var result = await _mediator.Send(new DeleteSpecializationCommand() { Id = specializationId });
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
