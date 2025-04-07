@@ -116,6 +116,7 @@ services:
   mssql-server:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: mssql-server-database
+    user: root
     environment: 
       - ACCEPT_EULA=Y
       - SA_USERNAME=sa
@@ -134,12 +135,13 @@ services:
       start_period: 15s
 
   postgresql-server:
-    image: postgres:17-bookworm
+    image: postgres:latest
     container_name: postgressql-server-database
+    user: root
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: SecretPassword321
-      #POSTGRES_DATABASE: ServicesDB
+      POSTGRES_DATABASE: ServicesDB
     volumes:
       - ./.containers/postgres/data:/var/lib/postgresql/data
       - ./.containers/postgres/log:/var/log/postgresql
@@ -200,7 +202,7 @@ services:
       bootstrap.memory_lock: "true"
       ES_JAVA_OPTS: -Xms256m -Xmx256m
     volumes:
-      - ".containers/elasticsearch/es-data-elasticsearch:/usr/share/elasticsearch/data"
+      - ".containers/elasticsearch/es-data-elasticsearch:/var/lib/elasticsearch/data"
     networks:
       - elastic
     ulimits:

@@ -21,7 +21,7 @@ public class GetAllSpecializationQueryHandler : IRequestHandler<GetAllSpecializa
     public async Task<ResponseMessage<IEnumerable<SpecializationTableInfoDTO>>> Handle(GetAllSpecializationsQuery request, CancellationToken cancellationToken)
     {
         var specializations = await _repositoryManager.Specialization.GetAllWithParametersAsync(request.SpecializationParameters);
-        var specializationTableInfoDTOs = _mapper.Map<IEnumerable<SpecializationTableInfoDTO>>(specializations);
+        var specializationTableInfoDTOs = _mapper.Map<IEnumerable<SpecializationTableInfoDTO>?>(specializations);
 
         return new ResponseMessage<IEnumerable<SpecializationTableInfoDTO>>(specializationTableInfoDTOs);
     }

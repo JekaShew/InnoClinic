@@ -11,7 +11,8 @@ public class SpecializationMappers : Profile
     {
         CreateMap<Specialization, SpecializationInfoDTO>();
 
-        CreateMap<Specialization, SpecializationTableInfoDTO>();
+        CreateMap<Specialization, SpecializationTableInfoDTO>()
+            .ForSourceMember(src => src.ServiceCategorySpecializations, opt => opt.DoNotValidate());
         
         CreateMap<SpecializationForCreateDTO, Specialization>();
         

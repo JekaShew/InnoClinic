@@ -1,4 +1,5 @@
-﻿using FluentValidation;
+﻿using System.Reflection;
+using FluentValidation;
 using MassTransit;
 using MediatR;
 using Microsoft.Extensions.Configuration;
@@ -11,9 +12,10 @@ public static class ServiceExntensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration configuration)
     {
+        services.AddAutoMapperService();
         services.AddMediatorService();
         services.AddFluentValidationService();
-        services.AddRabbitMQMethod(configuration);
+        services.AddRabbitMQService(configuration);
 
         return services;
     }
@@ -21,7 +23,9 @@ public static class ServiceExntensions
     public static IServiceCollection AddMediatorService(this IServiceCollection services)
     {
         services.AddMediatR(configuration =>
-            configuration.RegisterServicesFromAssembly(typeof(ServicesAPI.Application.CQRS.Commands.ServiceCommands.CreateServiceCommand).Assembly));
+        {
+            configuration.RegisterServicesFromAssembly(typeof(CQRS.Commands.ServiceCommands.CreateServiceCommand).Assembly);
+        });
 
         return services;
     }
@@ -33,7 +37,7 @@ public static class ServiceExntensions
         return services;
     }
 
-    private static IServiceCollection AddRabbitMQMethod(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddRabbitMQService(this IServiceCollection services, IConfiguration configuration)
     {
         // RabbitMQ + MassTransit
         services.AddMassTransit(busConfigurator =>
@@ -53,6 +57,14 @@ public static class ServiceExntensions
                 configurator.ConfigureEndpoints(context);
             });
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddAutoMapperService(this IServiceCollection services)
+    {
+        // AutoMapper
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         return services;
     }

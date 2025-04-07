@@ -16,7 +16,6 @@ public class SpecializationRequestCheckConsistancyConsumer : IConsumer<Specializ
     public SpecializationRequestCheckConsistancyConsumer(IRepositoryManager repositoryManager, IMapper mapper, ILogger logger, IPublishEndpoint publishEndpoint)
     {
         _repositoryManager = repositoryManager;
-
         _mapper = mapper;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
