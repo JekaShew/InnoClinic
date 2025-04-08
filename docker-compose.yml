@@ -141,7 +141,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: SecretPassword321
-      POSTGRES_DATABASE: ServicesDB
+      # POSTGRES_DATABASE: ServicesDB
     volumes:
       - ./.containers/postgres/data:/var/lib/postgresql/data
       - ./.containers/postgres/log:/var/log/postgresql

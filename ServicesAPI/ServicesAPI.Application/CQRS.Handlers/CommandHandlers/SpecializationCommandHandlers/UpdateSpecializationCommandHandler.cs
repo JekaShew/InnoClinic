@@ -31,7 +31,7 @@ public class UpdateSpecializationCommandHandler : IRequestHandler<UpdateSpeciali
             return new ResponseMessage<SpecializationInfoDTO>("Specialization not Found!", 404);
         }
 
-        specialization = _mapper.Map<Specialization>(request.specializationForUpdateDTO);
+        specialization = _mapper.Map(request.specializationForUpdateDTO, specialization);
 
         await _repositoryManager.BeginAsync();
         var oldServiceCategorySpecializations = await _repositoryManager.ServiceCategorySpecialization

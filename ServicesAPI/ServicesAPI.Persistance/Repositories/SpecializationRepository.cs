@@ -15,9 +15,14 @@ public class SpecializationRepository : GenericRepository<Specialization>, ISpec
         _servicesDBContext = servicesDBContext;
     }
 
-    public async Task<IEnumerable<Specialization>> GetAllWithParametersAsync(SpecializationParameters specializationParameters)
+    public async Task<IEnumerable<Specialization>> GetAllWithParametersAsync(SpecializationParameters? specializationParameters)
     {
         IQueryable<Specialization> specializations = _servicesDBContext.Specializations.AsQueryable();
+        if(specializationParameters is null)
+        {
+            specializationParameters = new SpecializationParameters();
+        }
+
         if (specializationParameters.SearchString is not null 
                 && specializationParameters.SearchString.Length != 0 )
         {

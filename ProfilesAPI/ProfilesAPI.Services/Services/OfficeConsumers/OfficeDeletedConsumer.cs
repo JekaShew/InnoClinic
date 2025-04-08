@@ -29,8 +29,15 @@ namespace ProfilesAPI.Services.Services.OfficeConsumers
             var officeToDelete = await _repositoryManager.Office.GetByIdAsync(context.Message.Id);
             try
             {
-                await _repositoryManager.Office.DeleteAsync(officeToDelete);
-                _logger.Information($"Succesfully deleted Office with Id: {context.Message.Id}");
+                if (officeToDelete is not null)
+                {
+                    await _repositoryManager.Office.DeleteAsync(officeToDelete);
+                    _logger.Information($"Succesfully deleted Office with Id: {context.Message.Id}");
+                }
+                else
+                {
+                    _logger.Information($"Error while deleting Office with Id: {context.Message.Id}! No Such Office Found!");
+                }
             }
             catch (Exception ex)
             {

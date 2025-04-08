@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using ServicesAPI.Domain.Data.IRepositories;
 using ServicesAPI.Persistance.Data;
 
@@ -9,6 +10,7 @@ public class EFCoreRepositoryManager : IRepositoryManager
     private ServicesDBContext _servicesDBContext;
     private IDbContextTransaction _transaction;
     private IServiceReposiotry _serviceRepository;
+    private IExecutionStrategy _strategy;
     private ISpecializationRepository _specializationRepository;
     private IServiceCategoryRepository _serviceCategory;
     private IServiceCategorySpecializationRepository _serviceCategorySpecialization;
@@ -47,11 +49,16 @@ public class EFCoreRepositoryManager : IRepositoryManager
     {
         try
         {
-            await _servicesDBContext.SaveChangesAsync();
+
             if (_transaction is not null)
             {
+                await _servicesDBContext.SaveChangesAsync();
                 await _transaction.CommitAsync();
             }
+            else
+            {
+                await _servicesDBContext.SaveChangesAsync();
+            }            
         }
         catch (Exception ex)
         {

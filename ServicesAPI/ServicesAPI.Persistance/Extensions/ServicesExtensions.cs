@@ -27,7 +27,7 @@ public static class ServicesExtensions
                 {
                     // if Migrations in different Assembly
                     postgresqlserverOption.MigrationsAssembly("ServicesAPI.Persistance");
-                    postgresqlserverOption.EnableRetryOnFailure();
+                    //postgresqlserverOption.EnableRetryOnFailure();
                 }));
 
         return services;

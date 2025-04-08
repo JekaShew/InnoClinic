@@ -27,7 +27,7 @@ public class UpdateServiceCategorySpecializationCommandHandler : IRequestHandler
             return new ResponseMessage<ServiceCategorySpecializationInfoDTO>("Related Service Category and Specialization not Found!", 404);
         }
 
-        serviceCategorySpecialization = _mapper.Map<ServiceCategorySpecialization>(request.ServiceCategorySpecializationForUpdateDTO);
+        serviceCategorySpecialization = _mapper.Map(request.ServiceCategorySpecializationForUpdateDTO, serviceCategorySpecialization);
         await _repositoryManager.ServiceCategorySpecialization.UpdateAsync(request.ServiceCategorySpecializationId, serviceCategorySpecialization);
         await _repositoryManager.CommitAsync();
         var serviceCategorySpecialziationInfoDTO = _mapper.Map<ServiceCategorySpecializationInfoDTO>(serviceCategorySpecialization);

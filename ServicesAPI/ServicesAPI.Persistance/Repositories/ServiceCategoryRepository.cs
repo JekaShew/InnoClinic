@@ -17,11 +17,16 @@ public class ServiceCategoryRepository : GenericRepository<ServiceCategory>, ISe
         _servicesDBContext = servicesDBContext;
     }
 
-    public async Task<IEnumerable<ServiceCategory>> GetAllWithParametersAsync(ServiceCategoryParameters serviceCategoryParameters)
+    public async Task<IEnumerable<ServiceCategory>> GetAllWithParametersAsync(ServiceCategoryParameters? serviceCategoryParameters)
     {
         IQueryable<ServiceCategory> serviceCategories = _servicesDBContext.ServiceCategiories.AsQueryable();
+        if(serviceCategoryParameters is null)
+        {
+            serviceCategoryParameters = new ServiceCategoryParameters();
+        }
+
         if (serviceCategoryParameters.SearchString is not null
-                && serviceCategoryParameters.SearchString.Length != 0)
+            && serviceCategoryParameters.SearchString.Length != 0)
         {
             serviceCategories = _servicesDBContext.ServiceCategiories
                 .Where(s =>

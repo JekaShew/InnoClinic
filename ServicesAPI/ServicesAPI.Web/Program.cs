@@ -3,6 +3,7 @@ using InnoClinic.CommonLibrary.Exceptions;
 using ServicesAPI.Application.Extensions;
 using ServicesAPI.Persistance.Extensions;
 using Serilog;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,8 +11,13 @@ builder.Host.AddSerilogMethod(builder.Configuration, builder.Configuration["Serv
 builder.Services.AddControllers(config =>
 {
     config.RespectBrowserAcceptHeader = true;
+    
 })
-    .AddApplicationPart(typeof(ServicesAPI.Presentation.Controllers.ServiceController).Assembly);
+    .AddJsonOptions(opt =>
+    {
+        opt.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    })
+    .AddApplicationPart(typeof(ServicesAPI.Presentation.Controllers.ServicesController).Assembly);
 
 
 builder.Services.AddSwaggerMethod();

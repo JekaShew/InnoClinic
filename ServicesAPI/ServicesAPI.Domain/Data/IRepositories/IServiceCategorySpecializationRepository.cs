@@ -5,5 +5,5 @@ namespace ServicesAPI.Domain.Data.IRepositories;
 
 public interface IServiceCategorySpecializationRepository : IGenericRepository<ServiceCategorySpecialization>
 {
-    public Task<IEnumerable<ServiceCategorySpecialization>> GetAllWithParametersAsync(ServiceCategorySpecializationParameters serviceParameters);
+    public Task<IEnumerable<ServiceCategorySpecialization>> GetAllWithParametersAsync(ServiceCategorySpecializationParameters? serviceParameters);
 }

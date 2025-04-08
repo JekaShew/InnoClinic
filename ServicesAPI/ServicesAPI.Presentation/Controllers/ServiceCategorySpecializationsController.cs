@@ -9,11 +9,11 @@ namespace ServicesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ServiceCategorySpecializationController : ControllerBase
+public class ServiceCategorySpecializationsController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public ServiceCategorySpecializationController(IMediator mediator)
+    public ServiceCategorySpecializationsController(IMediator mediator)
     {
         _mediator = mediator;
     }

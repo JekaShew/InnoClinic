@@ -63,12 +63,10 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
 
     public async Task<TEntity?> UpdateAsync(Guid Id, TEntity updatedEntity)
     {
-        _servicesDBContext.Set<TEntity>().Update(updatedEntity);
-
         var entityModel = await _servicesDBContext.Set<TEntity>().FindAsync(Id);
         if (entityModel is not null)
         {
-            _servicesDBContext.Set<TEntity>().Entry(updatedEntity).State = EntityState.Detached;
+            _servicesDBContext.Set<TEntity>().Entry(entityModel).State = EntityState.Detached;
             _servicesDBContext.Set<TEntity>().Update(updatedEntity);
         }
 

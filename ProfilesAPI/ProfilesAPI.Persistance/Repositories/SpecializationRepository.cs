@@ -16,13 +16,14 @@ public class SpecializationRepository : ISpecializationRepository
 
     public async Task CreateAsync(Specialization specialization)
     {
-        var query = "Insert into Specializations (Id, Title, Description) " +
-            "Values (@Id, @Title, @Description); ";
+        var query = "Insert into Specializations (Id, Title, Description, ToDelete) " +
+            "Values (@Id, @Title, @Description, @ToDelete); ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", Guid.NewGuid(), System.Data.DbType.Guid);
         parameters.Add("Title", specialization.Title, System.Data.DbType.String);
         parameters.Add("Description", specialization.Description, System.Data.DbType.String);
+        parameters.Add("ToDelete", specialization.ToDelete, System.Data.DbType.Boolean);
 
         using (var connection = _profilesDBContext.Connection)
         {
@@ -68,12 +69,13 @@ public class SpecializationRepository : ISpecializationRepository
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Update Specializations " +
-                "Set Title = @Title, Description = @Description " +
+                "Set Title = @Title, Description = @Description, ToDelete = @ToDelete " +
                 "Where Specializations.Id = @SpecializationId ";
             var parameters = new DynamicParameters();
             parameters.Add("SpecializationId", specializationId, System.Data.DbType.Guid);
             parameters.Add("Title", updatedSpecialization.Title, System.Data.DbType.String);
             parameters.Add("Description", updatedSpecialization.Description, System.Data.DbType.String);
+            parameters.Add("ToDelete", updatedSpecialization.ToDelete, System.Data.DbType.Boolean);
             await connection.ExecuteAsync(query, parameters);
         }
     }

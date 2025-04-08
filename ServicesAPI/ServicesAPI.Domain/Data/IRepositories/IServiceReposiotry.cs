@@ -5,5 +5,5 @@ namespace ServicesAPI.Domain.Data.IRepositories;
 
 public interface IServiceReposiotry : IGenericRepository<Service>
 {
-    public Task<IEnumerable<Service>> GetAllWithParametersAsync(ServiceParameters serviceParameters);
+    public Task<IEnumerable<Service>> GetAllWithParametersAsync(ServiceParameters? serviceParameters);
 }

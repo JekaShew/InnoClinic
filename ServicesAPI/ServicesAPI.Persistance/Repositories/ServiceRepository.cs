@@ -3,7 +3,6 @@ using ServicesAPI.Domain.Data.IRepositories;
 using ServicesAPI.Domain.Data.Models;
 using ServicesAPI.Persistance.Data;
 using ServicesAPI.Shared.DTOs.ServiceDTOs;
-using ServicesAPI.Shared.DTOs.SpecializationDTOs;
 
 namespace ServicesAPI.Persistance.Repositories;
 
@@ -16,9 +15,13 @@ public class ServiceRepository : GenericRepository<Service>, IServiceReposiotry
         _servicesDBContext = servicesDBContext;
     }
 
-    public async Task<IEnumerable<Service>> GetAllWithParametersAsync(ServiceParameters serviceParameters)
+    public async Task<IEnumerable<Service>> GetAllWithParametersAsync(ServiceParameters? serviceParameters)
     {
         IQueryable<Service> services = _servicesDBContext.Services.AsQueryable();
+        if(serviceParameters is null)
+        {
+            serviceParameters = new ServiceParameters();
+        }
 
         if (serviceParameters.MaxPrice is not null
                 && serviceParameters.MaxPrice >= serviceParameters.MinPrice)

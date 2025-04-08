@@ -14,11 +14,16 @@ public class ServiceCategorySpecializationRepository : GenericRepository<Service
         _servicesDBContext = servicesDBContext;
     }
 
-    public async Task<IEnumerable<ServiceCategorySpecialization>> GetAllWithParametersAsync(ServiceCategorySpecializationParameters serviceCategorySpecializationParameters)
+    public async Task<IEnumerable<ServiceCategorySpecialization>> GetAllWithParametersAsync(ServiceCategorySpecializationParameters? serviceCategorySpecializationParameters)
     {
         IQueryable<ServiceCategorySpecialization> serviceCategorySpecilaizations = _servicesDBContext.ServiceCategorySpecializations.AsQueryable();
+        if(serviceCategorySpecializationParameters is null)
+        {
+            serviceCategorySpecializationParameters = new ServiceCategorySpecializationParameters();
+        }
 
-        if (serviceCategorySpecializationParameters.ServiceCategories is not null && serviceCategorySpecializationParameters.ServiceCategories.Count >= 1)
+        if (serviceCategorySpecializationParameters.ServiceCategories is not null 
+            && serviceCategorySpecializationParameters.ServiceCategories.Count >= 1)
         {
             serviceCategorySpecilaizations = _servicesDBContext.ServiceCategorySpecializations
                 .Where(scs => serviceCategorySpecializationParameters.ServiceCategories.Any(sp => sp.Equals(scs.ServiceCategoryId)));
@@ -31,7 +36,7 @@ public class ServiceCategorySpecializationRepository : GenericRepository<Service
         }
 
         if (serviceCategorySpecializationParameters.ServiceCategorySearchString is not null
-                && serviceCategorySpecializationParameters.ServiceCategorySearchString.Length != 0)
+            && serviceCategorySpecializationParameters.ServiceCategorySearchString.Length != 0)
         {
             serviceCategorySpecilaizations = _servicesDBContext.ServiceCategorySpecializations
                 .Where(scs =>
@@ -42,7 +47,7 @@ public class ServiceCategorySpecializationRepository : GenericRepository<Service
         }
 
         if (serviceCategorySpecializationParameters.SpecializationSearchString is not null
-                && serviceCategorySpecializationParameters.SpecializationSearchString.Length != 0)
+            && serviceCategorySpecializationParameters.SpecializationSearchString.Length != 0)
         {
             serviceCategorySpecilaizations = _servicesDBContext.ServiceCategorySpecializations
                 .Where(scs =>

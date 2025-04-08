@@ -9,11 +9,11 @@ namespace ServicesAPI.Presentation.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class ServiceController : ControllerBase
+public class ServicesController : ControllerBase
 {
     private readonly IMediator _mediator;
 
-    public ServiceController(IMediator mediator)
+    public ServicesController(IMediator mediator)
     {
         _mediator = mediator;
     }
@@ -116,7 +116,7 @@ public class ServiceController : ControllerBase
     /// Change Service Status
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("{serviceId}")]
+    [HttpPut("changeservicestatus/{serviceId}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]

@@ -19,14 +19,22 @@ public class SpecializationDeletedConsumer : IConsumer<SpecializationDeletedEven
     public async Task Consume(ConsumeContext<SpecializationDeletedEvent> context)
     {
         var specializationToDelete = await _repositoryManager.Specialization.GetByIdAsync(context.Message.Id);
+
         try
         {
-            await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
-            _logger.Information($"Succesfully deleted Specialization with Id: {context.Message.Id}");
+            if(specializationToDelete is not null)
+            {
+                await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
+                _logger.Information($"Succesfully deleted Specialization with Id: {context.Message.Id}");
+            }
+            else
+            {
+                _logger.Information($"Error while deleting Specialization with Id: {context.Message.Id}! No Such Specialization Found!");
+            }
         }
         catch (Exception ex)
         {
-            _logger.Error($"Error deleting Specialization with Id: {context.Message.Id}. Exception: {ex.Message}");
+            _logger.Error($"Error while deleting Specialization with Id: {context.Message.Id}. Exception: {ex.Message}");
             _logger.Error($"UNABLE to DELETE Specialization with Id:{context.Message.Id}! It's ToDelete Status Changed to TRUE! Please Delete this Specialization with Id: {context.Message.Id} as soon as possible!");
             specializationToDelete.ToDelete = true;
             await _repositoryManager.Specialization.UpdateAsync(specializationToDelete.Id, specializationToDelete);

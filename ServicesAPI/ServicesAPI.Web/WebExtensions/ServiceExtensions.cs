@@ -40,7 +40,7 @@ namespace ServicesAPI.Web.WebExtensions
                 });
                 // Add xml Swagger comments
                 var swaggerAssambly = Assembly
-                    .GetAssembly(typeof(ServicesAPI.Presentation.Controllers.ServiceController));
+                    .GetAssembly(typeof(ServicesAPI.Presentation.Controllers.ServicesController));
                 var swaggerPath = Path.GetDirectoryName(swaggerAssambly.Location);
                 var xmlFile = $"{swaggerAssambly.GetName().Name}.xml";
                 var xmlPath = Path.Combine(swaggerPath, xmlFile);

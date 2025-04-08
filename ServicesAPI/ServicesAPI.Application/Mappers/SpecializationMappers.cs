@@ -16,10 +16,11 @@ public class SpecializationMappers : Profile
         
         CreateMap<SpecializationForCreateDTO, Specialization>();
         
-        CreateMap<SpecializationForUpdateDTO, Specialization>();
+        CreateMap<SpecializationForUpdateDTO, Specialization>()
+            .ForMember(dest => dest.Id, opt=> opt.Ignore());
 
-        CreateMap<SpecializationCreatedEvent, Specialization>();
-        CreateMap<SpecializationUpdatedEvent, Specialization>();
-        CreateMap<SpecializationDeletedEvent, Specialization>();
+        CreateMap<SpecializationCreatedEvent, Specialization>().ReverseMap();
+        CreateMap<SpecializationUpdatedEvent, Specialization>().ReverseMap();
+        CreateMap<SpecializationDeletedEvent, Specialization>().ReverseMap();
     }
 }
