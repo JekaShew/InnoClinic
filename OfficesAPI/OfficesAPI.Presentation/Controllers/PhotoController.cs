@@ -1,8 +1,9 @@
-﻿using CommonLibrary.Response;
+﻿using CommonLibrary.CommonService;
+using CommonLibrary.Constants;
+using CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
-using OfficesAPI.Shared.DTOs.OfficeDTOs;
 using OfficesAPI.Shared.DTOs.PhotoDTOs;
 
 namespace OfficesAPI.Presentation.Controllers;
@@ -13,6 +14,7 @@ namespace OfficesAPI.Presentation.Controllers;
 public class PhotoController : ControllerBase
 {
     private readonly IPhotoService _photoServices;
+ 
     public PhotoController(IPhotoService photoServices)
     {
         _photoServices = photoServices;

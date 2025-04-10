@@ -1,9 +1,10 @@
-﻿using CommonLibrary.Response;
+﻿using CommonLibrary.CommonService;
+using CommonLibrary.Constants;
+using CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Shared.DTOs.OfficeDTOs;
-using OfficesAPI.Shared.DTOs.PhotoDTOs;
 using Serilog;
 
 
@@ -14,12 +15,16 @@ namespace OfficesAPI.Presentation.Controllers;
 public class OfficesController : ControllerBase
 {
     private readonly IOfficeService _officeService;
+    private readonly ICacheService _cache;
+    private readonly CacheKeyConstants _cacheKeyConstants = new CacheKeyConstants("Offices");
 
     public OfficesController(
             IOfficeService officeService,
-            ILogger logger)
+            ILogger logger,
+            ICacheService cache)
     {
         _officeService = officeService;
+        _cache = cache;
     }
 
     /// <summary>
@@ -33,14 +38,22 @@ public class OfficesController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    public async Task<IActionResult> GetAllOffices()
+    public async ValueTask<IActionResult> GetAllOffices()
     {
+        var officeTableInfoDTOs = _cache.GetData<IEnumerable<OfficeTableInfoDTO>>(_cacheKeyConstants.GetAll);
+        if(officeTableInfoDTOs is not null)
+        {
+            return Ok(officeTableInfoDTOs);
+        }
+
         var result = await _officeService.GetAllOfficesAsync();
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
+
+        _cache.SetData(_cacheKeyConstants.GetAll, result.Value, TimeSpan.FromMinutes(5));
+
         return Ok(result.Value);
     }
 
@@ -57,12 +70,21 @@ public class OfficesController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 500)]
     public async Task<IActionResult> GetOfficeByid(string officeId)
     {
+        var cacheKey = $"{_cacheKeyConstants.GetById}{officeId}";
+        var officeTableInfoDTOs = _cache.GetData<IEnumerable<OfficeTableInfoDTO>>(cacheKey);
+        if (officeTableInfoDTOs is not null)
+        {
+            return Ok(officeTableInfoDTOs);
+        }
+
         var result = await _officeService.GetOfficeByIdAsync(officeId);
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
+
+        _cache.SetData(cacheKey, result.Value, TimeSpan.FromMinutes(5));
+
         return Ok(result.Value);
     }
 
@@ -88,7 +110,10 @@ public class OfficesController : ControllerBase
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
+
+        var cacheKey = $"{_cacheKeyConstants.GetById}{result.Value.Id}";
+        _cache.SetData(cacheKey, result.Value, TimeSpan.FromMinutes(3));
+
         return CreatedAtAction(nameof(GetOfficeByid), new { officeId = result.Value.Id }, result.Value);
     }
 
@@ -112,7 +137,12 @@ public class OfficesController : ControllerBase
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
+
+        _cache.RemoveData(_cacheKeyConstants.GetAll);
+        var cacheKey = $"{_cacheKeyConstants.GetById}{result.Value.Id}";
+        _cache.RemoveData(cacheKey);
+        _cache.SetData(cacheKey, result.Value, TimeSpan.FromMinutes(3));
+
         return Ok(result.Value);
     }
 
@@ -135,7 +165,11 @@ public class OfficesController : ControllerBase
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
+
+        _cache.RemoveData(_cacheKeyConstants.GetAll);
+        var cacheKey = $"{_cacheKeyConstants.GetById}{officeId}";
+        _cache.RemoveData(cacheKey);
+
         return NoContent();
     }
 
@@ -158,7 +192,11 @@ public class OfficesController : ControllerBase
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);
         }
-            
+
+        _cache.RemoveData(_cacheKeyConstants.GetAll);
+        var cacheKey = $"{_cacheKeyConstants.GetById}{officeId}";
+        _cache.RemoveData(cacheKey);
+
         return Ok();
     }
 }

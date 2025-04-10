@@ -19,6 +19,7 @@ public static class ServiceExtensions
 
         services.AddFluentValidationMethod();
         services.AddRabbitMQMethod(configuration);
+        //services.AddRedisCacheMethod(configuration);
 
         return services;
     }
@@ -54,4 +55,12 @@ public static class ServiceExtensions
 
         return services;
     }
+
+    //private static IServiceCollection AddRedisCacheMethod(this IServiceCollection services, IConfiguration configuration)
+    //{
+    //    // Redis Cache
+       
+
+    //    return services;
+    //}
 }

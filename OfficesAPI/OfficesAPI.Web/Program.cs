@@ -17,6 +17,7 @@ builder.Services.AddSwaggerMethod();
 builder.Services.AddCorsPolicies();
 
 builder.Services.AddCommonServices(builder.Configuration);
+builder.Services.AddRedisCache(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddPersistanceServices(builder.Configuration);

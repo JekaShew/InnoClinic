@@ -59,7 +59,6 @@ public static class CommonServicesExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {       
-        
         // CommonService
         services.AddScoped<ICommonService, CommonService>();
 
@@ -70,8 +69,27 @@ public static class CommonServicesExtensions
         // JWT Authentication Scheme
         JWTAuthenticationScheme.AddJWTAuthenticationScheme(services, configuration);
 
+        // Redis Cache
+        services.AddRedisCache(configuration);
+
         return services;
     }
+
+    public static IServiceCollection AddRedisCache(
+       this IServiceCollection services,
+       IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("RedisDocker");
+            options.InstanceName = configuration["Redis:InstanceName"];
+        });
+
+        services.AddScoped<ICacheService, CacheService>();
+
+        return services;
+    }
+
     public static IApplicationBuilder UseCommonPolicies(this IApplicationBuilder app)
     {
         app.UseExceptionHandler(opt => { });
