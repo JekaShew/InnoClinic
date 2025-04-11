@@ -71,7 +71,7 @@ public class OfficesController : ControllerBase
     public async Task<IActionResult> GetOfficeByid(string officeId)
     {
         var cacheKey = $"{_cacheKeyConstants.GetById}{officeId}";
-        var officeTableInfoDTOs = _cache.GetData<IEnumerable<OfficeTableInfoDTO>>(cacheKey);
+        var officeTableInfoDTOs = _cache.GetData<OfficeInfoDTO>(cacheKey);
         if (officeTableInfoDTOs is not null)
         {
             return Ok(officeTableInfoDTOs);
