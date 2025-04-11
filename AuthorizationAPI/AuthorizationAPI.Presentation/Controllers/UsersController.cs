@@ -256,7 +256,7 @@ public class UsersController : ControllerBase
     /// Changes User's role for Administrator
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPatch("{userId:guid}/changeroleofuser")]
+    [HttpPatch("{userId}/changeroleofuser")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]

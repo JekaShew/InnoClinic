@@ -1,9 +1,26 @@
 
 services:
-  authorization.web:
+  api.gateway:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=5000
+    image: apigateway
+    container_name: APIGateway
+    build:
+      context: .
+      args:
+      - BUILD_CONFIGURATION=Development
+      dockerfile: APIGateway/APIGateway/Dockerfile
+    ports:
+    -  "5000:5000"
+    restart: on-failure
+    # networks:
+    #   - backend
+
+  authorization.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=5001
     image: authorizationapi
     container_name: AuthorizationAPI-microsrervice
     build:
@@ -12,7 +29,7 @@ services:
       - BUILD_CONFIGURATION=Development
       dockerfile: AuthorizationAPI/AuthorizationAPI.Web/Dockerfile
     ports:
-    -  "5000:5000"
+    -  "5001:5001"
     restart: on-failure
     depends_on:
       elasticsearch:
@@ -30,7 +47,7 @@ services:
   offices.web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=5001
+      - ASPNETCORE_HTTP_PORTS=5002
     image: officesapi
     container_name: OfficesAPI-microsrervice
     build:
@@ -39,7 +56,7 @@ services:
       - BUILD_CONFIGURATION=Development
       dockerfile: OfficesAPI/OfficesAPI.Web/Dockerfile
     ports:
-    - "5001:5001"
+    - "5002:5002"
     restart: on-failure
     depends_on:
       elasticsearch:
@@ -56,7 +73,7 @@ services:
   profiles.web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=5002
+      - ASPNETCORE_HTTP_PORTS=5003
     image: profilesapi
     container_name: ProfilesAPI-microsrervice
     build:
@@ -65,7 +82,7 @@ services:
       - BUILD_CONFIGURATION=Development
       dockerfile: ProfilesAPI/ProfilesAPI.Web/Dockerfile
     ports:
-    - "5002:5002"
+    - "5003:5003"
     restart: on-failure
     depends_on:
       elasticsearch:
@@ -88,7 +105,7 @@ services:
   services.web:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_HTTP_PORTS=5003
+      - ASPNETCORE_HTTP_PORTS=5004
     image: servicesapi
     container_name: ServicesAPI-microsrervice
     build:
@@ -97,7 +114,7 @@ services:
       - BUILD_CONFIGURATION=Development
       dockerfile: ServicesAPI/ServicesAPI.Web/Dockerfile
     ports:
-    - "5003:5003"
+    - "5004:5004"
     restart: on-failure
     depends_on:
       elasticsearch:
@@ -124,6 +141,8 @@ services:
     volumes:
     - ./.containers/sqlserver/data:/var/opt/mssql/data
     - ./.containers/sqlserver/log:/var/opt/mssql/log
+    - mssqlDB-data:/var/opt/mssql/data
+    - mssqlDB-log:/var/opt/mssql/log
     ports: 
     - "1433:1433"
     restart: always
@@ -162,6 +181,7 @@ services:
     container_name: profiles.azure-blob-storage
     volumes:
     - ./.containers/azure-blob-storage:/data
+    - azurite-blob-storage:/data
     ports:
     - "10000:10000"
     command: "azurite-blob --blobHost 0.0.0.0 -l /data"
@@ -180,6 +200,7 @@ services:
     volumes:
       # This is where smtp4dev stores the database..
         - ./.containers/smtp4dev-data:/smtp4dev
+        - smtp4dev:/smtp4dev
     environment:
       #Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. "/" or "/smtp4dev"
       # - ServerOptions__BasePath=/smtp4dev
@@ -205,6 +226,7 @@ services:
       ES_JAVA_OPTS: -Xms256m -Xmx256m
     volumes:
       - ".containers/elasticsearch/es-data-elasticsearch:/var/lib/elasticsearch/data"
+      - elasticsearch:/var/lib/elasticsearch/data
     networks:
       - elastic
     ulimits:
@@ -246,6 +268,7 @@ services:
       - "5341:5341"
     volumes:
       - ./.containers/seq/data:/data
+      - seq:/data
 
   rabbit-mq:
     image: rabbitmq:management
@@ -256,6 +279,7 @@ services:
     hostname: innoclinic-rabbitmq
     volumes:
       - ./.containers/rabbitmq/data:/var/lib/rabbitmq
+      - rabbitmq:/var/lib/rabbitmq
     environment:
       RABBITMQ_DEFAULT_USER: "guest"
       RABBITMQ_DEFAULT_PASS: "guest" 
@@ -272,6 +296,7 @@ services:
       - "6379:6379"
     volumes:
       - ./.containers/redis/data:/data
+      - redis:/data
     restart: always 
     healthcheck:
       test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
@@ -283,9 +308,18 @@ services:
 volumes:
   es-data-elasticsearch:
     driver: local
+  mssqlDB-data:
+  mssqlDB-log:
   postgresDB-data:
   postgresDB-log:
+  azurite-blob-storage:
+  smtp4dev:
+  elasticsearch:
+  seq:
+  rabbitmq:
+  redis:
 
 networks: 
   elastic:
     driver: bridge
+  backend:

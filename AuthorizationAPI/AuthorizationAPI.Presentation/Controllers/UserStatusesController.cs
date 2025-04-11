@@ -20,7 +20,7 @@ public class UserStatusesController : ControllerBase
     /// Gets selected User Status
     /// </summary>
     /// <returns>Single User Status</returns>
-    [HttpGet("{userStatusId:guid}")]
+    [HttpGet("{userStatusId}")]
     [ProducesResponseType(typeof(UserStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -90,7 +90,7 @@ public class UserStatusesController : ControllerBase
     /// Updates selected User Status 
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("/{userStatusId:guid}")]
+    [HttpPut("/{userStatusId}")]
     [ProducesResponseType(typeof(UserStatusInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -114,7 +114,7 @@ public class UserStatusesController : ControllerBase
     /// Deletes User Status By Id
     /// </summary>
     /// <returns>Message</returns>
-    [HttpDelete("{userStatusId:guid}")]
+    [HttpDelete("{userStatusId}")]
     [ProducesResponseType(204)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]

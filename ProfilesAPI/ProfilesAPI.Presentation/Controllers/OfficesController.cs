@@ -19,7 +19,7 @@ public class OfficesController : ControllerBase
     /// Administrator's Request to check and add Offices From OfficesAPI
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPost("requestcheckofficeconsistancy")]
+    [HttpPost("checkconsistancy")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 500)]

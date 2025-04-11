@@ -1,6 +1,4 @@
-﻿using CommonLibrary.CommonService;
-using CommonLibrary.Constants;
-using CommonLibrary.Response;
+﻿using CommonLibrary.Response;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OfficesAPI.Services.Abstractions.Interfaces;
@@ -11,11 +9,11 @@ namespace OfficesAPI.Presentation.Controllers;
 [Route("api/Offices/{officeId}/[controller]")]
 [ApiController]
 
-public class PhotoController : ControllerBase
+public class PhotosController : ControllerBase
 {
     private readonly IPhotoService _photoServices;
  
-    public PhotoController(IPhotoService photoServices)
+    public PhotosController(IPhotoService photoServices)
     {
         _photoServices = photoServices;
     }
@@ -71,7 +69,7 @@ public class PhotoController : ControllerBase
     /// Gets the list of all Photos
     /// </summary>
     /// <returns>The Photos list</returns>
-    [HttpGet("/getallphotos")]
+    [HttpGet("/api/Photos/getallphotos")]
     [ProducesResponseType(typeof(IEnumerable<PhotoInfoDTO>), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]
@@ -116,7 +114,7 @@ public class PhotoController : ControllerBase
     /// Gets selected Photo
     /// </summary>
     /// <returns>Single Photo</returns>
-    [HttpGet("/{photoId}")]
+    [HttpGet("/api/Photos/{photoId}")]
     [ProducesResponseType(typeof(PhotoInfoDTO), 200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]

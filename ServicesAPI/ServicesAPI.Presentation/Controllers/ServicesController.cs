@@ -116,7 +116,7 @@ public class ServicesController : ControllerBase
     /// Change Service Status
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPut("changeservicestatus/{serviceId}")]
+    [HttpPut("{serviceId}/changeservicestatus")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 400)]
     [ProducesResponseType(typeof(FailMessage), 403)]

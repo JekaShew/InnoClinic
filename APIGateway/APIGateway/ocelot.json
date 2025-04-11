@@ -1,0 +1,763 @@
+{
+    "GlobalConfiguration": {
+        "BaseUrl": "http://localhost:5000",
+        "RateLimitOptions": {
+            "QuotaExceededMessage": "Request not Allowed! Plese try again later.",
+            "HttpStatusCode": 429
+        }
+    },
+    "Routes": [
+        // AuthorizationAPI Routes
+        // AuthorizationAPI -> Authorization Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Authorization/signin",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Authorization/signin",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ],
+            "RateLimitOptions": {
+                "EnableRateLimiting": true,
+                "Period": "10s",
+                "Limit": 9,
+                "PeriodTimespan": 10
+            }
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Authorization/signout",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Authorization/signout",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ],
+            "RateLimitOptions": {
+                "EnableRateLimiting": true,
+                "Period": "5s",
+                "Limit": 5,
+                "PeriodTimespan": 10
+            }
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Authorization/signup",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Authorization/signup",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ],
+            "RateLimitOptions": {
+                "EnableRateLimiting": true,
+                "Period": "10s",
+                "Limit": 7,
+                "PeriodTimespan": 10
+            }
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Authorization/refresh",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Authorization/refresh",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ],
+            "RateLimitOptions": {
+                "EnableRateLimiting": true,
+                "Period": "10s",
+                "Limit": 30,
+                "PeriodTimespan": 10
+            }
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Authorization/resendemailverification",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Authorization/resendemailverification",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+
+        // AuthorizationAPI -> Email Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Emails/{userId}/sendfromdoctoremail",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Emails/{userId}/sendfromdoctoremail",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Emails/{userId}/sendfromadministratoremail",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Emails/{userId}/sendfromadministratoremail",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Emails/{userId:guid}/sendfromnoreplyemail",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Emails/{userId:guid}/sendfromnoreplyemail",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        // AuthorizationAPI -> RefreshToken Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/RefreshTokens/{refreshTokenId}",
+            "UpstreamHttpMethod": [ "Get", "Delete" ],
+            "DownstreamPathTemplate": "/api/RefreshTokens/{refreshTokenId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/RefreshTokens",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/RefreshTokens",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/RefreshTokens/{refreshTokenId}/revoke",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/RefreshTokens/{refreshTokenId}/revoke",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        // AuthorizationAPI -> Role Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Roles/{roleId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Roles/{roleId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ],
+            "RateLimitOptions": {
+                "EnableRateLimiting": true,
+                "Period": "10s",
+                "Limit": 10,
+                "PeriodTimespan": 10
+            },
+            "FileCacheOptions": {
+                "TtlSeconds": 10
+            }
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Roles",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Roles",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ],
+            "RateLimitOptions": {
+                "EnableRateLimiting": true,
+                "Period": "10s",
+                "Limit": 7,
+                "PeriodTimespan": 10
+            },
+            "FileCacheOptions": {
+                "TtlSeconds": 10
+            }
+        },
+        // AuthorizationAPI -> UserStatuses Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/UserStatuses/{userStatusId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/UserStatuses/{userStatusId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/UserStatuses",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/UserStatuses",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        // AuthorizationAPI -> Users Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/{userId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Users/{userId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/{userId}/getbyadministrator",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/Users/{userId}/getbyadministrator",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/{userId}/updatebyadministrator",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Users/{userId}/updatebyadministrator",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/Users",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/deletecurrentaccount",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Users/deletecurrentaccount",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/changepasswordbyoldpassword",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Users/changepasswordbyoldpassword",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/changeforgottenpasswordbysecretphrase",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Users/changeforgottenpasswordbysecretphrase",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/{userId}/changeuserstatusofuser",
+            "UpstreamHttpMethod": [ "Patch" ],
+            "DownstreamPathTemplate": "/api/Users/{userId}/changeuserstatusofuser",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/{userId}/changeroleofuser",
+            "UpstreamHttpMethod": [ "Patch" ],
+            "DownstreamPathTemplate": "/api/Users/{userId}/changeroleofuser",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        // ??? Rework sending link to email with query parameters ???
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/verifyemail",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/Users/verifyemail",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/changeemailbypassword",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Users/changeemailbypassword",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/changeforgottenpasswordbyemailrequest",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Users/changeforgottenpasswordbyemailrequest",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Users/changeforgottenpasswordbyemail",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Users/changeforgottenpasswordbyemail",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5001
+                }
+            ]
+        },
+        // OfficesAPI Routes
+        // OfficesAPI -> Offices Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Offices",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Offices",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Offices/{officeId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Offices/{officeId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Offices/{officeId}/changestatusofofficebyid",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Offices/{officeId}/changestatusofofficebyid",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        // OfficesAPI -> Photos Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Offices/{officeId}/Photos",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Offices/{officeId}/Photos",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Offices/{officeId}/Photos/{photoId}",
+            "UpstreamHttpMethod": [ "Delete" ],
+            "DownstreamPathTemplate": "/api/Offices/{officeId}/Photos/{photoId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Photos/{photoId}",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/Photos/{photoId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Photos/getallphotos",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/Photos/getallphotos",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5002
+                }
+            ]
+        },
+        // ProfilesAPI Routes
+        // ProfilesAPI -> Administrators Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Administrators/{administratorId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Administrators/{administratorId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Administrators",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Administrators",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        // ProfilesAPI -> Receptionists Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Receptionists/{receptionistId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Receptionists/{receptionistId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Receptionists",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Receptionists",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        // ProfilesAPI -> Patients Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Patients/{patientId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Patients/{patientId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Patients",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Patients",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        // ProfilesAPI -> WorkStatuses Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/WorkStatuses/{workStatusId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/WorkStatuses/{workStatusId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/WorkStatuses",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/WorkStatuses",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        // ProfilesAPI -> Doctors Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Doctors/{doctorId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Doctors/{doctorId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Doctors/{doctorId}/updatedoctorspecializations",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Doctors/{doctorId}/updatedoctorspecializations",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Doctors",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Doctors",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        // ProfilesAPI -> Specializations Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Specialization/checkconsistancy",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Specialization/checkconsistancy",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+        // ProfilesAPI -> Offices Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Offices/checkconsistancy",
+            "UpstreamHttpMethod": [ "Post" ],
+            "DownstreamPathTemplate": "/api/Offices/checkconsistancy",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5003
+                }
+            ]
+        },
+
+        // ServicesAPI Routes
+        // ServicesAPI -> Specializations Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Specializations/{specializationId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Specializations/{specializationId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Specializations",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Specializations",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        // ServicesAPI -> ServiceCategories Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/ServiceCategories/{serviceCategoryId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/ServiceCategories/{serviceCategoryId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/ServiceCategories",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/ServiceCategories",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        // ServicesAPI -> ServiceCategorySpecializations Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/ServiceCategorySpecializations/{serviceCategorySpecializationId}",
+            "UpstreamHttpMethod": [ "Get", "Put" ],
+            "DownstreamPathTemplate": "/api/ServiceCategorySpecializations/{serviceCategorySpecializationId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/ServiceCategorySpecializations",
+            "UpstreamHttpMethod": [ "Get" ],
+            "DownstreamPathTemplate": "/api/ServiceCategorySpecializations",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        // ServicesAPI -> Services Controller
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Services/{serviceId}",
+            "UpstreamHttpMethod": [ "Get", "Put", "Delete" ],
+            "DownstreamPathTemplate": "/api/Services/{serviceId}",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Services/{serviceId}/changeservicestatus",
+            "UpstreamHttpMethod": [ "Put" ],
+            "DownstreamPathTemplate": "/api/Services/{serviceId}/changeservicestatus",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        },
+        {
+            "UpstreamPathTemplate": "/InnoClinic/Services",
+            "UpstreamHttpMethod": [ "Get", "Post" ],
+            "DownstreamPathTemplate": "/api/Services",
+            "DownstreamScheme": "http",
+            "DownstreamHostAndPorts": [
+                {
+                    "Host": "host.docker.internal",
+                    "Port": 5004
+                }
+            ]
+        }
+    ]
+}

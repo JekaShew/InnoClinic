@@ -1,4 +1,5 @@
 ﻿using CommonLibrary.CommonService;
+using CommonLibrary.Middlewarel;
 using InnoClinic.CommonLibrary.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -79,10 +80,11 @@ public static class CommonServicesExtensions
        this IServiceCollection services,
        IConfiguration configuration)
     {
+        var instanceName = configuration["Redis:InstanceName"];
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = configuration.GetConnectionString("RedisDocker");
-            options.InstanceName = configuration["Redis:InstanceName"];
+            options.InstanceName = instanceName;
         });
 
         services.AddScoped<ICacheService, CacheService>();
@@ -93,6 +95,7 @@ public static class CommonServicesExtensions
     public static IApplicationBuilder UseCommonPolicies(this IApplicationBuilder app)
     {
         app.UseExceptionHandler(opt => { });
+        app.UseMiddleware<APIGatewayDefence>();
         app.UseSerilogRequestLogging();
 
         return app;

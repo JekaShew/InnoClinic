@@ -21,7 +21,7 @@ public class SpecializationsController : ControllerBase
     /// Administrator's Request to check and add Specializations From ProfilesAPI
     /// </summary>
     /// <returns>Message</returns>
-    [HttpPost("requestcheckspecializationconsistancy")]
+    [HttpPost("checkconsistancy")]
     [ProducesResponseType(200)]
     [ProducesResponseType(typeof(FailMessage), 403)]
     [ProducesResponseType(typeof(FailMessage), 500)]
