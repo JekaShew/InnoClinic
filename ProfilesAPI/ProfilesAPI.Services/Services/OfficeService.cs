@@ -63,25 +63,11 @@ public class OfficeService : IOfficeService
     public async Task DeleteOfficeAsync(OfficeDeletedEvent officeDeletedEvent)
     {
         var officeToDelete = await _repositoryManager.Office.GetByIdAsync(officeDeletedEvent.Id);
-        try
+
+        if (officeToDelete is not null)
         {
-            if (officeToDelete is not null)
-            {
-                await _repositoryManager.Office.DeleteAsync(officeToDelete);
-                _logger.Information($"Succesfully deleted Office with Id: {officeDeletedEvent.Id}");
-            }
-            else
-            {
-                _logger.Information($"Error while deleting Office with Id: {officeDeletedEvent.Id}! No Such Office Found!");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error deleting Office with Id: {officeDeletedEvent.Id}. Exception: {ex.Message}");
-            _logger.Error($"UNABLE to DELETE Office with Id:{officeDeletedEvent.Id}! It's IsDelete Status Changed to TRUE! Please Delete this Office with Id: {officeDeletedEvent.Id} as soon as possible!");
-            officeToDelete.IsDelete = true;
-            await _repositoryManager.Office.UpdateAsync(officeToDelete.Id, officeToDelete);
-            _logger.Error($"Error deleting Office with Id: {officeDeletedEvent.Id}. Exception: {ex.Message}");
+            await _repositoryManager.Office.DeleteAsync(officeToDelete);
+            _logger.Information($"Succesfully deleted Office with Id: {officeDeletedEvent.Id}");
         }
     }
 

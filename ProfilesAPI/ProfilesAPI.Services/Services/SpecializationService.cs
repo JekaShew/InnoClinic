@@ -81,26 +81,11 @@ public class SpecializationService : ISpecializationService
     {
         var specializationToDelete = await _repositoryManager.Specialization.GetByIdAsync(specializationDeletedEvent.Id);
 
-        try
+        if (specializationToDelete is not null)
         {
-            if (specializationToDelete is not null)
-            {
-                await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
-                _logger.Information($"Succesfully deleted Specialization with Id: {specializationDeletedEvent.Id}");
-            }
-            else
-            {
-                _logger.Information($"Error while deleting Specialization with Id: {specializationDeletedEvent.Id}! No Such Specialization Found!");
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.Error($"Error while deleting Specialization with Id: {specializationDeletedEvent.Id}. Exception: {ex.Message}");
-            _logger.Error($"UNABLE to DELETE Specialization with Id:{specializationDeletedEvent.Id}! It's IsDelete Status Changed to TRUE! Please Delete this Specialization with Id: {specializationDeletedEvent.Id} as soon as possible!");
-            specializationToDelete.IsDelete = true;
-            await _repositoryManager.Specialization.UpdateAsync(specializationToDelete.Id, specializationToDelete);
-            _logger.Error($"Error deleting Specialization with Id: {specializationDeletedEvent.Id}. Exception: {ex.Message}");
-        }
+            await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
+            _logger.Information($"Succesfully deleted Specialization with Id: {specializationDeletedEvent.Id}");
+        }        
     }
 
     public async Task UpdateSpecializationAsync(SpecializationUpdatedEvent specializationUpdatedEvent)
