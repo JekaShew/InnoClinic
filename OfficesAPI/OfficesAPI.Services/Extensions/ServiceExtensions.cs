@@ -1,10 +1,8 @@
 ﻿using FluentValidation;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using OfficesAPI.Services.Abstractions.Interfaces;
 using OfficesAPI.Services.Services;
-using OfficesAPI.Services.Services.OfficesConsumers;
 using System.Reflection;
 
 namespace OfficesAPI.Services.Extensions;
@@ -16,10 +14,7 @@ public static class ServiceExtensions
         // Registration of Services
         services.AddScoped<IOfficeService, OfficeService>();
         services.AddScoped<IPhotoService, PhotoService>();
-
         services.AddFluentValidationMethod();
-        services.AddRabbitMQMethod(configuration);
-        //services.AddRedisCacheMethod(configuration);
 
         return services;
     }
@@ -31,36 +26,4 @@ public static class ServiceExtensions
 
         return services;
     }
-
-    private static IServiceCollection AddRabbitMQMethod(this IServiceCollection services, IConfiguration configuration)
-    {
-        // FluentValidation
-        services.AddMassTransit(busConfigurator =>
-        {
-            busConfigurator.SetKebabCaseEndpointNameFormatter();
-
-            busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
-            
-            busConfigurator.UsingRabbitMq((context, configurator) =>
-            {
-                configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
-                {
-                    hostConfigurator.Username(configuration["MessageBroker:Username"]);
-                    hostConfigurator.Password(configuration["MessageBroker:Password"]);
-                });
-                
-                configurator.ConfigureEndpoints(context);
-            });
-        });
-
-        return services;
-    }
-
-    //private static IServiceCollection AddRedisCacheMethod(this IServiceCollection services, IConfiguration configuration)
-    //{
-    //    // Redis Cache
-       
-
-    //    return services;
-    //}
 }

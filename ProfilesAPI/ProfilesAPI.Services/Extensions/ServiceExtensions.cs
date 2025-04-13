@@ -1,13 +1,9 @@
 ﻿using Azure.Storage.Blobs;
-using CommonLibrary.RabbitMQEvents;
 using FluentValidation;
-using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using ProfilesAPI.Services.Services;
-using ProfilesAPI.Services.Services.OfficeConsumers;
-using ProfilesAPI.Services.Services.SpecializationConsumers;
 using System.Reflection;
 
 namespace ProfilesAPI.Services.Extensions
@@ -33,40 +29,6 @@ namespace ProfilesAPI.Services.Extensions
             services.AddAzureBlobStorageMethod(configuration);
             services.AddFluentValidationMethod();
             services.AddAutoMapperMethod();
-            services.AddRabbitMQMethod(configuration);
-
-            return services;
-        }
-
-        private static IServiceCollection AddRabbitMQMethod(this IServiceCollection services, IConfiguration configuration)
-        {
-            // RabbitMQ
-            services.AddMassTransit(busConfigurator =>
-            {
-                busConfigurator.SetKebabCaseEndpointNameFormatter();
-                    
-                busConfigurator.AddConsumer<OfficeCreatedConsumer>();
-                busConfigurator.AddConsumer<OfficeDeletedConsumer>();
-                busConfigurator.AddConsumer<OfficeUpdatedConsumer>();
-                busConfigurator.AddConsumer<OfficeCheckConsistancyConsumer>();
-
-                busConfigurator.AddConsumer<SpecializationCreatedConsumer>();
-                busConfigurator.AddConsumer<SpecializationDeletedConsumer>();
-                busConfigurator.AddConsumer<SpecializationUpdatedConsumer>();
-                busConfigurator.AddConsumer<SpecializationCheckConsistancyConsumer>();
-
-                busConfigurator.UsingRabbitMq((context, configurator) =>
-                {
-                    configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
-                    {
-                        hostConfigurator.Username(configuration["MessageBroker:Username"]);
-                        hostConfigurator.Password(configuration["MessageBroker:Password"]);
-                    });
-
-
-                    configurator.ConfigureEndpoints(context);
-                });
-            });
 
             return services;
         }

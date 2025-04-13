@@ -1,4 +1,5 @@
 ﻿using CommonLibrary.RabbitMQEvents;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
@@ -162,5 +163,13 @@ public class OfficeService : IOfficeService
         await _publishEndpoint.Publish(officeUpdatedEvent);
 
         return new ResponseMessage();
+    }
+
+    public async Task<IEnumerable<OfficeCheckConsistancyEvent>> GetAllOfficeCheckConsistancyEventsAsync()
+    {
+        var offices = await _repositoryManager.Office.GetAllOfficesAsync();
+        var officeCheckConsistancyEvents = offices.Select(o => OfficeMapper.OfficeToOfficeCheckConsistancyEvent(o));
+
+        return officeCheckConsistancyEvents;
     }
 }

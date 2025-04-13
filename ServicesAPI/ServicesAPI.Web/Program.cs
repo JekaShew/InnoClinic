@@ -4,6 +4,7 @@ using ServicesAPI.Application.Extensions;
 using ServicesAPI.Persistance.Extensions;
 using Serilog;
 using System.Text.Json.Serialization;
+using ServicesAPI.Presentation.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddCommonServices(builder.Configuration);
 
 builder.Services.AddPersistanceServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddPresentationServices(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 

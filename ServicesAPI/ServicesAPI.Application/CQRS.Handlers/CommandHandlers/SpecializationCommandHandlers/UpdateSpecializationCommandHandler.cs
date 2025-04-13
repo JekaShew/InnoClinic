@@ -54,7 +54,6 @@ public class UpdateSpecializationCommandHandler : IRequestHandler<UpdateSpeciali
                     SpecializationId = specialization.Id
                 };
                 newServiceCategorySpecializations.Add(serviceCategorySpecialization);
-                // await _repositoryManager.ServiceCategorySpecialization.CreateAsync(serviceCategorySpercialization);
             }
         }
 

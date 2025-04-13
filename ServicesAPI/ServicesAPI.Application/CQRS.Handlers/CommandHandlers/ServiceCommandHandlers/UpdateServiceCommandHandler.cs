@@ -22,7 +22,6 @@ public class UpdateServiceCommandHandler : IRequestHandler<UpdateServiceCommand,
 
     public async Task<ResponseMessage<ServiceInfoDTO>> Handle(UpdateServiceCommand request, CancellationToken cancellationToken)
     {
-        // LAzya loading service category
         var service = await _repositoryManager.Service.GetByIdAsync(request.ServiceId);
         if (service is null)
         {

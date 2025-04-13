@@ -32,7 +32,7 @@ public class InitialMigration : Migration
             .WithColumn("Id").AsGuid().PrimaryKey()
             .WithColumn("Title").AsString().NotNullable()
             .WithColumn("Description").AsString().Nullable()
-            .WithColumn("ToDelete").AsBoolean().NotNullable();
+            .WithColumn("IsDelete").AsBoolean().NotNullable();
 
         Create.Table("Offices")
         .WithColumn("Id").AsString().PrimaryKey()
@@ -42,7 +42,7 @@ public class InitialMigration : Migration
         .WithColumn("OfficeNumber").AsString().NotNullable()
         .WithColumn("RegistryPhoneNumber").AsString().Nullable()
         .WithColumn("IsActive").AsBoolean().NotNullable()
-        .WithColumn("ToDelete").AsBoolean().NotNullable();
+        .WithColumn("IsDelete").AsBoolean().NotNullable();
 
         Create.Table("Patients")
             .WithColumn("Id").AsGuid().PrimaryKey()

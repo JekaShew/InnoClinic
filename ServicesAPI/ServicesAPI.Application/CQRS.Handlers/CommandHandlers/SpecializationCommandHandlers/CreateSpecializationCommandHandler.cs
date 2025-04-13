@@ -41,7 +41,6 @@ public class CreateSpecializationCommandHandler : IRequestHandler<CreateSpeciali
                     SpecializationId = specialization.Id
                 };
                 serviceCategorySpecializations.Add(serviceCategorySpecialization);
-                // await _repositoryManager.ServiceCategorySpecialization.CreateAsync(serviceCategorySpercialization);
             }
         }
 

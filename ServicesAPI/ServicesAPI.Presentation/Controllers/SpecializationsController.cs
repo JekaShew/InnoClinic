@@ -55,7 +55,7 @@ public class SpecializationsController : ControllerBase
     //[Authorize(Roles = "Administrator")]
     public async Task<IActionResult> GetAllSpecializations([FromBody] SpecializationParameters? specializationParameters)
     {
-        var result = await _mediator.Send(new GetAllSpecializationsQuery() { SpecializationParameters = specializationParameters });
+        var result = await _mediator.Send(new GetAllSpecializationsWithParametersQuery() { SpecializationParameters = specializationParameters });
         if (!result.IsComplited)
         {
             return new FailMessage(result.ErrorMessage, result.StatusCode);

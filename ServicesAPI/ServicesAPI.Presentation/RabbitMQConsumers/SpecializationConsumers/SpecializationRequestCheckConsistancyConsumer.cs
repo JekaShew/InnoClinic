@@ -1,29 +1,30 @@
 ﻿using AutoMapper;
 using CommonLibrary.RabbitMQEvents.SpecializationEvents;
 using MassTransit;
+using MediatR;
 using Serilog;
-using ServicesAPI.Domain.Data.IRepositories;
+using ServicesAPI.Application.CQRS.Queries.SpecializationQueries;
 
-namespace ServicesAPI.Application.RabbitMQConsumers.SpecializationConsumers;
+namespace ServicesAPI.Presentation.RabbitMQConsumers.SpecializationConsumers;
 
 public class SpecializationRequestCheckConsistancyConsumer : IConsumer<SpecializationRequestCheckConsistancyEvent>
 {
-    private readonly IRepositoryManager _repositoryManager;
+    private readonly IMediator _mediator;
     private readonly IMapper _mapper;
     private readonly IPublishEndpoint _publishEndpoint;
     private readonly ILogger _logger;
 
-    public SpecializationRequestCheckConsistancyConsumer(IRepositoryManager repositoryManager, IMapper mapper, ILogger logger, IPublishEndpoint publishEndpoint)
+    public SpecializationRequestCheckConsistancyConsumer(IMapper mapper, ILogger logger, IPublishEndpoint publishEndpoint, IMediator mediator)
     {
-        _repositoryManager = repositoryManager;
         _mapper = mapper;
         _logger = logger;
         _publishEndpoint = publishEndpoint;
+        _mediator = mediator;
     }
     public async Task Consume(ConsumeContext<SpecializationRequestCheckConsistancyEvent> context)
     {
         _logger.Information($"User with Id: {context.Message.UserId} requested check specializations consistancy on ProfilesAPI at {context.Message.DateTime}");
-        var consistantSpecializations = await _repositoryManager.Specialization.GetAllAsync();
+        var consistantSpecializations = await _mediator.Send(new GetAllSpecializationsQuery()); 
         foreach (var consistantSpecialization in consistantSpecializations)
         {
             var specializationCheckConsistancyEvent = _mapper.Map<SpecializationCheckConsistancyEvent>(consistantSpecialization);

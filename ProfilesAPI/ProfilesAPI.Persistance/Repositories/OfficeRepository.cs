@@ -17,9 +17,9 @@ public class OfficeRepository : IOfficeRepository
     public async Task CreateAsync(Office office)
     {
         var query = "Insert into Offices (Id, City, Street, HouseNumber, OfficeNumber, " +
-                "RegistryPhoneNumber, IsActive, ToDelete) " +
+                "RegistryPhoneNumber, IsActive, IsDelete) " +
              "Values (@Id, @City, @Street, @HouseNumber, @OfficeNumber, @RegistryPhoneNumber, " +
-                "@IsActive, @ToDelete) ";
+                "@IsActive, @IsDelete) ";
 
         var parameters = new DynamicParameters();
         parameters.Add("Id", office.Id, System.Data.DbType.String);
@@ -29,7 +29,7 @@ public class OfficeRepository : IOfficeRepository
         parameters.Add("OfficeNumber", office.OfficeNumber, System.Data.DbType.String);
         parameters.Add("RegistryPhoneNumber", office.RegistryPhoneNumber, System.Data.DbType.String);
         parameters.Add("IsActive", office.IsActive, System.Data.DbType.Boolean);
-        parameters.Add("ToDelete", office.ToDelete, System.Data.DbType.Boolean);
+        parameters.Add("IsDelete", office.IsDelete, System.Data.DbType.Boolean);
 
         using (var connection = _profilesDBContext.Connection)
         {
@@ -56,7 +56,7 @@ public class OfficeRepository : IOfficeRepository
             var query = "Update Offices " +
                 "Set City = @City, Street = @Street, HouseNumber = @HouseNumber, " +
                 "OfficeNumber = @OfficeNumber, RegistryPhoneNumber = @RegistryPhoneNumber, " +
-                "IsActive = @IsActive, ToDelete = @ToDelete" +
+                "IsActive = @IsActive, IsDelete = @IsDelete" +
                 "Where Offices.Id = @OfficeId ";
             var parameters = new DynamicParameters();
             parameters.Add("OfficeId", officeId, System.Data.DbType.Guid);
@@ -66,7 +66,7 @@ public class OfficeRepository : IOfficeRepository
             parameters.Add("OfficeNumber", updatedOffice.OfficeNumber, System.Data.DbType.String);
             parameters.Add("RegistryPhoneNumber", updatedOffice.RegistryPhoneNumber, System.Data.DbType.String);
             parameters.Add("IsActive", updatedOffice.IsActive, System.Data.DbType.Boolean);
-            parameters.Add("ToDelete", updatedOffice.ToDelete, System.Data.DbType.Boolean);
+            parameters.Add("IsDelete", updatedOffice.IsDelete, System.Data.DbType.Boolean);
            
             await connection.ExecuteAsync(query, parameters);
         }

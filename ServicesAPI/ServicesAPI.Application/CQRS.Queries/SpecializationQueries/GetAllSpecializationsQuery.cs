@@ -1,10 +1,8 @@
-﻿using InnoClinic.CommonLibrary.Response;
-using MediatR;
-using ServicesAPI.Shared.DTOs.SpecializationDTOs;
+﻿using MediatR;
+using ServicesAPI.Domain.Data.Models;
 
 namespace ServicesAPI.Application.CQRS.Queries.SpecializationQueries;
 
-public class GetAllSpecializationsQuery : IRequest<ResponseMessage<IEnumerable<SpecializationTableInfoDTO>>>
+public class GetAllSpecializationsQuery : IRequest<IEnumerable<Specialization>>
 {
-    public SpecializationParameters SpecializationParameters { get; set; } = new SpecializationParameters();
 }

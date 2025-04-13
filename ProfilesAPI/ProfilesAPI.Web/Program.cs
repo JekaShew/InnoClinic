@@ -5,6 +5,7 @@ using InnoClinic.CommonLibrary.Exceptions;
 using ProfilesAPI.Services.Extensions;
 using ProfilesAPI.Web.Extensions;
 using Serilog;
+using ProfilesAPI.Presentation.Extensions;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +24,7 @@ builder.Services.AddCommonServices(builder.Configuration);
         
 builder.Services.AddPersistanceServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
+builder.Services.AddPresentationServices(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddCorsPolicies();

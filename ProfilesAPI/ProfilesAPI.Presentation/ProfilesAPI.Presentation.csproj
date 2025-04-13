@@ -16,10 +16,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="MassTransit.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ProfilesAPI.Persistance\ProfilesAPI.Persistance.csproj" />
     <ProjectReference Include="..\ProfilesAPI.Services.Abstractions\ProfilesAPI.Services.Abstractions.csproj" />
   </ItemGroup>
 

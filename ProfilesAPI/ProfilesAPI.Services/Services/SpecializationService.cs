@@ -1,9 +1,14 @@
-﻿using CommonLibrary.CommonService;
+﻿using AutoMapper;
+using CommonLibrary.CommonService;
 using CommonLibrary.Constants;
+using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using CommonLibrary.RabbitMQEvents.SpecializationEvents;
 using InnoClinic.CommonLibrary.Response;
 using MassTransit;
+using ProfilesAPI.Domain.Data.Models;
+using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using Serilog;
 
 namespace ProfilesAPI.Services.Services;
 
@@ -11,13 +16,22 @@ public class SpecializationService : ISpecializationService
 {
     private readonly ICommonService _commonService;
     private readonly IPublishEndpoint _publishEndpoint;
+    private readonly IRepositoryManager _repositoryManager;
+    private readonly IMapper _mapper;
+    private readonly ILogger _logger;
 
     public SpecializationService(
-        ICommonService commonService, 
-        IPublishEndpoint publishEndpoint)
+        ICommonService commonService,
+        IPublishEndpoint publishEndpoint,
+        IRepositoryManager repositoryManager,
+        IMapper mapper,
+        ILogger logger)
     {
         _commonService = commonService;
         _publishEndpoint = publishEndpoint;
+        _repositoryManager = repositoryManager;
+        _mapper = mapper;
+        _logger = logger;
     }
 
     public async Task<ResponseMessage> RequestCheckSpecializationConsistancyAsync()
@@ -33,8 +47,66 @@ public class SpecializationService : ISpecializationService
             UserId = currentUserInfo.Id,
             DateTime = DateTime.UtcNow,
         };
-        await _publishEndpoint.Publish(specializationRequestCheckConsistancyEvent);
 
+        await _publishEndpoint.Publish(specializationRequestCheckConsistancyEvent);
+        _logger.Information($"Succesfully sent request to check OfficeConsistancy by user with ID: {specializationRequestCheckConsistancyEvent.UserId} at {specializationRequestCheckConsistancyEvent.DateTime}!");
         return new ResponseMessage();
+    }
+
+    public async Task CheckSpecializationConsistancyAsync(SpecializationCheckConsistancyEvent specializationCheckConsistancyEvent)
+    {
+        var specialization = await _repositoryManager.Specialization.GetByIdAsync(specializationCheckConsistancyEvent.Id);
+        var consistantSpecialization = _mapper.Map<Specialization>(specializationCheckConsistancyEvent);
+        if (specialization is null)
+        {
+            await _repositoryManager.Specialization.CreateAsync(consistantSpecialization);
+            _logger.Information($"Succesfully added Specialization: {consistantSpecialization}");
+        }
+
+        if (specialization is not null && !specialization.Equals(consistantSpecialization))
+        {
+            await _repositoryManager.Specialization.UpdateAsync(consistantSpecialization.Id, consistantSpecialization);
+            _logger.Information($"Succesfully updated Specialization: {consistantSpecialization}");
+        }
+    }
+
+    public async Task CreateSpecializationAsync(SpecializationCreatedEvent specializationCreatedEvent)
+    {
+        var specialziation = _mapper.Map<Specialization>(specializationCreatedEvent);
+        await _repositoryManager.Specialization.CreateAsync(specialziation);
+        _logger.Information($"Succesfully added Specialization: {specialziation}");
+    }
+
+    public async Task DeleteSpecializationAsync(SpecializationDeletedEvent specializationDeletedEvent)
+    {
+        var specializationToDelete = await _repositoryManager.Specialization.GetByIdAsync(specializationDeletedEvent.Id);
+
+        try
+        {
+            if (specializationToDelete is not null)
+            {
+                await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
+                _logger.Information($"Succesfully deleted Specialization with Id: {specializationDeletedEvent.Id}");
+            }
+            else
+            {
+                _logger.Information($"Error while deleting Specialization with Id: {specializationDeletedEvent.Id}! No Such Specialization Found!");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.Error($"Error while deleting Specialization with Id: {specializationDeletedEvent.Id}. Exception: {ex.Message}");
+            _logger.Error($"UNABLE to DELETE Specialization with Id:{specializationDeletedEvent.Id}! It's IsDelete Status Changed to TRUE! Please Delete this Specialization with Id: {specializationDeletedEvent.Id} as soon as possible!");
+            specializationToDelete.IsDelete = true;
+            await _repositoryManager.Specialization.UpdateAsync(specializationToDelete.Id, specializationToDelete);
+            _logger.Error($"Error deleting Specialization with Id: {specializationDeletedEvent.Id}. Exception: {ex.Message}");
+        }
+    }
+
+    public async Task UpdateSpecializationAsync(SpecializationUpdatedEvent specializationUpdatedEvent)
+    {
+        var specialization = _mapper.Map<Specialization>(specializationUpdatedEvent);
+        await _repositoryManager.Specialization.UpdateAsync(specializationUpdatedEvent.Id, specialization);
+        _logger.Information($"Succesfully updated Specialization: {specialization}");
     }
 }

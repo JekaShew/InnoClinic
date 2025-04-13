@@ -1,5 +1,6 @@
 using InnoClinic.CommonLibrary.Exceptions;
 using OfficesAPI.Persistance.Extensions;
+using OfficesAPI.Presentation.Extensions;
 using OfficesAPI.Services.Extensions;
 using OfficesAPI.Web.Extensions;
 using Serilog;
@@ -21,6 +22,7 @@ builder.Services.AddRedisCache(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddPersistanceServices(builder.Configuration);
+builder.Services.AddPresentationServices(builder.Configuration);
 
 builder.Services.AddHttpContextAccessor();
 
