@@ -1,10 +1,7 @@
 ﻿using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using ProfilesAPI.Presentation.RabbitMQConsumers.ConsumerObservers.OfficeConsumerObservers;
-using ProfilesAPI.Presentation.RabbitMQConsumers.ConsumerObservers.SpecializationConsumerObservers;
-using ProfilesAPI.Presentation.RabbitMQConsumers.OfficeConsumers;
+using ProfilesAPI.Presentation.RabbitMQConsumers.ConsumerObservers;
 using ProfilesAPI.Services.Services.SpecializationConsumers;
 
 namespace ProfilesAPI.Presentation.Extensions;
@@ -20,19 +17,13 @@ public static class ServiceExtensions
 
     private static IServiceCollection AddRabbitMQService(this IServiceCollection services, IConfiguration configuration)
     {
-        //services.AddConsumeObserver<OfficeDeletedConsumerObserver>();
-        //services.AddConsumeObserver<SpecializationDeletedConsumerObserver>();
-        //services.AddConsumeObserver(provider => new OfficeDeletedConsumerObserver());
-        //services.AddConsumeObserver(provider => new SpecializationDeletedConsumerObserver());
-
-
         // RabbitMQ + MassTransit
         services.AddMassTransit(busConfigurator =>
         {
             busConfigurator.SetKebabCaseEndpointNameFormatter();
-
+            
             busConfigurator.AddConsumersFromNamespaceContaining<SpecializationCreatedConsumer>();
-
+            busConfigurator.AddConsumeObserver<CustomConsumerObserver>();
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
                 configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
