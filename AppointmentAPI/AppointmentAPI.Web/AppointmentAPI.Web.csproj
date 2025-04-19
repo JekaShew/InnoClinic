@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>40c76380-9cfd-4218-846f-3a2f8c2a4caa</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Swagger" Version="8.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="8.1.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="8.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\CommonLibrary\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\AppointmentAPI.Application\AppointmentAPI.Application.csproj" />
+    <ProjectReference Include="..\AppointmentAPI.Domain\AppointmentAPI.Domain.csproj" />
+    <ProjectReference Include="..\AppointmentAPI.Persistance\AppointmentAPI.Persistance.csproj" />
+    <ProjectReference Include="..\AppointmentAPI.Presentation\AppointmentAPI.Presentation.csproj" />
+  </ItemGroup>
+
+</Project>

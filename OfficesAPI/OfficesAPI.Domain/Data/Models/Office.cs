@@ -7,6 +7,7 @@ namespace OfficesAPI.Domain.Data.Models;
 public class Office
 {
     [BsonId, BsonElement("_id"), BsonRepresentation(BsonType.ObjectId)]
+    //[BsonRepresentation(BsonType.Binary, GuidRepresentation = GuidRepresentation.Standard)]
     public string Id { get; set; }
     [BsonElement("city"), BsonRepresentation(BsonType.String)]
     public string City { get; set; }
