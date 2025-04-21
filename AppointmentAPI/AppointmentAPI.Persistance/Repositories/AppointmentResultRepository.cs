@@ -1,6 +1,7 @@
 ﻿using AppointmentAPI.Domain.Data.Models;
 using AppointmentAPI.Domain.IRepositories;
 using AppointmentAPI.Persistance.Data;
+using AppointmentAPI.Shared.DTOs.AppointmentResultDTOs;
 
 namespace AppointmentAPI.Persistance.Repositories;
 
@@ -15,6 +16,6 @@ public class AppointmentResultRepository : EFGenericRepository<AppointmentResult
 
     public async Task<IEnumerable<AppointmentResult>> GetAllWithParametersAsync(AppointmentResultParameters? serviceParameters)
     {
-
+       
     }
 }

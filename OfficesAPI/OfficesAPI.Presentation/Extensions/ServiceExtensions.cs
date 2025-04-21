@@ -26,7 +26,7 @@ public static class ServiceExtensions
 
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
-                configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
+                configurator.Host(configuration["MessageBroker:HostDocker"], configuration["MessageBroker:Port"], configuration["MessageBroker:VirtualHost"], hostConfigurator =>
                 {
                     hostConfigurator.Username(configuration["MessageBroker:Username"]);
                     hostConfigurator.Password(configuration["MessageBroker:Password"]);

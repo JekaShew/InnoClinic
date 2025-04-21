@@ -470,9 +470,9 @@
             ]
         },
         {
-            "UpstreamPathTemplate": "/InnoClinic/Photos/getallphotos",
+            "UpstreamPathTemplate": "/InnoClinic/Photos",
             "UpstreamHttpMethod": [ "Get" ],
-            "DownstreamPathTemplate": "/api/Photos/getallphotos",
+            "DownstreamPathTemplate": "/api/Photos",
             "DownstreamScheme": "http",
             "DownstreamHostAndPorts": [
                 {

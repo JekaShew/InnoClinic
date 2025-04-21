@@ -1,4 +1,6 @@
 ﻿using CommonLibrary.RabbitMQEvents.SpecializationEvents;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
 using MassTransit;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using Serilog;
@@ -10,7 +12,9 @@ public class SpecializationCreatedConsumer : IConsumer<SpecializationCreatedEven
     private readonly ISpecializationService _specializationService;
     private readonly ILogger _logger;
 
-    public SpecializationCreatedConsumer( ILogger logger, ISpecializationService specializationService)
+    public SpecializationCreatedConsumer(
+            ILogger logger, 
+            ISpecializationService specializationService)
     {
         _logger = logger;
         _specializationService = specializationService;

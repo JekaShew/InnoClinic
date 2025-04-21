@@ -22,8 +22,7 @@ public class DeleteOfficeCommandHandler : IRequestHandler<DeleteOfficeCommand>
 
         if (officeToDelete is not null)
         {
-            await _repositoryManager.Office.DeleteAsync(officeToDelete);
-            await _repositoryManager.CommitAsync();
+            await _repositoryManager.Office.SoftDeleteAsync(officeToDelete);
             _logger.Information($"Succesfully deleted Office with Id: {request.Id} !");
         }
     }

@@ -10,7 +10,7 @@ public class DoctorTableInfoDTO
     public string Phone { get; set; }
     public Guid PhotoId { get; set; }
     public string? Photo { get; set; }
-    public string? OfficeId { get; set; }
+    public Guid OfficeId { get; set; }
     // public OfficeInfoDTO Office { get; set; }
     // public WorkStatusInfoDTO WorkStatus { get; set; }
     public Guid? WorkStatusId { get; set; }

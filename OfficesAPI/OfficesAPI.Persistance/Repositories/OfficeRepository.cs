@@ -19,7 +19,7 @@ public class OfficeRepository : IOfficeRepository
         _officesContext.AddCommand(() => _officeCollection.InsertOneAsync(office));
     }
 
-    public void DeleteOfficeById(string officeId)
+    public void DeleteOfficeById(Guid officeId)
     {
         var filter = Builders<Office>.Filter.Eq(o => o.Id, officeId);
         _officesContext.AddCommand(() => _officeCollection.DeleteOneAsync(filter));
@@ -30,7 +30,7 @@ public class OfficeRepository : IOfficeRepository
         return await _officeCollection.Find(FilterDefinition<Office>.Empty).ToListAsync();
     }
 
-    public async Task<Office> GetOfficeByIdAsync(string officeId)
+    public async Task<Office> GetOfficeByIdAsync(Guid officeId)
     {
         var filter = Builders<Office>.Filter.Eq(o => o.Id, officeId);
         return await _officeCollection.Find(filter).FirstOrDefaultAsync();

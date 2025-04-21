@@ -1,6 +1,6 @@
 ﻿namespace AppointmentAPI.Domain.Data.Models;
 
-public class Doctor : BaseModel
+public class Doctor : BaseExternalModel
 {
     public Guid UserId { get; set; }
     public string FirstName { get; set; }

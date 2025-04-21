@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using CommonLibrary.RabbitMQEvents.DoctorEvents;
+using MediatR;
 
 namespace AppointmentAPI.Application.CQRS.Commands.Doctor;
 

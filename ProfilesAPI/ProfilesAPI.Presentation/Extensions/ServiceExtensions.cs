@@ -21,12 +21,13 @@ public static class ServiceExtensions
         services.AddMassTransit(busConfigurator =>
         {
             busConfigurator.SetKebabCaseEndpointNameFormatter();
-            
-            busConfigurator.AddConsumersFromNamespaceContaining<SpecializationCreatedConsumer>();
+
             busConfigurator.AddConsumeObserver<CustomConsumerObserver>();
+            busConfigurator.AddConsumersFromNamespaceContaining<SpecializationCreatedConsumer>();
+
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
-                configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
+                configurator.Host(configuration["MessageBroker:HostDocker"], configuration["MessageBroker:Port"], configuration["MessageBroker:VirtualHost"], hostConfigurator =>
                 {
                     hostConfigurator.Username(configuration["MessageBroker:Username"]);
                     hostConfigurator.Password(configuration["MessageBroker:Password"]);

@@ -2,7 +2,6 @@
 using MongoDB.Driver;
 using OfficesAPI.Persistance.Extensions;
 using System.Collections.Concurrent;
-using System.Data;
 
 namespace OfficesAPI.Persistance.Data;
 
@@ -19,6 +18,7 @@ public class OfficesContext : IOfficesContext
         mongoClient = new MongoClient(mongoUrl);
         _officesDB = mongoClient.GetDatabase("OfficesDB");
         _commandTasks = new ConcurrentQueue<Func<Task>>();
+
     }
     public void AddCommand(Func<Task> func)
     {

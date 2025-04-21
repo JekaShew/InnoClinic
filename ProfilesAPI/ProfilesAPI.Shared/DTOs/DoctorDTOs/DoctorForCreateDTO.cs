@@ -13,7 +13,7 @@ public class DoctorForCreateDTO
     public DateTime BirthDate { get; set; }
     public DateTime CareerStartDate { get; set; }
     public IFormFile? Photo { get; set; }
-    public string? OfficeId { get; set; }
+    public Guid OfficeId { get; set; }
     public Guid? WorkStatusId { get; set; }
     public IEnumerable<DoctorSpecializationForCreateDTO>? DoctorSpecializations { get; set; }
 }

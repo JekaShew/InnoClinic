@@ -23,8 +23,7 @@ public class DeleteDoctorCommandHandler : IRequestHandler<DeleteDoctorCommand>
 
         if (doctorToDelete is not null)
         {
-            await _repositoryManager.Doctor.DeleteAsync(doctorToDelete);
-            await _repositoryManager.CommitAsync();
+            await _repositoryManager.Doctor.SoftDeleteAsync(doctorToDelete);
             _logger.Information($"Succesfully deleted Doctor with Id: {request.Id}!");
         }
     }

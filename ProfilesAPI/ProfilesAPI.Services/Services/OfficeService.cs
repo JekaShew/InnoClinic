@@ -2,11 +2,15 @@
 using CommonLibrary.CommonService;
 using CommonLibrary.Constants;
 using CommonLibrary.RabbitMQEvents.OfficeEvents;
+using CommonLibrary.RabbitMQEvents.SpecializationEvents;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using MassTransit;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Validators.SpecializationValidators;
 using Serilog;
 
 namespace ProfilesAPI.Services.Services;
@@ -18,19 +22,28 @@ public class OfficeService : IOfficeService
     private readonly IRepositoryManager _repositoryManager;
     private readonly IMapper _mapper;
     private readonly ILogger _logger;
+    private readonly IValidator<OfficeCreatedEvent> _officeCreatedEventValidator;
+    private readonly IValidator<OfficeUpdatedEvent> _officeUpdatedEventValidator;
+    private readonly IValidator<OfficeCheckConsistancyEvent> _officeCheckConsistancyEventValidator;
 
     public OfficeService(
         ICommonService commonService,
         IPublishEndpoint publishEndpoint,
         IRepositoryManager repositoryManager,
         IMapper mapper,
-        ILogger logger)
+        ILogger logger,
+        IValidator<OfficeCreatedEvent> officeCreatedEventValidator,
+        IValidator<OfficeUpdatedEvent> officeUpdatedEventValidator,
+        IValidator<OfficeCheckConsistancyEvent> officeCheckConsistancyEventValidator)
     {
         _commonService = commonService;
         _publishEndpoint = publishEndpoint;
         _repositoryManager = repositoryManager;
         _mapper = mapper;
         _logger = logger;
+        _officeCreatedEventValidator = officeCreatedEventValidator;
+        _officeUpdatedEventValidator = officeUpdatedEventValidator;
+        _officeCheckConsistancyEventValidator = officeCheckConsistancyEventValidator;
     }
 
     public async Task<ResponseMessage> RequestCheckOfficeConsistancyAsync()
@@ -55,6 +68,12 @@ public class OfficeService : IOfficeService
 
     public async Task CreateOfficeAsync(OfficeCreatedEvent officeCreatedEvent)
     {
+        var validationResult = await _officeCreatedEventValidator.ValidateAsync(officeCreatedEvent);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
         var office = _mapper.Map<Office>(officeCreatedEvent);
         await _repositoryManager.Office.CreateAsync(office);
         _logger.Information($"Succesfully added Office: {office}");
@@ -66,13 +85,19 @@ public class OfficeService : IOfficeService
 
         if (officeToDelete is not null)
         {
-            await _repositoryManager.Office.DeleteAsync(officeToDelete);
+            await _repositoryManager.Office.SoftDeleteAsync(officeToDelete);
             _logger.Information($"Succesfully deleted Office with Id: {officeDeletedEvent.Id}");
         }
     }
 
     public async Task UpdateOfficeAsync(OfficeUpdatedEvent officeUpdatedEvent)
     {
+        var validationResult = await _officeUpdatedEventValidator.ValidateAsync(officeUpdatedEvent);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
         var office = _mapper.Map<Office>(officeUpdatedEvent);
         await _repositoryManager.Office.UpdateAsync(officeUpdatedEvent.Id, office);
         _logger.Information($"Succesfully updated Office: {office}");
@@ -80,6 +105,11 @@ public class OfficeService : IOfficeService
 
     public async Task CheckOfficeConsistancyAsync(OfficeCheckConsistancyEvent officeCreatedEvent)
     {
+        var validationResult = await _officeCheckConsistancyEventValidator.ValidateAsync(officeCreatedEvent);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
 
         var office = await _repositoryManager.Office.GetByIdAsync(officeCreatedEvent.Id);
         var consistantOffice = _mapper.Map<Office>(officeCreatedEvent);

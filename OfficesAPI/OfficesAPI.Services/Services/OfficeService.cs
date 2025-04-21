@@ -1,12 +1,10 @@
-﻿using CommonLibrary.RabbitMQEvents;
-using CommonLibrary.RabbitMQEvents.OfficeEvents;
+﻿using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using FluentValidation;
 using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using MassTransit;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
 using OfficesAPI.Domain.Data.Models;
 using OfficesAPI.Domain.IRepositories;
 using OfficesAPI.Services.Abstractions.Interfaces;
@@ -44,7 +42,7 @@ public class OfficeService : IOfficeService
         }
 
         var office = OfficeMapper.OfficeForCreateDTOToOffice(officeForCreateDTO);
-        office.Id = ObjectId.GenerateNewId().ToString();
+        office.Id = Guid.NewGuid(); //ObjectId.GenerateNewId().ToString();
         var officeId = office.Id;
         if (files is not null && files.Count != 0)
         {
@@ -77,7 +75,7 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
-    public async Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId)
+    public async Task<ResponseMessage> DeleteOfficeByIdAsync(Guid officeId)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
@@ -108,7 +106,7 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<IEnumerable<OfficeTableInfoDTO>>(officeTableInfoDTOs);
     }
 
-    public async Task<ResponseMessage<OfficeInfoDTO>> GetOfficeByIdAsync(string officeId)
+    public async Task<ResponseMessage<OfficeInfoDTO>> GetOfficeByIdAsync(Guid officeId)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
@@ -121,7 +119,7 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
-    public async Task<ResponseMessage<OfficeInfoDTO>> UpdateOfficeInfoAsync(string officeId,[FromBody] OfficeForUpdateDTO officeForUpdateDTO)
+    public async Task<ResponseMessage<OfficeInfoDTO>> UpdateOfficeInfoAsync(Guid officeId,[FromBody] OfficeForUpdateDTO officeForUpdateDTO)
     {
         var validationResult = await _officeForUpdateValidator.ValidateAsync(officeForUpdateDTO);
         if (!validationResult.IsValid)
@@ -146,7 +144,7 @@ public class OfficeService : IOfficeService
         return new ResponseMessage<OfficeInfoDTO>(officeInfoDTO);
     }
 
-    public async Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(string officeId)
+    public async Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(Guid officeId)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)

@@ -1,6 +1,7 @@
 ﻿using AppointmentAPI.Domain.Data.Models;
 using AppointmentAPI.Domain.IRepositories;
 using AppointmentAPI.Persistance.Data;
+using AppointmentAPI.Shared.DTOs.AppointmentDTOs;
 namespace AppointmentAPI.Persistance.Repositories;
 
 public class AppointmentRepository : EFGenericRepository<Appointment>, IAppointmentRepository

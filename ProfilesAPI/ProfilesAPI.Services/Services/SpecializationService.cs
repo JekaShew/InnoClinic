@@ -3,11 +3,14 @@ using CommonLibrary.CommonService;
 using CommonLibrary.Constants;
 using CommonLibrary.RabbitMQEvents.OfficeEvents;
 using CommonLibrary.RabbitMQEvents.SpecializationEvents;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
 using InnoClinic.CommonLibrary.Response;
 using MassTransit;
 using ProfilesAPI.Domain.Data.Models;
 using ProfilesAPI.Domain.IRepositories;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Services.Validators.OfficeValidators;
 using Serilog;
 
 namespace ProfilesAPI.Services.Services;
@@ -19,19 +22,28 @@ public class SpecializationService : ISpecializationService
     private readonly IRepositoryManager _repositoryManager;
     private readonly IMapper _mapper;
     private readonly ILogger _logger;
+    private readonly IValidator<SpecializationCreatedEvent> _specializationCreatedEventValidator;
+    private readonly IValidator<SpecializationUpdatedEvent> _specializationUpdatedEventValidator;
+    private readonly IValidator<SpecializationCheckConsistancyEvent> _specializationCheckConsistancyEventValidator;
 
     public SpecializationService(
         ICommonService commonService,
         IPublishEndpoint publishEndpoint,
         IRepositoryManager repositoryManager,
         IMapper mapper,
-        ILogger logger)
+        ILogger logger,
+        IValidator<SpecializationCreatedEvent> specializationCreatedEventValidator,
+        IValidator<SpecializationUpdatedEvent> specializationUpdatedEventValidator,
+        IValidator<SpecializationCheckConsistancyEvent> specializationCheckConsistancyEventValidator)
     {
         _commonService = commonService;
         _publishEndpoint = publishEndpoint;
         _repositoryManager = repositoryManager;
         _mapper = mapper;
         _logger = logger;
+        _specializationCreatedEventValidator = specializationCreatedEventValidator;
+        _specializationUpdatedEventValidator = specializationUpdatedEventValidator;
+        _specializationCheckConsistancyEventValidator = specializationCheckConsistancyEventValidator;
     }
 
     public async Task<ResponseMessage> RequestCheckSpecializationConsistancyAsync()
@@ -55,6 +67,12 @@ public class SpecializationService : ISpecializationService
 
     public async Task CheckSpecializationConsistancyAsync(SpecializationCheckConsistancyEvent specializationCheckConsistancyEvent)
     {
+        var validationResult = await _specializationCheckConsistancyEventValidator.ValidateAsync(specializationCheckConsistancyEvent);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
         var specialization = await _repositoryManager.Specialization.GetByIdAsync(specializationCheckConsistancyEvent.Id);
         var consistantSpecialization = _mapper.Map<Specialization>(specializationCheckConsistancyEvent);
         if (specialization is null)
@@ -72,6 +90,12 @@ public class SpecializationService : ISpecializationService
 
     public async Task CreateSpecializationAsync(SpecializationCreatedEvent specializationCreatedEvent)
     {
+        var validationResult = await _specializationCreatedEventValidator.ValidateAsync(specializationCreatedEvent);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
         var specialziation = _mapper.Map<Specialization>(specializationCreatedEvent);
         await _repositoryManager.Specialization.CreateAsync(specialziation);
         _logger.Information($"Succesfully added Specialization: {specialziation}");
@@ -83,13 +107,19 @@ public class SpecializationService : ISpecializationService
 
         if (specializationToDelete is not null)
         {
-            await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
+            await _repositoryManager.Specialization.SoftDeleteAsync(specializationToDelete);
             _logger.Information($"Succesfully deleted Specialization with Id: {specializationDeletedEvent.Id}");
         }        
     }
 
     public async Task UpdateSpecializationAsync(SpecializationUpdatedEvent specializationUpdatedEvent)
     {
+        var validationResult = await _specializationUpdatedEventValidator.ValidateAsync(specializationUpdatedEvent);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationAppException(validationResult.Errors.Select(e => e.ErrorMessage).ToArray());
+        }
+
         var specialization = _mapper.Map<Specialization>(specializationUpdatedEvent);
         await _repositoryManager.Specialization.UpdateAsync(specializationUpdatedEvent.Id, specialization);
         _logger.Information($"Succesfully updated Specialization: {specialization}");

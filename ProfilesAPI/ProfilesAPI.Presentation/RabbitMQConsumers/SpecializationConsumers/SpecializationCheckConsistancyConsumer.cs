@@ -1,4 +1,7 @@
-﻿using CommonLibrary.RabbitMQEvents.SpecializationEvents;
+﻿using CommonLibrary.RabbitMQEvents.OfficeEvents;
+using CommonLibrary.RabbitMQEvents.SpecializationEvents;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
 using MassTransit;
 using ProfilesAPI.Services.Abstractions.Interfaces;
 using Serilog;
@@ -10,7 +13,9 @@ public class SpecializationCheckConsistancyConsumer : IConsumer<SpecializationCh
     private readonly ISpecializationService _specializationService;
     private readonly ILogger _logger;
 
-    public SpecializationCheckConsistancyConsumer(ILogger logger, ISpecializationService specializationService)
+    public SpecializationCheckConsistancyConsumer(
+            ILogger logger, 
+            ISpecializationService specializationService)
     {
         _logger = logger;
         _specializationService = specializationService;

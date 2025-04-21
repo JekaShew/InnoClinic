@@ -6,7 +6,7 @@ public interface IOfficeRepository
 {
     public void CreateOffice(Office office);
     public Task<ICollection<Office>> GetAllOfficesAsync();
-    public Task<Office> GetOfficeByIdAsync(string officeId);
+    public Task<Office> GetOfficeByIdAsync(Guid officeId);
     public void UpdateOffice(Office office);
-    public void DeleteOfficeById(string officeId);
+    public void DeleteOfficeById(Guid officeId);
 }

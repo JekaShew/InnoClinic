@@ -7,21 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="CQRS\Handlers\QueryHandlers\DoctorSpecialization\" />
-    <Folder Include="CQRS\Handlers\QueryHandlers\Doctor\" />
-    <Folder Include="CQRS\Handlers\QueryHandlers\Office\" />
-    <Folder Include="CQRS\Handlers\QueryHandlers\Service\" />
-    <Folder Include="CQRS\Handlers\QueryHandlers\Specialization\" />
-    <Folder Include="CQRS\Handlers\QueryHandlers\Patient\" />
-    <Folder Include="CQRS\Queries\Doctor\" />
-    <Folder Include="CQRS\Queries\DoctorSpecialization\" />
-    <Folder Include="CQRS\Queries\Office\" />
-    <Folder Include="CQRS\Queries\Specialization\" />
-    <Folder Include="CQRS\Queries\Service\" />
-    <Folder Include="CQRS\Queries\Patient\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="14.0.0" />
     <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />

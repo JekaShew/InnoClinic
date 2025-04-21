@@ -22,7 +22,7 @@ public class OfficeRepository : IOfficeRepository
                 "@IsActive, @IsDelete) ";
 
         var parameters = new DynamicParameters();
-        parameters.Add("Id", office.Id, System.Data.DbType.String);
+        parameters.Add("Id", office.Id, System.Data.DbType.Guid);
         parameters.Add("City", office.City, System.Data.DbType.String);
         parameters.Add("Street", office.Street, System.Data.DbType.String);
         parameters.Add("HouseNumber", office.HouseNumber, System.Data.DbType.String);
@@ -37,19 +37,19 @@ public class OfficeRepository : IOfficeRepository
         }
     }
 
-    public async Task<Office> GetByIdAsync(string officeId)
+    public async Task<Office> GetByIdAsync(Guid officeId)
     {
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Select * From Offices " +
-                "Where Offices.Id = @OfficeId";
+                "Where Offices.Id = @OfficeId AND IsDelete = 0 ";
             var office = await connection.QueryFirstOrDefaultAsync<Office>(query, new { officeId });
 
             return office;
         }
     }
 
-    public async Task UpdateAsync(string officeId, Office updatedOffice)
+    public async Task UpdateAsync(Guid officeId, Office updatedOffice)
     {
         using (var connection = _profilesDBContext.Connection)
         {
@@ -79,6 +79,20 @@ public class OfficeRepository : IOfficeRepository
             var query = "Delete From Offices " +
                 "Where Offices.Id = @OfficeId ";
             await connection.ExecuteAsync(query, new { office.Id });
+        }
+    }
+    public async Task SoftDeleteAsync(Office office)
+    {
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var query = "Update From Offices " +
+                "Where Offices.Id = @OfficeId " +
+                "SET IsDelete = @IsDelete ";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("OfficeId", office.Id, System.Data.DbType.Guid);
+            parameters.Add("IsDelete", true, System.Data.DbType.Boolean);
+            await connection.ExecuteAsync(query, parameters);
         }
     }
 }

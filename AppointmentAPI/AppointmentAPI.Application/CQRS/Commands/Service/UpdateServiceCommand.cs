@@ -1,8 +1,9 @@
-﻿using MediatR;
+﻿using CommonLibrary.RabbitMQEvents.ServiceEvents;
+using MediatR;
 
 namespace AppointmentAPI.Application.CQRS.Commands.Service;
 
 public class UpdateServiceCommand : IRequest
 {
-    public ServiceUpdatedEvent ServiceUpdatedEvent { get; set; }
+    public ServiceUpdatedEvent? ServiceUpdatedEvent { get; set; }
 }

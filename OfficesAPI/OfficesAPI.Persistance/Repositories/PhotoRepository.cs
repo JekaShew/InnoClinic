@@ -20,13 +20,13 @@ public class PhotoRepository : IPhotoRepository
         _officesContext.AddCommand(() => _photoCollection.InsertOneAsync(photo));
     }
 
-    public void DeletePhotoById(string photoId)
+    public void DeletePhotoById(Guid photoId)
     {
         var filter = Builders<Photo>.Filter.Eq(o => o.Id, photoId);
         _officesContext.AddCommand(() => _photoCollection.DeleteOneAsync(filter));
     }
 
-    public void DeletePhotosOfOfficeByOfficeId(string officeId)
+    public void DeletePhotosOfOfficeByOfficeId(Guid officeId)
     {
         var filter = Builders<Photo>.Filter.Where(o => o.OfficeId.Equals(officeId));
         _officesContext.AddCommand(() => _photoCollection.DeleteManyAsync(filter));
@@ -44,7 +44,7 @@ public class PhotoRepository : IPhotoRepository
         return await _photoCollection.Find(filter).ToListAsync();
     }
 
-    public async Task<Photo> GetPhotoById(string photoId)
+    public async Task<Photo> GetPhotoById(Guid photoId)
     {
         var filter = Builders<Photo>.Filter.Eq(o => o.Id, photoId);
         return await _photoCollection.Find(filter).FirstOrDefaultAsync();

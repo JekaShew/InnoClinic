@@ -1,6 +1,9 @@
 ﻿using CommonLibrary.RabbitMQEvents.OfficeEvents;
+using FluentValidation;
+using InnoClinic.CommonLibrary.Exceptions;
 using MassTransit;
 using ProfilesAPI.Services.Abstractions.Interfaces;
+using ProfilesAPI.Shared.DTOs.AdministratorDTOs;
 using Serilog;
 
 namespace ProfilesAPI.Presentation.RabbitMQConsumers.OfficeConsumers;
@@ -10,7 +13,9 @@ public class OfficeCreatedConsumer : IConsumer<OfficeCreatedEvent>
     private readonly ILogger _logger;
     private readonly IOfficeService _officeService;
 
-    public OfficeCreatedConsumer(ILogger logger, IOfficeService officeService)
+    public OfficeCreatedConsumer(
+            ILogger logger,
+            IOfficeService officeService)
     {
         _logger = logger;
         _officeService = officeService;

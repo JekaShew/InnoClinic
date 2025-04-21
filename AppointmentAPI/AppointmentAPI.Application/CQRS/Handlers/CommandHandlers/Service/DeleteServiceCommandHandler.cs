@@ -22,8 +22,7 @@ public class DeleteServiceCommandHandler : IRequestHandler<DeleteServiceCommand>
 
         if (serviceToDelete is not null)
         {
-            await _repositoryManager.Service.DeleteAsync(serviceToDelete);
-            await _repositoryManager.CommitAsync();
+            await _repositoryManager.Service.SoftDeleteAsync(serviceToDelete);
             _logger.Information($"Succesfully deleted Service with Id: {request.Id} !");
         }
     }

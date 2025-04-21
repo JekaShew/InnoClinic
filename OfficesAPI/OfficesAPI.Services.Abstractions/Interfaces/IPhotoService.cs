@@ -6,9 +6,9 @@ namespace OfficesAPI.Services.Abstractions.Interfaces;
 
 public interface IPhotoService
 {
-    public Task<ResponseMessage<PhotoInfoDTO>> AddPhototoOffice(string officeId, IFormFile formFile);
-    public Task<ResponseMessage> DeleteOfficePhotoById(string officeId, string photoId);
+    public Task<ResponseMessage<PhotoInfoDTO>> AddPhotoToOffice(Guid officeId, IFormFile formFile);
+    public Task<ResponseMessage> DeleteOfficePhotoById(Guid officeId, Guid photoId);
     public Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotos();
-    public Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(string officeId);
-    public Task<ResponseMessage<PhotoInfoDTO>> GetPhotoById(string photoId);
+    public Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(Guid officeId);
+    public Task<ResponseMessage<PhotoInfoDTO>> GetPhotoById(Guid photoId);
 }

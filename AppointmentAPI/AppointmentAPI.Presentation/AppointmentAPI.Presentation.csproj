@@ -27,8 +27,4 @@
     <ProjectReference Include="..\AppointmentAPI.Application\AppointmentAPI.Application.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="RabbitMQConsumers\" />
-  </ItemGroup>
-
 </Project>

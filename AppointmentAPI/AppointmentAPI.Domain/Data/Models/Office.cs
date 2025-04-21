@@ -1,6 +1,6 @@
 ﻿namespace AppointmentAPI.Domain.Data.Models;
 
-public class Office : BaseModel
+public class Office : BaseExternalModel
 {
     public string City { get; set; }
     public string Street { get; set; }

@@ -1,4 +1,5 @@
-﻿using AppointmentAPI.Presentation.RabbitMQ.Consumers.Doctor;
+﻿using AppointmentAPI.Presentation.RabbitMQ;
+using AppointmentAPI.Presentation.RabbitMQ.Consumers.Doctor;
 using MassTransit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -24,9 +25,10 @@ public static class ServiceExtensions
 
             //Add consumers 
             busConfigurator.AddConsumersFromNamespaceContaining<DoctorCreatedConsumer>();
+            busConfigurator.AddConsumeObserver<CustomConsumerObserver>();
             busConfigurator.UsingRabbitMq((context, configurator) =>
             {
-                configurator.Host(configuration["MessageBroker:HostDocker"], 5672, "/", hostConfigurator =>
+                configurator.Host(configuration["MessageBroker:HostDocker"], configuration["MessageBroker:Port"], configuration["MessageBroker:VirtualHost"], hostConfigurator =>
                 {
                     hostConfigurator.Username(configuration["MessageBroker:Username"]);
                     hostConfigurator.Password(configuration["MessageBroker:Password"]);

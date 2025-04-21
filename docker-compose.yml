@@ -319,6 +319,7 @@ volumes:
   rabbitmq:
   redis:
 
+
 networks: 
   elastic:
     driver: bridge

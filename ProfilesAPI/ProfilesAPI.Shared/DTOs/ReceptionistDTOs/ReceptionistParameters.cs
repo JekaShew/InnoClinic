@@ -2,6 +2,6 @@
 
 public class ReceptionistParameters : RequestParameters
 {
-    public ICollection<string>? Offices { get; set; }
+    public ICollection<Guid>? Offices { get; set; }
     public string? SearchString { get; set; }
 }

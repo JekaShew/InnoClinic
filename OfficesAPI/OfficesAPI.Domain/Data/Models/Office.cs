@@ -1,14 +1,18 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 
 namespace OfficesAPI.Domain.Data.Models;
 
 [Serializable, BsonIgnoreExtraElements]
 public class Office
 {
-    [BsonId, BsonElement("_id"), BsonRepresentation(BsonType.ObjectId)]
-    //[BsonRepresentation(BsonType.Binary, GuidRepresentation = GuidRepresentation.Standard)]
-    public string Id { get; set; }
+    //[BsonId, BsonElement("_id"), BsonRepresentation(BsonType.ObjectId)]
+    //public string Id { get; set; }
+
+    [BsonId, BsonElement("_id"), BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid Id { get; set; }
+   
     [BsonElement("city"), BsonRepresentation(BsonType.String)]
     public string City { get; set; }
     [BsonElement("street"), BsonRepresentation(BsonType.String)]

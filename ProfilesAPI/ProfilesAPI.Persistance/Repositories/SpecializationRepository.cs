@@ -41,11 +41,26 @@ public class SpecializationRepository : ISpecializationRepository
         }
     }
 
+    public async Task SoftDeleteAsync(Specialization specialization)
+    {
+        using (var connection = _profilesDBContext.Connection)
+        {
+            var query = "Update From Specializations " +
+                "Where Specializations.Id = @SpecializationId " +
+                "SET IsDelete = @IsDelete ";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("SpecializationId", specialization.Id, System.Data.DbType.Guid);
+            parameters.Add("IsDelete", true, System.Data.DbType.Boolean);
+            await connection.ExecuteAsync(query, parameters);
+        }
+    }
+
     public async Task<ICollection<Specialization>> GetAllAsync()
     {
         using(var connection = _profilesDBContext.Connection)
         {
-            var query = "Select * From Specializations ";
+            var query = "Select * From Specializations Where IsDelete = 0 ";
             var specializations = await connection.QueryAsync<Specialization>(query);
 
             return specializations.ToList();
@@ -57,7 +72,7 @@ public class SpecializationRepository : ISpecializationRepository
         using (var connection = _profilesDBContext.Connection)
         {
             var query = "Select * From Specializations " +
-                "Where Specializations.Id = @SpecializationId ";
+                "Where Specializations.Id = @SpecializationId  AND IsDelete = 0 ";
             var specialization = await connection.QueryFirstOrDefaultAsync<Specialization>(query, new { specializationId});
             
             return specialization;

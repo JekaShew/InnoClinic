@@ -1,6 +1,6 @@
 ﻿namespace AppointmentAPI.Domain.Data.Models;
 
-public class Specialization : BaseModel
+public class Specialization : BaseExternalModel
 {
     public  string Title { get; set; }
     public string? Description { get; set; }

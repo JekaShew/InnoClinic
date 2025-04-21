@@ -22,8 +22,7 @@ public class DeleteSpecializationCommandHandler : IRequestHandler<DeleteSpeciali
 
         if (specializationToDelete is not null)
         {
-            await _repositoryManager.Specialization.DeleteAsync(specializationToDelete);
-            await _repositoryManager.CommitAsync();
+            await _repositoryManager.Specialization.SoftDeleteAsync(specializationToDelete);
             _logger.Information($"Succesfully deleted Specialization with Id: {request.Id} !");
         }
     }

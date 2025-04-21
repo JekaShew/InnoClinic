@@ -17,7 +17,7 @@ public class PhotoService : IPhotoService
         _repositoryManager = repositoryManager;
 
     }
-    public async Task<ResponseMessage<PhotoInfoDTO>> AddPhototoOffice(string officeId, IFormFile formFile)
+    public async Task<ResponseMessage<PhotoInfoDTO>> AddPhotoToOffice(Guid officeId, IFormFile formFile)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if(office is null)
@@ -42,7 +42,7 @@ public class PhotoService : IPhotoService
 
         return new ResponseMessage<PhotoInfoDTO>(photoInfoDTO);
     }
-    public async Task<ResponseMessage> DeleteOfficePhotoById(string officeId,string photoId)
+    public async Task<ResponseMessage> DeleteOfficePhotoById(Guid officeId, Guid photoId)
     {
         var office = await _repositoryManager.Office.GetOfficeByIdAsync(officeId);
         if (office is null)
@@ -72,7 +72,7 @@ public class PhotoService : IPhotoService
         return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(photoDTOs);
     }
 
-    public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(string officeId)
+    public async Task<ResponseMessage<IEnumerable<PhotoInfoDTO>>> GetAllPhotosOfOfficeById(Guid officeId)
     {
         var photos = await _repositoryManager.Photo.GetPhotoListByFilter(x => x.OfficeId.Equals(officeId));
         var photoDTOs = photos.Select(p => PhotoMapper.PhotoToPhotoInfoDTO(p));
@@ -80,7 +80,7 @@ public class PhotoService : IPhotoService
         return new ResponseMessage<IEnumerable<PhotoInfoDTO>>(photoDTOs);
     }
 
-    public async Task<ResponseMessage<PhotoInfoDTO>> GetPhotoById(string photoId)
+    public async Task<ResponseMessage<PhotoInfoDTO>> GetPhotoById(Guid photoId)
     {
         var photo = await _repositoryManager.Photo.GetPhotoById(photoId);
         if(photo is null)

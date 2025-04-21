@@ -6,12 +6,12 @@ namespace OfficesAPI.Domain.Data.Models;
 [Serializable, BsonIgnoreExtraElements]
 public class Photo
 {
-    [BsonId, BsonElement("_id"), BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; }
+    [BsonId, BsonElement("_id"), BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid Id { get; set; }
     [BsonElement("url"), BsonRepresentation(BsonType.String)]
     public string Url { get; set; }
     [BsonElement("title"), BsonRepresentation(BsonType.String)]
     public string Title { get; set; }
     [BsonElement("office_id"), BsonRepresentation(BsonType.String)]
-    public string OfficeId { get; set; }
+    public Guid OfficeId { get; set; }
 }

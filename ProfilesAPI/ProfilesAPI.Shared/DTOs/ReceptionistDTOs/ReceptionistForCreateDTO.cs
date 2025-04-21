@@ -14,5 +14,5 @@ public class ReceptionistForCreateDTO
     public DateTime CareerStartDate { get; set; }
     public IFormFile? Photo { get; set; }
     public Guid? WorkStatusId { get; set; }
-    public string? OfficeId { get; set; }
+    public Guid OfficeId { get; set; }
 }

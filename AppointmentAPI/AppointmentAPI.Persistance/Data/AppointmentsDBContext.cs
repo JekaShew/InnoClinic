@@ -26,6 +26,9 @@ public class AppointmentsDBContext(DbContextOptions<AppointmentsDBContext> optio
                 .ForEach(fk => fk.DeleteBehavior = DeleteBehavior.Restrict);
         }
 
+        modelBuilder.Entity<BaseExternalModel>()
+            .HasQueryFilter(e => !e.IsDelete.Value);
+
         modelBuilder.ApplyConfiguration(new AppointmentConfiguration());
         modelBuilder.ApplyConfiguration(new AppointmentResultConfiguration());
 

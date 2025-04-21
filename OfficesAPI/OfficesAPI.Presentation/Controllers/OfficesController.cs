@@ -68,13 +68,13 @@ public class OfficesController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 404)]
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
-    public async Task<IActionResult> GetOfficeByid(string officeId)
+    public async Task<IActionResult> GetOfficeByid(Guid officeId)
     {
         var cacheKey = $"{_cacheKeyConstants.GetById}{officeId}";
-        var officeTableInfoDTOs = _cache.GetData<OfficeInfoDTO>(cacheKey);
-        if (officeTableInfoDTOs is not null)
+        var officeTableInfoDTO = _cache.GetData<OfficeInfoDTO>(cacheKey);
+        if (officeTableInfoDTO is not null)
         {
-            return Ok(officeTableInfoDTOs);
+            return Ok(officeTableInfoDTO);
         }
 
         var result = await _officeService.GetOfficeByIdAsync(officeId);
@@ -130,7 +130,7 @@ public class OfficesController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 422)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> UpdateOffice(string officeId, [FromBody] OfficeForUpdateDTO officeForUpdateDTO)
+    public async Task<IActionResult> UpdateOffice(Guid officeId, [FromBody] OfficeForUpdateDTO officeForUpdateDTO)
     {
         var result = await _officeService.UpdateOfficeInfoAsync(officeId, officeForUpdateDTO);
         if (!result.IsComplited)
@@ -158,7 +158,7 @@ public class OfficesController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> DeleteOfficeById(string officeId)
+    public async Task<IActionResult> DeleteOfficeById(Guid officeId)
     {
         var result = await _officeService.DeleteOfficeByIdAsync(officeId);
         if (!result.IsComplited)
@@ -185,7 +185,7 @@ public class OfficesController : ControllerBase
     [ProducesResponseType(typeof(FailMessage), 408)]
     [ProducesResponseType(typeof(FailMessage), 500)]
     //[Authorize(Roles = "Administrator")]
-    public async Task<IActionResult> ChangeStatusOfOfficeByIdAsync(string officeId)
+    public async Task<IActionResult> ChangeStatusOfOfficeByIdAsync(Guid officeId)
     {
         var result = await _officeService.ChangeStatusOfOfficeByIdAsync(officeId);
         if (!result.IsComplited)

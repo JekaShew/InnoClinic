@@ -22,8 +22,7 @@ namespace AppointmentAPI.Application.CQRS.Handlers.CommandHandlers.DoctorSpecial
 
             if (doctorSpecializationToDelete is not null)
             {
-                await _repositoryManager.DoctorSpecialization.DeleteAsync(doctorSpecializationToDelete);
-                await _repositoryManager.CommitAsync();
+                await _repositoryManager.DoctorSpecialization.SoftDeleteAsync(doctorSpecializationToDelete);
                 _logger.Information($"Succesfully deleted Doctor's Specialization with Id: {request.Id} !");
             }
         }

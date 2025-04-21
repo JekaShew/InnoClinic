@@ -9,9 +9,9 @@ public interface IOfficeService
 {
     public Task<ResponseMessage<IEnumerable<OfficeTableInfoDTO>>> GetAllOfficesAsync();
     public Task<IEnumerable<OfficeCheckConsistancyEvent>> GetAllOfficeCheckConsistancyEventsAsync();
-    public Task<ResponseMessage<OfficeInfoDTO>> GetOfficeByIdAsync(string officeId);
+    public Task<ResponseMessage<OfficeInfoDTO>> GetOfficeByIdAsync(Guid officeId);
     public Task<ResponseMessage<OfficeInfoDTO>> CreateOfficeAsync(OfficeForCreateDTO officeForCreateDTO, ICollection<IFormFile> files);
-    public Task<ResponseMessage<OfficeInfoDTO>> UpdateOfficeInfoAsync(string officeId, OfficeForUpdateDTO officeForUpdateDTO);
-    public Task<ResponseMessage> DeleteOfficeByIdAsync(string officeId);
-    public Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(string officeId);
+    public Task<ResponseMessage<OfficeInfoDTO>> UpdateOfficeInfoAsync(Guid officeId, OfficeForUpdateDTO officeForUpdateDTO);
+    public Task<ResponseMessage> DeleteOfficeByIdAsync(Guid officeId);
+    public Task<ResponseMessage> ChangeStatusOfOfficeByIdAsync(Guid officeId);
 }
